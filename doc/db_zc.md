@@ -19,6 +19,6 @@ comment_count 评论总数
 upload_time 投稿时间
 
 ## 视频存储
-video/日期/video_id
-cover/日期/video_id
+static/日期/video_id/video.mp4
+static/日期/video_id/cover.jpg
 
