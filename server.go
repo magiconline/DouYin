@@ -2,12 +2,21 @@ package main
 
 import (
 	"DouYin/controller"
+	"DouYin/repository"
 	"fmt"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
+	// 初始化数据库连接
+	err := repository.Init()
+	if err != nil {
+		fmt.Println("数据库连接错误:", err)
+		os.Exit(1)
+	}
+
 	fmt.Println("Starting server")
 	r := gin.Default()
 
