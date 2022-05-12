@@ -10,12 +10,21 @@ import (
 )
 
 func main() {
-	// 初始化数据库连接
-	err := repository.Init()
+	// 初始化日志
+	err := logger.Init("./log")
 	if err != nil {
-		fmt.Println("数据库连接错误:", err)
+		fmt.Println("日志初始化错误", err)
 		os.Exit(1)
 	}
+	logger.Logger.Println("日志初始化成功")
+
+	// 初始化数据库连接
+	err = repository.Init()
+	if err != nil {
+		logger.Logger.Println("数据库初始化错误:", err)
+		os.Exit(1)
+	}
+	logger.Logger.Println("数据库初始化成功")
 
 	fmt.Println("Starting server")
 	r := gin.Default()
@@ -35,5 +44,6 @@ func main() {
 		ctx.JSON(200, body)
 	})
 
+	logger.Logger.Println("启动服务器")
 	r.Run()
 }

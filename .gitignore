@@ -3,3 +3,6 @@
 
 # GoLand配置
 /.idea/
+
+# 日志文件
+/log
