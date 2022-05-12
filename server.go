@@ -44,5 +44,6 @@ func main() {
 		ctx.JSON(200, body)
 	})
 
+	logger.Logger.Println("启动服务器")
 	r.Run()
 }
