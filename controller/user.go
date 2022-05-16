@@ -14,14 +14,14 @@ func UserStore(c *gin.Context) *interface{} {
 }
 
 //根据用户名查找用户
-func FindUserByName(name string) (*User, error) {
-	var user User
-	// err :=
-	// return &user, err
-	return nil
-}
+// func FindUserByName(name string) (*User, error) {
+// 	var user User
+// 	// err :=
+// 	// return &user, err
+// 	return nil
+// }
 
 //创建用户
-func CreateUser(name string) (*User, error) {
+// func CreateUser(name string) (*User, error) {
 
-}
+// }
