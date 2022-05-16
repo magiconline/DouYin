@@ -12,7 +12,7 @@ CREATE TABLE `video`
     `cover_url`      TEXT            NOT NULL,
     `favorite_count` INT UNSIGNED    NOT NULL,
     `comment_count`  INT UNSIGNED    NOT NULL,
-    `upload_time`    INT UNSIGNED    NOT NULL,
+    `upload_time`    BIGINT UNSIGNED    NOT NULL,
     PRIMARY KEY (`video_id`)
 );
 
