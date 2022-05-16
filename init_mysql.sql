@@ -27,19 +27,11 @@ CREATE TABLE `user`
     PRIMARY KEY (`user_id`)
 );
 
-create table comment_star
+create table star
 (
-    `id`         BIGINT UNSIGNED             NOT NULL comment '主键评论id',
-    `user_id`    BIGINT UNSIGNED             NOT NULL comment '用户ID',
-    `comment_id` BIGINT UNSIGNED             NOT NULL comment '评论ID',
-    status       SMALLINT UNSIGNED default 0 NOT NULL comment '点赞状态 0-取消赞 1-有效点赞',
-    PRIMARY KEY (`id`)
-);
-create table video_star
-(
-    `id`       BIGINT UNSIGNED             NOT NULL comment '主键评论id',
-    `user_id`  BIGINT UNSIGNED             NOT NULL comment '用户ID',
-    `video_id` BIGINT UNSIGNED             NOT NULL comment '视频ID',
-    status     SMALLINT UNSIGNED default 0 NOT NULL comment '点赞状态 0-取消赞 1-有效点赞',
-    PRIMARY KEY (`id`)
+    id           bigint unsigned auto_increment comment '主键ID' primary key,
+    user_id      bigint unsigned  not null comment '用户ID',
+    star_type    tinyint unsigned not null comment '点赞类型 0-评论区点赞 1-视频点赞',
+    star_type_id bigint unsigned  not null comment '视频或者评论ID',
+    status       tinyint unsigned not null comment '点赞状态 0-取消点赞 1-已点赞'
 );
