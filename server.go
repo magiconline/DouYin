@@ -28,6 +28,9 @@ func main() {
 
 	r := gin.Default()
 
+	// 托管静态资源
+	r.Static("/static", "./static")
+
 	r.GET("/douyin/feed/", func(ctx *gin.Context) {
 		body := controller.Feed(ctx)
 		ctx.JSON(200, body)
