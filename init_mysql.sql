@@ -35,3 +35,12 @@ create table star
     star_type_id bigint unsigned  not null comment '视频或者评论ID',
     status       tinyint unsigned not null comment '点赞状态 0-取消点赞 1-已点赞'
 );
+
+
+-- 插入用户
+INSERT INTO `user` (`user_id`, `user_name`, `password`, `follow_count`, `follower_count`, `token`) VALUES (1, "test_user", "123", 0, 0, "abc");
+
+-- 插入视频
+INSERT INTO `video` (`video_id`, `user_id`, `play_url`, `cover_url`, `favorite_count`, `comment_count`, `upload_time`) VALUES (1, 1, "/static/2022/05/16/抖音-记录美好生活.mp4", "/static/2022/05/16/抖音-记录美好生活.jpg", 0, 0, UNIX_TIMESTAMP());
+INSERT INTO `video` (`video_id`, `user_id`, `play_url`, `cover_url`, `favorite_count`, `comment_count`, `upload_time`) VALUES (2, 1, "/static/2022/05/16/抖音-记录美好生活(1).mp4", "/static/2022/05/16/抖音-记录美好生活.jpg", 0, 0, UNIX_TIMESTAMP());
+INSERT INTO `video` (`video_id`, `user_id`, `play_url`, `cover_url`, `favorite_count`, `comment_count`, `upload_time`) VALUES (3, 1, "/static/2022/05/16/抖音-记录美好生活(2).mp4", "/static/2022/05/16/抖音-记录美好生活.jpg", 0, 0, UNIX_TIMESTAMP());
