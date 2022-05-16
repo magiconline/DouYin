@@ -26,7 +26,7 @@ func Favorite(userId, token, videoId, actionType string) *FavoriteData {
 			StatusMsg:  "视频ID格式错误",
 		}
 	}
-	action_type, err := strconv.ParseUint(actionType, 10, 8)
+	//action_type, err := strconv.ParseUint(actionType, 10, 8)
 	if err != nil {
 		return &FavoriteData{
 			StatusCode: 3,
