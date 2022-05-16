@@ -10,10 +10,7 @@ require (
 
 require (
 	github.com/gin-contrib/sse v0.1.0 // indirect
-<<<<<<< HEAD
-	github.com/go-ini/ini v1.66.4 // indirect
-=======
->>>>>>> ae071375a64106fc4a0343090833be63c5d3f736
+	// github.com/go-ini/ini v1.66.4 // indirect
 	github.com/go-playground/locales v0.13.0 // indirect
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
