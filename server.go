@@ -2,6 +2,7 @@ package main
 
 import (
 	"DouYin/controller"
+	"DouYin/logger"
 	"DouYin/repository"
 	"fmt"
 	"os"
@@ -10,14 +11,30 @@ import (
 )
 
 func main() {
+	// 初始化日志
+	err := logger.Init("./log")
+	if err != nil {
+		fmt.Println("日志初始化失败：", err)
+		os.Exit(1)
+	}
+	logger.Logger.Println("日志初始化成功")
+
 	// 初始化数据库连接
-	err := repository.Init()
+	err = repository.Init()
 	if err != nil {
 		fmt.Println("数据库连接错误:", err)
 		os.Exit(1)
 	}
 
-	fmt.Println("Starting server")
+	// test
+	// videoTable := repository.VideoTable{2, 0, "test", "test", 0, 0, 0}
+	// err = repository.InsertVideoTable(&videoTable)
+	// if err != nil {
+	// 	logger.Logger.Println("数据插入失败,", err)
+	// } else {
+	// 	logger.Logger.Println("数据插入成功")
+	// }
+
 	r := gin.Default()
 
 	r.GET("/douyin/feed/", func(ctx *gin.Context) {
@@ -35,5 +52,6 @@ func main() {
 		ctx.JSON(200, body)
 	})
 
+	logger.Logger.Println("启动服务器")
 	r.Run()
 }
