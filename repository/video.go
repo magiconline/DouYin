@@ -17,13 +17,11 @@ type VideoTable struct {
 }
 
 func InsertVideoTable(videoTable *VideoTable) error {
-	result := DB.Table("video").Create(&videoTable)
-	if result.Error != nil {
-
-		fmt.Println("InsertVideoTable error:", result.Error)
-		return result.Error
+	err := DB.Table("video").Create(&videoTable).Error
+	if err != nil {
+		fmt.Println("Insert VideoTable error:", err)
 	}
-	return nil
+	return err
 }
 
 func InsertVideo() error {
@@ -38,10 +36,10 @@ func InsertCover() error {
 func FeedAll(latestTime uint64) ([]map[string]interface{}, error) {
 	var videoList []map[string]interface{}
 
-	result := DB.Table("video").Where("upload_time < ?", latestTime).Order("upload_time desc").Limit(30).Find(&videoList)
+	err := DB.Table("video").Where("upload_time < ?", latestTime).Order("upload_time desc").Limit(30).Find(&videoList).Error
 
 	// fmt.Println(videoList)
-	return videoList, result.Error
+	return videoList, err
 }
 
 // func FeedOne(latestTime uint32, userID uint64) {
@@ -53,13 +51,13 @@ func AuthorInfo(userID uint64) (*map[string]interface{}, error) {
 
 	err := DB.Table("user").Select("user_id", "user_name", "follow_count", "follower_count", "title").Where("user_id = ?", userID).Find(&author).Error
 
-	return &author[0], result.Error
+	return &author[0], err
 }
 
 // 根据user_id查找所有视频
 func UserVideoList(userID uint64) (*[]map[string]interface{}, error) {
 	var videoList []map[string]interface{}
-	result := DB.Table("video").Where("user_id = ?", userID).Order("upload_time desc").Find(&videoList)
+	err := DB.Table("video").Where("user_id = ?", userID).Order("upload_time desc").Find(&videoList).Error
 
-	return &videoList, result.Error
+	return &videoList, err
 }
