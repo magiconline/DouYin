@@ -54,3 +54,11 @@ func AuthorInfo(userID uint64) (*map[string]interface{}, error) {
 
 	return &author[0], result.Error
 }
+
+// 根据user_id查找所有视频
+func UserVideoList(userID uint64) (*[]map[string]interface{}, error) {
+	var videoList []map[string]interface{}
+	result := DB.Table("video").Where("user_id = ?", userID).Order("upload_time desc").Find(&videoList)
+
+	return &videoList, result.Error
+}
