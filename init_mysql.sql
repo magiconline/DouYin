@@ -10,9 +10,10 @@ CREATE TABLE `video`
     `user_id`        BIGINT UNSIGNED NOT NULL,
     `play_url`       TEXT            NOT NULL,
     `cover_url`      TEXT            NOT NULL,
-    `favorite_count` INT UNSIGNED    NOT NULL,
-    `comment_count`  INT UNSIGNED    NOT NULL,
+    `favorite_count` INT UNSIGNED    NOT NULL DEFAULT 0,
+    `comment_count`  INT UNSIGNED    NOT NULL DEFAULT 0,
     `upload_time`    BIGINT UNSIGNED    NOT NULL,
+    `title` TEXT,
     PRIMARY KEY (`video_id`)
 );
 

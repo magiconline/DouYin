@@ -13,6 +13,7 @@ type VideoTable struct {
 	FavoriteCount uint32 `gorm:"column:favorite_count"`
 	CommentCount  uint32 `gorm:"column:comment_count"`
 	UploadTime    uint64 `gorm:"column:upload_time"`
+	Title         string `gorm:"column:title"`
 }
 
 func InsertVideoTable(videoTable *VideoTable) error {
@@ -50,7 +51,7 @@ func FeedAll(latestTime uint64) ([]map[string]interface{}, error) {
 func AuthorInfo(userID uint64) (*map[string]interface{}, error) {
 	var author []map[string]interface{}
 
-	result := DB.Table("user").Select("user_id", "user_name", "follow_count", "follower_count").Where("user_id = ?", userID).Find(&author)
+	err := DB.Table("user").Select("user_id", "user_name", "follow_count", "follower_count", "title").Where("user_id = ?", userID).Find(&author).Error
 
 	return &author[0], result.Error
 }
