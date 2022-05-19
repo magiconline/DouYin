@@ -24,6 +24,8 @@ func main() {
 	if err != nil {
 		fmt.Println("数据库连接错误:", err)
 		os.Exit(1)
+	} else {
+		fmt.Println("数据库连接成功")
 	}
 
 	// test
@@ -37,6 +39,17 @@ func main() {
 
 	r := gin.Default()
 
+	// r.GET("/douyin/user", func(ctx *gin.Context) {
+	// 	ctx.JSON(json.SUCCESS, gin.H{
+	// 		"Code": json.SUCCESS,
+	// 		"Msg":  json.GetMsg(json.SUCCESS),
+	// 		"Data": "返回数据成功",
+	// 	})
+	// })
+	// r.GET("/douyin/user/login",func(ctx *gin.Context) {
+	// 	body  := controller.
+	// } )
+	// r.GET("/douyin/user/register",)
 	r.GET("/douyin/feed/", func(ctx *gin.Context) {
 		body := controller.Feed(ctx)
 		ctx.JSON(200, body)
