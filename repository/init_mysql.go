@@ -19,5 +19,6 @@ func Init() error {
 		fmt.Println(err)
 		return err
 	}
+
 	return nil
 }
