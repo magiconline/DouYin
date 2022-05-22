@@ -1,46 +1,61 @@
 package controller
 
 import (
-	"DouYin/repository"
+	"DouYin/logger"
 	"DouYin/service"
+	"github.com/gin-gonic/gin"
 	"strconv"
 )
 
-type FavoriteData struct {
-	StatusCode uint
-	StatusMsg  string
-}
+func Favorite(ctx *gin.Context) *gin.H {
+	userIdStr := ctx.Query("user_id")
+	videoIdStr := ctx.Query("video_id")
+	//获取token
+	token := ctx.Query("token")
+	//1.点赞 2.取消点赞
+	actionTypeStr := ctx.Query("action_type")
 
-func Favorite(userId, token, videoId, actionType string) *FavoriteData {
-	user_id, err := strconv.ParseUint(userId, 10, 64)
+	userIdInt, err := strconv.Atoi(userIdStr)
 	if err != nil {
-		return &FavoriteData{
-			StatusCode: 1,
-			StatusMsg:  "用户ID格式错误",
+		logger.Logger.Println("error:", err)
+		return &gin.H{
+			"status_code": 1,
+			"status_msg":  "用户ID格式错误",
 		}
 	}
-	video_id, err := strconv.ParseUint(videoId, 10, 64)
-	if err != nil {
-		return &FavoriteData{
-			StatusCode: 2,
-			StatusMsg:  "视频ID格式错误",
+	videoIdInt, err1 := strconv.Atoi(videoIdStr)
+	if err1 != nil {
+		return &gin.H{
+			"status_code": 2,
+			"status_msg":  "视频ID格式错误",
 		}
 	}
-	//action_type, err := strconv.ParseUint(actionType, 10, 8)
-	if err != nil {
-		return &FavoriteData{
-			StatusCode: 3,
-			StatusMsg:  "点赞状态格式错误",
+	actionTypeInt, err2 := strconv.Atoi(actionTypeStr)
+	if err2 != nil {
+		return &gin.H{
+			"status_code": 3,
+			"status_msg":  "点赞格式传入错误",
 		}
 	}
+	if actionTypeInt != 1 && actionTypeInt != 2 {
+		return &gin.H{
+			"status_code": 4,
+			"status_msg":  "传入参数为1或者2！",
+		}
+	}
+	logger.Logger.Printf("userIdInt：%d actionTypeInt：%d videoIdInt：%d token：%s", userIdInt, actionTypeInt, videoIdInt, token)
 	//用户鉴权token
-	//查询当前用户此视频的点赞状态
-	var current_star *repository.Star
-	current_star = service.QueryByUserIdAndVideoId(user_id, video_id)
-	//根据用户ID及视频ID修改点赞状态
-	if current_star == nil {
-		//此时用户未曾点赞 插入数据
+	if actionTypeInt == 1 {
+		service.AddStar(uint64(userIdInt), uint64(videoIdInt))
+		return &gin.H{
+			"status_code": 0,
+			"status_msg":  "点赞成功！",
+		}
+	} else {
+		service.DeleteStar(uint64(userIdInt), uint64(videoIdInt))
+		return &gin.H{
+			"status_code": 0,
+			"status_msg":  "取消点赞成功！",
+		}
 	}
-	//service.FavoriteOperation()
-	return nil
 }
