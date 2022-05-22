@@ -31,15 +31,14 @@ create table star
 (
     id           bigint unsigned auto_increment comment '主键ID' primary key,
     user_id      bigint unsigned  not null comment '用户ID',
-    star_type    tinyint unsigned not null comment '点赞类型 0-评论区点赞 1-视频点赞',
-    star_type_id bigint unsigned  not null comment '视频或者评论ID',
-    status       tinyint unsigned not null comment '点赞状态 0-取消点赞 1-已点赞'
-);
+    video_id     bigint unsigned  not null comment '视频ID'
+ );
 
 
 -- 插入用户
-INSERT INTO `user` (`user_id`, `user_name`, `password`, `follow_count`, `follower_count`, `token`) VALUES (1, "test_user", "123", 0, 0, "abc");
-
+INSERT INTO `users` (`id`, `user_name`, `password`, `follow_count`, `follower_count`, `token`) VALUES (1, "test_user", "123", 0, 0, "abc");
+-- 插入点赞状态表
+INSERT INTO douyin.star (user_id, video_id) VALUES (1, 1);
 -- 插入视频
 INSERT INTO `video` (`video_id`, `user_id`, `play_url`, `cover_url`, `favorite_count`, `comment_count`, `upload_time`) VALUES (1, 1, "/static/2022/05/16/抖音-记录美好生活.mp4", "/static/2022/05/16/抖音-记录美好生活.jpg", 0, 0, UNIX_TIMESTAMP());
 INSERT INTO `video` (`video_id`, `user_id`, `play_url`, `cover_url`, `favorite_count`, `comment_count`, `upload_time`) VALUES (2, 1, "/static/2022/05/16/抖音-记录美好生活(1).mp4", "/static/2022/05/16/抖音-记录美好生活.jpg", 0, 0, UNIX_TIMESTAMP());

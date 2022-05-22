@@ -48,3 +48,24 @@ func (*StarDao) DeleteStar(userId, videoId uint64) {
 		return
 	}
 }
+
+// AuthorId 根据视频ID获取作者ID
+func (*StarDao) AuthorId(videoID uint64) (*[]map[string]interface{}, error) {
+	var authorID []map[string]interface{}
+	result := DB.Table("video").Where("video_id = ?", videoID).Find(&authorID)
+	return &authorID, result.Error
+}
+
+// AuthorInfo userId(user_id, user_name, follow_count, follower_count)字段
+func (*StarDao) AuthorInfo(userId uint64) (*map[string]interface{}, error) {
+	var author []map[string]interface{}
+	result := DB.Table("users").Select("id", "user_name", "follow_count", "follower_count").Where("id = ?", userId).Find(&author)
+	return &author[0], result.Error
+}
+
+// StarList StarVideoList 根据user_id查找用户点赞列表
+func (*StarDao) StarList(userID uint64) (*[]map[string]interface{}, error) {
+	var starList []map[string]interface{}
+	result := DB.Table("star").Where("user_id = ?", userID).Find(&starList)
+	return &starList, result.Error
+}

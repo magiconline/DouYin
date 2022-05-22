@@ -50,10 +50,10 @@ func main() {
 		body := controller.Favorite(ctx)
 		ctx.JSON(200, body)
 	})
-	//r.GET("/douyin/favorite/action/", func(ctx *gin.Context) {
-	//	body := controller.Favorite(ctx)
-	//	ctx.JSON(200, body)
-	//})
+	r.GET("/douyin/favorite/list/", func(ctx *gin.Context) {
+		body := controller.ThumbListVideo(ctx)
+		ctx.JSON(200, body)
+	})
 	logger.Logger.Println("启动服务器")
 	r.Run()
 }
