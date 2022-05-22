@@ -2,10 +2,10 @@ package service
 
 import "DouYin/repository"
 
-func FavoriteOperation(star *repository.Star) {
-	repository.NewStarDaoInstance().FavorableOperation(star)
+func AddStar(userId, videoId uint64) {
+	repository.NewStarDaoInstance().AddStar(userId, videoId)
 }
 
-func QueryByUserIdAndVideoId(userId, videoId uint64) *repository.Star {
-	return repository.NewStarDaoInstance().QueryByUserIdAndVideoId(userId, videoId)
+func DeleteStar(userId, videoId uint64) {
+	repository.NewStarDaoInstance().DeleteStar(userId, videoId)
 }

@@ -33,7 +33,7 @@ func InsertCover() error {
 	return nil
 }
 
-// 查找时间upload_time<latestTime, 降序排列的30条视频
+// FeedAll 查找时间upload_time<latestTime, 降序排列的30条视频
 func FeedAll(latestTime uint64) ([]map[string]interface{}, error) {
 	var videoList []map[string]interface{}
 
@@ -46,7 +46,7 @@ func FeedAll(latestTime uint64) ([]map[string]interface{}, error) {
 // func FeedOne(latestTime uint32, userID uint64) {
 // }
 
-// 根据userID获取查询user表(user_id, user_name, follow_count, follower_count)字段
+// AuthorInfo 根据userID获取查询user表(user_id, user_name, follow_count, follower_count)字段
 func AuthorInfo(userID uint64) (*map[string]interface{}, error) {
 	var author []map[string]interface{}
 
