@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	mysqlUrl = "root:wang186017@tcp(127.0.0.1:3306)/douyin"
+	mysqlUrl = "root:123456@tcp(127.0.0.1:3306)/douyin"
 	DB       *gorm.DB
 )
 
