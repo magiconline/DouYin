@@ -45,6 +45,29 @@ func PublishAction(ctx *gin.Context) *interface{} {
 	return nil
 }
 
-func PublishList(ctx *gin.Context) *interface{} {
-	return nil
+// 登录用户的视频发布列表，直接列出用户所有投稿过的视频
+func PublishList(ctx *gin.Context) *gin.H {
+	// 获得参数
+	token := ctx.Query("token")
+	userIDStr := ctx.Query("user_id")
+
+	// 类型转换
+	userID, _ := strconv.ParseUint(userIDStr, 10, 0)
+
+	// 获得信息
+	videoList, err := service.UserVideoList(token, userID)
+	if err != nil {
+		// 错误处理
+
+		return &gin.H{
+			"code": 1,
+			"msg":  "success",
+		}
+	}
+
+	return &gin.H{
+		"code":       0,
+		"msg":        "failed",
+		"video_list": videoList,
+	}
 }

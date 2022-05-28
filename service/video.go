@@ -30,9 +30,9 @@ func Feed(latestTime uint64, token string) (uint64, []map[string]interface{}, er
 
 			var author *map[string]interface{}
 			author, err = repository.AuthorInfo(user_id)
-			// if err != nil {
-			// 	// 错误处理
-			// }
+			if err != nil {
+				// 错误处理
+			}
 			(*author)["id"] = (*author)["user_id"]
 			(*author)["name"] = (*author)["user_name"]
 			(*author)["is_follow"] = false
@@ -47,7 +47,7 @@ func Feed(latestTime uint64, token string) (uint64, []map[string]interface{}, er
 		// 获得nextTime
 		nextTime := videoList[len(videoList)-1]["upload_time"].(uint64)
 
-		return nextTime, videoList, err
+		return nextTime, videoList, nil
 	} else {
 		// 验证token
 
@@ -56,4 +56,40 @@ func Feed(latestTime uint64, token string) (uint64, []map[string]interface{}, er
 		// 验证失败
 		return 0, nil, nil
 	}
+}
+
+// 根据userID和token获得所有的视频列表
+func UserVideoList(token string, userID uint64) (*[]map[string]interface{}, error) {
+	// 检查token与id是否匹配
+
+	// 匹配, 根据userID查找数据库，按上传时间排序
+	videoList, err := repository.UserVideoList(userID)
+	if err != nil {
+		// 错误处理，返回空列表
+		return videoList, err
+	}
+	// 将视频列表中填充author信息
+	for i := range *videoList {
+
+		user_id := (*videoList)[i]["user_id"].(uint64)
+
+		var author *map[string]interface{}
+		author, err = repository.AuthorInfo(user_id)
+		if err != nil {
+			// 错误处理
+
+		}
+		(*author)["id"] = (*author)["user_id"]
+		(*author)["name"] = (*author)["user_name"]
+		(*author)["is_follow"] = false
+
+		(*videoList)[i]["author"] = author
+
+		// 将相对url转为完整url
+		(*videoList)[i]["play_url"] = server_ip + (*videoList)[i]["play_url"].(string)
+		(*videoList)[i]["cover_url"] = server_ip + (*videoList)[i]["cover_url"].(string)
+	}
+
+	return videoList, nil
+	// 不匹配
 }
