@@ -19,6 +19,6 @@ func Init() error {
 		fmt.Println(err)
 		return err
 	}
-
+	DB.AutoMigrate(&User{})
 	return nil
 }

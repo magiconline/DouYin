@@ -28,28 +28,23 @@ func main() {
 		fmt.Println("数据库连接成功")
 	}
 
-	// test
-	// videoTable := repository.VideoTable{2, 0, "test", "test", 0, 0, 0}
-	// err = repository.InsertVideoTable(&videoTable)
-	// if err != nil {
-	// 	logger.Logger.Println("数据插入失败,", err)
-	// } else {
-	// 	logger.Logger.Println("数据插入成功")
-	// }
-
 	r := gin.Default()
 
-	// r.GET("/douyin/user", func(ctx *gin.Context) {
-	// 	ctx.JSON(json.SUCCESS, gin.H{
-	// 		"Code": json.SUCCESS,
-	// 		"Msg":  json.GetMsg(json.SUCCESS),
-	// 		"Data": "返回数据成功",
-	// 	})
-	// })
-	// r.GET("/douyin/user/login",func(ctx *gin.Context) {
-	// 	body  := controller.
-	// } )
-	// r.GET("/douyin/user/register",)
+	// 托管静态资源
+	r.Static("/static", "./static")
+
+	r.POST("/douyin/user/login/", func(ctx *gin.Context) {
+		body := controller.UserLogin(ctx)
+		ctx.JSON(200, body)
+	})
+	r.POST("/douyin/user/register/", func(ctx *gin.Context) {
+		body := controller.UserRegister(ctx)
+		ctx.JSON(200, body)
+	})
+	r.GET("/douyin/user/", func(ctx *gin.Context) {
+		body := controller.UserInfo(ctx)
+		ctx.JSON(200, body)
+	})
 	r.GET("/douyin/feed/", func(ctx *gin.Context) {
 		body := controller.Feed(ctx)
 		ctx.JSON(200, body)
@@ -63,6 +58,11 @@ func main() {
 	r.GET("/douyin/publish/list/", func(ctx *gin.Context) {
 		body := controller.PublishList(ctx)
 		ctx.JSON(200, body)
+	})
+
+	r.POST("/douyin/favorite/action/", func(ctx *gin.Context) {
+		//body := controller.Favorite(ctx)
+		//ctx.JSON(200, body)
 	})
 
 	logger.Logger.Println("启动服务器")
