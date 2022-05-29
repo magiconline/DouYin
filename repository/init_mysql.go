@@ -2,7 +2,8 @@ package repository
 
 import (
 	"fmt"
-	mysql "gorm.io/driver/mysql"
+
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
@@ -19,5 +20,6 @@ func Init() error {
 		fmt.Println(err)
 		return err
 	}
+	DB.AutoMigrate(&User{})
 	return nil
 }

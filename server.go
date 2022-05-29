@@ -24,6 +24,8 @@ func main() {
 	if err != nil {
 		fmt.Println("数据库连接错误:", err)
 		os.Exit(1)
+	} else {
+		fmt.Println("数据库连接成功")
 	}
 
 	r := gin.Default()
@@ -31,6 +33,18 @@ func main() {
 	// 托管静态资源
 	r.Static("/static", "./static")
 
+	r.POST("/douyin/user/login/", func(ctx *gin.Context) {
+		body := controller.UserLogin(ctx)
+		ctx.JSON(200, body)
+	})
+	r.POST("/douyin/user/register/", func(ctx *gin.Context) {
+		body := controller.UserRegister(ctx)
+		ctx.JSON(200, body)
+	})
+	r.GET("/douyin/user/", func(ctx *gin.Context) {
+		body := controller.UserInfo(ctx)
+		ctx.JSON(200, body)
+	})
 	r.GET("/douyin/feed/", func(ctx *gin.Context) {
 		body := controller.Feed(ctx)
 		ctx.JSON(200, body)
