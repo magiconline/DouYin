@@ -51,7 +51,11 @@ func AuthorInfo(userID uint64) (*map[string]interface{}, error) {
 
 	err := DB.Table("user").Select("user_id", "user_name", "follow_count", "follower_count", "title").Where("user_id = ?", userID).Find(&author).Error
 
-	return &author[0], err
+	if err != nil {
+		return nil, err
+	}
+
+	return &author[0], nil
 }
 
 // 根据user_id查找所有视频
