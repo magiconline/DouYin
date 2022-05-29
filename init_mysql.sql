@@ -17,6 +17,8 @@ CREATE TABLE `video`
     PRIMARY KEY (`video_id`)
 );
 
+DROP TABLE IF EXISTS `user`;
+
 CREATE TABLE `user`
 (
     `user_id`        BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -41,8 +43,8 @@ INSERT INTO `users` (`id`, `user_name`, `password`, `follow_count`, `follower_co
 INSERT INTO douyin.star (user_id, video_id) VALUES (1, 1);
 
 -- 插入视频
-INSERT INTO `video` (`video_id`, `user_id`, `play_url`, `cover_url`, `favorite_count`, `comment_count`, `upload_time`, `title`) VALUES (1, 1, "/static/2022/05/16/抖音-记录美好生活.mp4", "/static/2022/05/16/抖音-记录美好生活.jpg", 0, 0, REPLACE(unix_timestamp(current_timestamp(3)),'.','');, "测试title");
+INSERT INTO `video` (`video_id`, `user_id`, `play_url`, `cover_url`, `favorite_count`, `comment_count`, `upload_time`, `title`) VALUES (1, 1, "/static/2022/05/16/抖音-记录美好生活.mp4", "/static/2022/05/16/抖音-记录美好生活.jpg", 0, 0, REPLACE(unix_timestamp(current_timestamp(3)),'.',''), "测试title");
 
-INSERT INTO `video` (`video_id`, `user_id`, `play_url`, `cover_url`, `favorite_count`, `comment_count`, `upload_time`, `title`) VALUES (2, 1, "/static/2022/05/16/抖音-记录美好生活(1).mp4", "/static/2022/05/16/抖音-记录美好生活.jpg", 0, 0, REPLACE(unix_timestamp(current_timestamp(3)),'.','');, "测试title");
+INSERT INTO `video` (`video_id`, `user_id`, `play_url`, `cover_url`, `favorite_count`, `comment_count`, `upload_time`, `title`) VALUES (2, 1, "/static/2022/05/16/抖音-记录美好生活(1).mp4", "/static/2022/05/16/抖音-记录美好生活.jpg", 0, 0, REPLACE(unix_timestamp(current_timestamp(3)),'.',''), "测试title");
 
-INSERT INTO `video` (`video_id`, `user_id`, `play_url`, `cover_url`, `favorite_count`, `comment_count`, `upload_time`, `title`) VALUES (3, 1, "/static/2022/05/16/抖音-记录美好生活(2).mp4", "/static/2022/05/16/抖音-记录美好生活.jpg", 0, 0, REPLACE(unix_timestamp(current_timestamp(3)),'.','');, "测试title");
+INSERT INTO `video` (`video_id`, `user_id`, `play_url`, `cover_url`, `favorite_count`, `comment_count`, `upload_time`, `title`) VALUES (3, 1, "/static/2022/05/16/抖音-记录美好生活(2).mp4", "/static/2022/05/16/抖音-记录美好生活.jpg", 0, 0, REPLACE(unix_timestamp(current_timestamp(3)),'.',''), "测试title");
