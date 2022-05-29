@@ -12,20 +12,20 @@ import (
 func UserLogin(c *gin.Context) *gin.H {
 	// return nil
 	//1.收到请求参数，取出参数中的email
-	email := c.Query("Email")
-	pwd := c.Query("Password")
+	username := c.Query("username")
+	pwd := c.Query("password")
 
 	//2.对请求参数进行表单验证，以保证数据库的安全---待完成
 
-	// 3.数据库查询用户email
-	_, err1 := repository.FindUserbyEmail(email)
+	// 3.数据库查询用户名
+	_, err1 := repository.FindUserbyName(username)
 	if err1 == gorm.ErrRecordNotFound {
 		return &gin.H{
 			"status_code": 1,
-			"status_msg":  "用户邮箱不存在,请注册",
+			"status_msg":  "用户名不存在,请注册",
 		}
 	} else if err1 == nil {
-		user, err := repository.FindUserbyEmailandPwd(email, pwd)
+		user, err := repository.FindUserbyNameandPwd(username, pwd)
 		//如果数据库查不到或者密码错误
 		if err == gorm.ErrRecordNotFound {
 			return &gin.H{
@@ -64,13 +64,13 @@ func UserLogin(c *gin.Context) *gin.H {
 
 //注册
 func UserRegister(c *gin.Context) *gin.H {
-	email := c.Query("Email")
-	pwd := c.Query("Password")
-	_, err1 := repository.FindUserbyEmail(email)
+	username := c.Query("username")
+	pwd := c.Query("password")
+	_, err1 := repository.FindUserbyName(username)
 	//若数据库中不存在此email
 	// if err == gorm.ErrRecordNotFound {
 	if err1 == gorm.ErrRecordNotFound {
-		u, err := repository.CreateUser(email, pwd)
+		u, err := repository.CreateUser(username, pwd)
 		//若创建新用户不成功
 		if err != nil {
 			return &gin.H{
@@ -102,7 +102,7 @@ func UserRegister(c *gin.Context) *gin.H {
 		if err1 == nil {
 			return &gin.H{
 				"status_code": 1,
-				"status_msg":  "该邮箱已被注册",
+				"status_msg":  "该用户名已被注册",
 			}
 		}
 	}
@@ -112,8 +112,9 @@ func UserRegister(c *gin.Context) *gin.H {
 	}
 
 }
+
 func UserInfo(c *gin.Context) *gin.H {
-	userid := c.Query("UserId")
+	userid := c.Query("user_id")
 	token := c.Query("token")
 
 	user, err := repository.FindUserbyID(userid)
