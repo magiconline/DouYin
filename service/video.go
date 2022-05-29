@@ -9,7 +9,12 @@ func InsertVideo() error {
 }
 
 // 静态资源ip
-var server_ip = "http://172.20.167.197:8080"
+// var server_ip = "http://172.26.59.240:8080"
+var server_ip string
+
+func SetServerIP(ip string) {
+	server_ip = ip
+}
 
 // 获得视频流
 // 如果token为空字符串则表示没有输入token，返回包含所有用户的视频流
