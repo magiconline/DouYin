@@ -45,7 +45,7 @@ func StarVideoList(userId uint64) (*[]map[string]interface{}, error) {
 		(*authorId)[i]["cover_url"] = server_ip + (*authorId)[i]["cover_url"].(string)
 		(*authorId)[i]["favorite_count"] = (*authorId)[i]["favorite_count"].(uint32)
 		(*authorId)[i]["is_favorite"] = true
-		(*authorId)[i]["title"] = "测试主题"
+		(*authorId)[i]["title"] = "测试"
 		delete((*authorId)[i], "video_id")
 		delete((*authorId)[i], "upload_time")
 	}
