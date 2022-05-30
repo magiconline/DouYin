@@ -66,7 +66,7 @@ func InsertCover(path string, videoName string, coverName string) error {
 	err := ffmpeg.Input("."+path+videoName).
 		Filter("select", ffmpeg.Args{fmt.Sprintf("gte(n,%d)", 0)}).
 		Output("pipe:", ffmpeg.KwArgs{"vframes": 1, "format": "image2", "vcodec": "mjpeg"}).
-		WithOutput(buf, os.Stdout).
+		WithOutput(buf).
 		Run()
 
 	if err != nil {

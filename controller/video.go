@@ -2,7 +2,6 @@ package controller
 
 import (
 	"DouYin/service"
-	"fmt"
 	"strconv"
 
 	"DouYin/logger"
@@ -17,10 +16,13 @@ func Feed(ctx *gin.Context) *gin.H {
 	token := ctx.DefaultQuery("token", "")
 
 	// 类型转换
-	// latestTimeUint32, err := strconv.ParseUint(latestTimeStr, 10, 32)
 	latestTimeInt, err := strconv.Atoi(latestTimeStr)
 	if err != nil {
-		logger.Logger.Println("error:", err)
+		logger.Logger.Println("error:", err.Error())
+		return &gin.H{
+			"status_code": 1,
+			"status_msg":  err.Error(),
+		}
 	}
 	nextTime, videoList, err := service.Feed(uint64(latestTimeInt), token)
 
@@ -28,8 +30,8 @@ func Feed(ctx *gin.Context) *gin.H {
 	if err != nil {
 		logger.Logger.Println("error:", err)
 		return &gin.H{
-			"code": 1,
-			"msg":  "failed",
+			"status_code": 1,
+			"status_msg":  err.Error(),
 		}
 	}
 
@@ -46,7 +48,6 @@ func Feed(ctx *gin.Context) *gin.H {
 func PublishAction(ctx *gin.Context) *gin.H {
 	data, err := ctx.FormFile("data")
 	if err != nil {
-		fmt.Println(err.Error())
 		return &gin.H{
 			"status_code": 1,
 			"status_msg":  err.Error(),
@@ -57,7 +58,6 @@ func PublishAction(ctx *gin.Context) *gin.H {
 
 	err = service.PublishAction(data, token, title)
 	if err != nil {
-		fmt.Println(err.Error())
 		return &gin.H{
 			"status_code": 1,
 			"status_msg":  err.Error(),

@@ -2,7 +2,6 @@ package service
 
 import (
 	"DouYin/repository"
-	"errors"
 	"mime/multipart"
 	"time"
 
@@ -50,50 +49,55 @@ func AuthorInfo(userID uint64) (*AuthorResponse, error) {
 // 如果token为空字符串则表示没有输入token，返回包含所有用户的视频流
 // 如果token不为空，验证token，然后返回该用户的视频流
 func Feed(latestTime uint64, token string) (uint64, *[]FeedResponse, error) {
-	if token == "" {
-		var response []FeedResponse
-		nextTime := latestTime
-		// 获得视频列表
-		videoList, err := repository.FeedAll(latestTime)
+	if token != "" {
+		_, err := Token2ID(token)
 		if err != nil {
-			// 错误处理
-			return latestTime, nil, err
+			return 0, nil, err
 		}
-
-		// 将视频列表中填充author信息
-		for i := range *videoList {
-			userID := (*videoList)[i]["user_id"].(uint64)
-
-			author, err := AuthorInfo(userID)
-			if err != nil {
-				continue
-			}
-			response_i := FeedResponse{
-				ID:            userID,
-				Author:        *author,
-				PlayUrl:       server_ip + (*videoList)[i]["play_url"].(string),
-				CoverUrl:      server_ip + (*videoList)[i]["cover_url"].(string),
-				FavoriteCount: (*videoList)[i]["favorite_count"].(uint32),
-				CommentCount:  (*videoList)[i]["comment_count"].(uint32),
-				IsFavorite:    false,
-				Title:         (*videoList)[i]["title"].(string),
-			}
-			response = append(response, response_i)
-			nextTime = (*videoList)[i]["upload_time"].(uint64)
-		}
-
-		return nextTime, &response, nil
-	} else {
-		return latestTime, nil, errors.New("暂不支持的方法！")
 	}
+
+	var response []FeedResponse
+	nextTime := latestTime
+	// 获得视频列表
+	videoList, err := repository.FeedAll(latestTime)
+	if err != nil {
+		// 错误处理
+		return latestTime, nil, err
+	}
+
+	// 将视频列表中填充author信息
+	for i := range *videoList {
+		userID := (*videoList)[i]["user_id"].(uint64)
+
+		author, err := AuthorInfo(userID)
+		if err != nil {
+			continue
+		}
+		response_i := FeedResponse{
+			ID:            (*videoList)[i]["video_id"].(uint64),
+			Author:        *author,
+			PlayUrl:       server_ip + (*videoList)[i]["play_url"].(string),
+			CoverUrl:      server_ip + (*videoList)[i]["cover_url"].(string),
+			FavoriteCount: (*videoList)[i]["favorite_count"].(uint32),
+			CommentCount:  (*videoList)[i]["comment_count"].(uint32),
+			IsFavorite:    false,
+			Title:         (*videoList)[i]["title"].(string),
+		}
+		response = append(response, response_i)
+		nextTime = (*videoList)[i]["upload_time"].(uint64)
+	}
+
+	return nextTime, &response, nil
 }
 
 // 获取userID的所有的视频列表
 func UserVideoList(token string, userID uint64) (*[]PublishActionResponse, error) {
 	// 检查token
-	_, err := Token2ID(token)
-	if err != nil {
-		return nil, err
+	if token != "" {
+		_, err := Token2ID(token)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	author, err := AuthorInfo(userID)
@@ -111,7 +115,7 @@ func UserVideoList(token string, userID uint64) (*[]PublishActionResponse, error
 	// 将视频列表中填充author信息
 	for i := range *videoList {
 		response_i := PublishActionResponse{
-			ID:            userID,
+			ID:            (*videoList)[i]["video_id"].(uint64),
 			Author:        *author,
 			PlayUrl:       server_ip + (*videoList)[i]["play_url"].(string),
 			CoverUrl:      server_ip + (*videoList)[i]["cover_url"].(string),

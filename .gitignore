@@ -1,5 +1,6 @@
 # 数据库
 /db/
+/static/
 
 # GoLand配置
 /.idea/
