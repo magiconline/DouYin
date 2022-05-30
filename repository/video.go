@@ -96,20 +96,13 @@ func FeedAll(latestTime uint64) (*[]map[string]interface{}, error) {
 	return &videoList, err
 }
 
-// func FeedOne(latestTime uint32, userID uint64) {
-// }
-
 // AuthorInfo 根据userID获取查询user表(user_id, user_name, follow_count, follower_count)字段
-func AuthorInfo(userID uint64) (*map[string]interface{}, error) {
-	var author []map[string]interface{}
+func AuthorInfo(userID uint64) (*User, error) {
+	var user User
 
-	err := DB.Table("user").Select("user_id", "user_name", "follow_count", "follower_count", "title").Where("user_id = ?", userID).Find(&author).Error
+	err := DB.Table("user").Select("user_id", "user_name", "follow_count", "follower_count").Where("user_id = ?", userID).First(&user).Error
 
-	if err != nil {
-		return nil, err
-	}
-
-	return &author[0], nil
+	return &user, err
 }
 
 // 根据user_id查找所有视频

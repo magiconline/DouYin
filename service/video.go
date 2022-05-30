@@ -3,7 +3,6 @@ package service
 import (
 	"DouYin/repository"
 	"errors"
-	"fmt"
 	"mime/multipart"
 	"time"
 
@@ -36,6 +35,8 @@ type FeedResponse struct {
 	IsFavorite    bool           `json:"is_favorite"`
 	Title         string         `json:"title"`
 }
+
+type PublishActionResponse FeedResponse
 
 func AuthorInfo(userID uint64) (*AuthorResponse, error) {
 	author, err := repository.AuthorInfo(userID)
@@ -88,45 +89,41 @@ func Feed(latestTime uint64, token string) (uint64, *[]FeedResponse, error) {
 }
 
 // 获取userID的所有的视频列表
-func UserVideoList(token string, userID uint64) (*[]map[string]interface{}, error) {
+func UserVideoList(token string, userID uint64) (*[]PublishActionResponse, error) {
 	// 检查token
 	_, err := Token2ID(token)
 	if err != nil {
-		fmt.Println("token验证失败:", err)
 		return nil, err
 	}
 
-	// 匹配, 根据userID查找数据库，按上传时间排序
+	author, err := AuthorInfo(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	// 根据userID查找数据库，按上传时间排序
 	videoList, err := repository.UserVideoList(userID)
 	if err != nil {
-		// 错误处理，返回空列表
-		return videoList, err
+		return nil, err
 	}
+
+	var response []PublishActionResponse
 	// 将视频列表中填充author信息
 	for i := range *videoList {
-
-		user_id := (*videoList)[i]["user_id"].(uint64)
-
-		author, err := repository.AuthorInfo(user_id)
-		if err != nil {
-			// 错误处理
-			fmt.Println(err)
-			continue
+		response_i := PublishActionResponse{
+			ID:            userID,
+			Author:        *author,
+			PlayUrl:       server_ip + (*videoList)[i]["play_url"].(string),
+			CoverUrl:      server_ip + (*videoList)[i]["cover_url"].(string),
+			FavoriteCount: (*videoList)[i]["favorite_count"].(uint32),
+			CommentCount:  (*videoList)[i]["comment_count"].(uint32),
+			IsFavorite:    false,
+			Title:         (*videoList)[i]["title"].(string),
 		}
-		authorMap := make(map[string]interface{})
-		authorMap["id"] = author.UserId
-		authorMap["name"] = author.UserName
-		authorMap["is_follow"] = false
-
-		(*videoList)[i]["author"] = authorMap
-
-		// 将相对url转为完整url
-		(*videoList)[i]["play_url"] = server_ip + (*videoList)[i]["play_url"].(string)
-		(*videoList)[i]["cover_url"] = server_ip + (*videoList)[i]["cover_url"].(string)
+		response = append(response, response_i)
 	}
 
-	return videoList, nil
-	// 不匹配
+	return &response, nil
 }
 
 // 登录用户选择视频上传

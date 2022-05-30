@@ -77,22 +77,25 @@ func PublishList(ctx *gin.Context) *gin.H {
 	userIDStr := ctx.Query("user_id")
 
 	// 类型转换
-	userID, _ := strconv.ParseUint(userIDStr, 10, 0)
-
+	userID, err := strconv.ParseUint(userIDStr, 10, 0)
+	if err != nil {
+		return &gin.H{
+			"status_code": 1,
+			"status_msg":  err.Error(),
+		}
+	}
 	// 获得信息
 	videoList, err := service.UserVideoList(token, userID)
 	if err != nil {
-		// 错误处理
-
 		return &gin.H{
-			"code": 1,
-			"msg":  "success",
+			"status_code": 1,
+			"status_msg":  err.Error(),
 		}
 	}
 
 	return &gin.H{
-		"code":       0,
-		"msg":        "failed",
-		"video_list": videoList,
+		"status_code": 0,
+		"status_msg":  "success",
+		"video_list":  videoList,
 	}
 }
