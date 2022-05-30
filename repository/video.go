@@ -88,13 +88,12 @@ func InsertCover(path string, videoName string, coverName string) error {
 }
 
 // FeedAll 查找时间upload_time<latestTime, 降序排列的30条视频
-func FeedAll(latestTime uint64) ([]map[string]interface{}, error) {
+func FeedAll(latestTime uint64) (*[]map[string]interface{}, error) {
 	var videoList []map[string]interface{}
 
 	err := DB.Table("video").Where("upload_time < ?", latestTime).Order("upload_time desc").Limit(30).Find(&videoList).Error
 
-	// fmt.Println(videoList)
-	return videoList, err
+	return &videoList, err
 }
 
 // func FeedOne(latestTime uint32, userID uint64) {

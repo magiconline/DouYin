@@ -60,8 +60,8 @@ func Feed(latestTime uint64, token string) (uint64, *[]FeedResponse, error) {
 		}
 
 		// 将视频列表中填充author信息
-		for i := range videoList {
-			userID := videoList[i]["user_id"].(uint64)
+		for i := range *videoList {
+			userID := (*videoList)[i]["user_id"].(uint64)
 
 			author, err := AuthorInfo(userID)
 			if err != nil {
@@ -71,16 +71,15 @@ func Feed(latestTime uint64, token string) (uint64, *[]FeedResponse, error) {
 			response_i := FeedResponse{
 				ID:            userID,
 				Author:        *author,
-				PlayUrl:       server_ip + videoList[i]["play_url"].(string),
-				CoverUrl:      server_ip + videoList[i]["cover_url"].(string),
-				FavoriteCount: videoList[i]["favorite_count"].(uint32),
-				CommentCount:  videoList[i]["comment_count"].(uint32),
+				PlayUrl:       server_ip + (*videoList)[i]["play_url"].(string),
+				CoverUrl:      server_ip + (*videoList)[i]["cover_url"].(string),
+				FavoriteCount: (*videoList)[i]["favorite_count"].(uint32),
+				CommentCount:  (*videoList)[i]["comment_count"].(uint32),
 				IsFavorite:    false,
-				Title:         videoList[i]["title"].(string),
+				Title:         (*videoList)[i]["title"].(string),
 			}
 			response = append(response, response_i)
-			nextTime = videoList[i]["upload_time"].(uint64)
-			fmt.Println("nextTime:", nextTime)
+			nextTime = (*videoList)[i]["upload_time"].(uint64)
 		}
 
 		return nextTime, &response, nil
