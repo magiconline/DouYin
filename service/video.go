@@ -65,7 +65,6 @@ func Feed(latestTime uint64, token string) (uint64, *[]FeedResponse, error) {
 
 			author, err := AuthorInfo(userID)
 			if err != nil {
-				fmt.Println("获取AuthorInfo错误:", err)
 				continue
 			}
 			response_i := FeedResponse{
