@@ -50,3 +50,12 @@ func ParseToken(token string) (*Claims, error) {
 
 	return nil, err
 }
+
+// 根据token获得userID
+func Token2ID(token string) (uint64, error) {
+	claims, err := ParseToken(token)
+	if err != nil {
+		return 0, err
+	}
+	return uint64(claims.ID), nil
+}
