@@ -2,6 +2,7 @@ package controller
 
 import (
 	"DouYin/service"
+	"fmt"
 	"strconv"
 
 	"DouYin/logger"
@@ -34,15 +35,39 @@ func Feed(ctx *gin.Context) *gin.H {
 
 	// 正常返回
 	return &gin.H{
-		"code":       0,
-		"msg":        "success",
-		"next_time":  nextTime,
-		"video_list": videoList,
+		"status_code": 0,
+		"status_msg":  "success",
+		"next_time":   nextTime,
+		"video_list":  *videoList,
 	}
 }
 
-func PublishAction(ctx *gin.Context) *interface{} {
-	return nil
+// 投稿接口
+func PublishAction(ctx *gin.Context) *gin.H {
+	data, err := ctx.FormFile("data")
+	if err != nil {
+		fmt.Println(err.Error())
+		return &gin.H{
+			"status_code": 1,
+			"status_msg":  err.Error(),
+		}
+	}
+	token := ctx.PostForm("token")
+	title := ctx.PostForm("title")
+
+	err = service.PublishAction(data, token, title)
+	if err != nil {
+		fmt.Println(err.Error())
+		return &gin.H{
+			"status_code": 1,
+			"status_msg":  err.Error(),
+		}
+	}
+
+	return &gin.H{
+		"status_code": 0,
+		"status_msg":  "success",
+	}
 }
 
 // 登录用户的视频发布列表，直接列出用户所有投稿过的视频

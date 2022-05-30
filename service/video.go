@@ -98,3 +98,42 @@ func UserVideoList(token string, userID uint64) (*[]map[string]interface{}, erro
 	return videoList, nil
 	// 不匹配
 }
+
+// 登录用户选择视频上传
+func PublishAction(data *multipart.FileHeader, token string, title string) error {
+	// 验证token
+	userID, err := Token2ID(token)
+	if err != nil {
+		return err
+	}
+
+	// 生成保存路径
+	path := "/static/" + time.Now().Format("2006/01/02") + "/"
+	name := uuid.NewString()
+	videoName := name + ".mp4"
+	coverName := name + ".jpg"
+
+	// 保存视频
+	err = repository.InsertVideo(path, videoName, data)
+	if err != nil {
+		return err
+	}
+
+	// 生成并保存缩略图
+	err = repository.InsertCover(path, videoName, coverName)
+	if err != nil {
+		return err
+	}
+
+	// 插入数据库
+	videoTable := repository.VideoTable{
+		UserId:     userID,
+		PlayUrl:    path + videoName,
+		CoverUrl:   path + coverName,
+		UploadTime: uint64(time.Now().UnixMilli()),
+		Title:      title,
+	}
+
+	err = repository.InsertVideoTable(&videoTable)
+	return err
+}

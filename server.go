@@ -55,6 +55,7 @@ func main() {
 	// 托管静态资源
 	r.Static("/static", "./static")
 
+	// 路由
 	r.POST("/douyin/user/login/", func(ctx *gin.Context) {
 		body := controller.UserLogin(ctx)
 		ctx.JSON(200, body)
