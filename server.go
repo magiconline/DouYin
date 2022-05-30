@@ -4,13 +4,35 @@ import (
 	"DouYin/controller"
 	"DouYin/logger"
 	"DouYin/repository"
+	"DouYin/service"
 	"fmt"
+	"net"
 	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
 
+func GetOutBoundIP() string {
+	conn, err := net.Dial("udp", "8.8.8.8:53")
+	if err != nil {
+		return "unknown"
+	}
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+	ip := strings.Split(localAddr.String(), ":")[0]
+	return ip
+}
+
 func main() {
+	// 获得本机ip+port
+	ip := GetOutBoundIP()
+	port := ":8080"
+	addr := "http://" + ip + port
+	fmt.Println("start server at ", addr)
+
+	// 设置静态资源ip
+	service.SetServerIP(addr)
+
 	// 初始化日志
 	err := logger.Init("./log")
 	if err != nil {
@@ -33,6 +55,7 @@ func main() {
 	// 托管静态资源
 	r.Static("/static", "./static")
 
+	// 路由
 	r.POST("/douyin/user/login/", func(ctx *gin.Context) {
 		body := controller.UserLogin(ctx)
 		ctx.JSON(200, body)
@@ -69,5 +92,5 @@ func main() {
 		ctx.JSON(200, body)
 	})
 	logger.Logger.Println("启动服务器")
-	r.Run()
+	r.Run(port)
 }

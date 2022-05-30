@@ -15,7 +15,13 @@ func Favorite(ctx *gin.Context) *gin.H {
 	token := ctx.Query("token")
 	//1.点赞 2.取消点赞
 	actionTypeStr := ctx.Query("action_type")
-
+	_, err := service.ParseToken(token)
+	if err != nil {
+		return &gin.H{
+			"status_code": 1,
+			"status_msg":  "token解析失败",
+		}
+	}
 	userIdInt, err := strconv.ParseUint(userIdStr, 10, 64)
 	if err != nil {
 		logger.Logger.Println("error:", err)
@@ -44,8 +50,6 @@ func Favorite(ctx *gin.Context) *gin.H {
 			"status_msg":  "传入参数为1或者2！",
 		}
 	}
-	logger.Logger.Printf("userIdInt：%d actionTypeInt：%d videoIdInt：%d token：%s", userIdInt, actionTypeInt, videoIdInt, token)
-	//用户鉴权token
 	if actionTypeInt == 1 {
 		service.AddStar(uint64(userIdInt), uint64(videoIdInt))
 		return &gin.H{

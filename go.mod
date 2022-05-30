@@ -4,17 +4,24 @@ go 1.18
 
 require (
 	github.com/gin-gonic/gin v1.7.7
-	gorm.io/driver/mysql v1.3.3
+	gorm.io/driver/mysql v1.3.4
 	gorm.io/gorm v1.23.5
 )
 
+require github.com/google/uuid v1.3.0
+
 require (
-	github.com/astaxie/beego v1.12.3 // indirect
-	github.com/shiena/ansicolor v0.0.0-20200904210342-c7312218db18 // indirect
+	github.com/aws/aws-sdk-go v1.38.20 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
+	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
+	github.com/u2takey/go-utils v0.3.1 // indirect
+	golang.org/x/image v0.0.0-20191009234506-e7c1f5e7dbb8 // indirect
 	google.golang.org/protobuf v1.23.0 // indirect
+	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 )
 
 require (
+	github.com/disintegration/imaging v1.6.2
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	// github.com/go-ini/ini v1.66.4 // indirect
 	github.com/go-playground/locales v0.13.0 // indirect
@@ -30,8 +37,9 @@ require (
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
+	github.com/u2takey/ffmpeg-go v0.4.1
 	github.com/ugorji/go/codec v1.1.7 // indirect
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9 // indirect
-	golang.org/x/sys v0.0.0-20200615200032-f1bc736245b1 // indirect
+	golang.org/x/sys v0.0.0-20200930185726-fdedc70b468f // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )

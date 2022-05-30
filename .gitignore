@@ -1,8 +1,10 @@
 # 数据库
 /db/
+/static/
 
 # GoLand配置
 /.idea/
 
 # 日志文件
 /log
+__debug_bin

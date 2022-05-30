@@ -59,7 +59,7 @@ func (*StarDao) AuthorId(videoID uint64) (*[]map[string]interface{}, error) {
 // AuthorInfo userId(user_id, user_name, follow_count, follower_count)字段
 func (*StarDao) AuthorInfo(userId uint64) (*map[string]interface{}, error) {
 	var author []map[string]interface{}
-	result := DB.Table("users").Select("id", "user_name", "follow_count", "follower_count").Where("id = ?", userId).Find(&author)
+	result := DB.Table("user").Select("user_id", "user_name", "follow_count", "follower_count").Where("user_id = ?", userId).Find(&author)
 	return &author[0], result.Error
 }
 
