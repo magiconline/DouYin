@@ -54,8 +54,43 @@ func ParseToken(token string) (*Claims, error) {
 // 根据token获得userID
 func Token2ID(token string) (uint64, error) {
 	claims, err := ParseToken(token)
+	//超时 返回新token
+	//校验错误 返回err
 	if err != nil {
+		if ve, ok := err.(*jwt.ValidationError); ok {
+			//token 超出有效期
+			if ve.Errors&jwt.ValidationErrorExpired != 0 {
+				token, err1 := RefreshToken(token)
+				if err1 == nil {
+					return Token2ID(token)
+				} else {
+					return 0, err1
+				}
+			}
+		}
 		return 0, err
 	}
 	return uint64(claims.ID), nil
+}
+
+func RefreshToken(tokenString string) (string, error) {
+	jwt.TimeFunc = func() time.Time {
+		return time.Unix(0, 0)
+	}
+	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		return jwtSecret, nil
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	if c, ok := token.Claims.(*Claims); ok && token.Valid {
+		jwt.TimeFunc = time.Now
+		c.StandardClaims.ExpiresAt = time.Now().Add(jwtEffectTime).Unix()
+		return GenerateToken(c.ID)
+	}
+
+	return "", err
+
 }
