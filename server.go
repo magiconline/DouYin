@@ -91,6 +91,20 @@ func main() {
 		body := controller.ThumbListVideo(ctx)
 		ctx.JSON(200, body)
 	})
+
+	r.POST("/douyin/relation/action/", func(ctx *gin.Context) {
+		body := controller.RelationAction(ctx)
+		ctx.JSON(200, body)
+	})
+	r.GET("/douyin/relation/follow/list/", func(ctx *gin.Context) {
+		body := controller.FollowList(ctx)
+		ctx.JSON(200, body)
+	})
+	r.GET("/douyin/relation/follower/list/", func(ctx *gin.Context) {
+		body := controller.FollowerList(ctx)
+		ctx.JSON(200, body)
+	})
+
 	logger.Logger.Println("启动服务器")
 	r.Run(port)
 }

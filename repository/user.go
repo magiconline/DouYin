@@ -59,3 +59,12 @@ func CreateUser(username, pwd string) (*User, error) {
 	err := DB.Table("user").Create(&user).Error
 	return &user, err
 }
+
+// 为关注/粉丝列表查询用户信息(user_name, follow_count, follower_count)
+func UserInfo(userID int64) (*User, error) {
+	var result User
+
+	err := DB.Where(User{UserId: userID}).Select("user_name", "follow_count", "follower_count").Take(&result).Error
+
+	return &result, err
+}
