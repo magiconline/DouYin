@@ -57,7 +57,7 @@ func Feed(latestTime uint64, token string) (uint64, *[]FeedResponse, error) {
 	}
 
 	var response []FeedResponse
-	nextTime := latestTime
+	nextTime := latestTime // 如果没有新视频则nextTime = latestTime
 	// 获得视频列表
 	videoList, err := repository.FeedAll(latestTime)
 	if err != nil {
@@ -139,7 +139,8 @@ func PublishAction(data *multipart.FileHeader, token string, title string) error
 	}
 
 	// 生成保存路径
-	path := "/static/" + time.Now().Format("2006/01/02") + "/"
+	curTime := time.Now()
+	path := "/static/" + curTime.Format("2006/01/02") + "/"
 	name := uuid.NewString()
 	videoName := name + ".mp4"
 	coverName := name + ".jpg"
@@ -161,7 +162,7 @@ func PublishAction(data *multipart.FileHeader, token string, title string) error
 		UserId:     userID,
 		PlayUrl:    path + videoName,
 		CoverUrl:   path + coverName,
-		UploadTime: uint64(time.Now().UnixMilli()),
+		UploadTime: uint64(curTime.UnixMilli()),
 		Title:      title,
 	}
 
