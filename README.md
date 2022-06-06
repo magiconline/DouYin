@@ -21,8 +21,10 @@ https://zhuanlan.zhihu.com/p/111824045
 
 # TODO
 1. 测试关注功能
+   1. ~~对应user的粉丝count +- 1~~
+   2. 检查user_id是否存在
+   3. 自己关注自己
 2. 使用联结查询
 3. SQL安全
 4. 性能测试
 5. 缓存
-

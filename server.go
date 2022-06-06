@@ -48,7 +48,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	gin.SetMode(gin.ReleaseMode)
+	// 设置release模式
+	// gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
 	// 托管静态资源

@@ -3,6 +3,10 @@ package service
 import (
 	"DouYin/repository"
 	"errors"
+	"fmt"
+	"time"
+
+	uuid "github.com/google/uuid"
 )
 
 // 关注列表的用户信息
@@ -15,20 +19,43 @@ type FollowResponse struct {
 }
 
 // 关注操作
-func RelationAction(userID uint64, token string, toUserID uint64, action bool) error {
+func RelationAction(token string, toUserID uint64, action bool) error {
+	var err error
 
 	// 验证token
-	tokenID, err := Token2ID(token)
+	userID, err := Token2ID(token)
 	if err != nil {
 		return err
 	}
 
-	if userID != tokenID {
-		return errors.New("token.user_id 与 user_id不同")
+	k := fmt.Sprintf("%d_%d", userID, toUserID)
+	v := uuid.NewString()
+
+	// 获得锁
+	if err = repository.GetRedisLock(k, v, 10*time.Second); err != nil {
+		return err
+	}
+	// 释放锁
+	defer repository.DeleteRedisLock(k, v)
+
+	// 修改relation
+	err = repository.Action(userID, toUserID, action)
+
+	// 更新user表关注数和粉丝数
+	var value int
+	if action {
+		value = 1
+	} else {
+		value = -1
 	}
 
-	err = repository.Action(userID, toUserID, action)
-	return err
+	err1 := repository.ChangeFollowCount(userID, value)
+	err2 := repository.ChangeFollowerCount(toUserID, value)
+	if err1 != nil || err2 != nil {
+		return errors.New("user.follow_count | user.follower_count 更新失败")
+	}
+
+	return nil
 }
 
 // 获取关注列表
@@ -43,7 +70,7 @@ func FollowList(userID uint64) (*[]FollowResponse, error) {
 		followUserID := (*followUserIDList)[i].ToUserID
 
 		// 获取其他信息
-		userInfo, err := repository.UserInfo(int64(userID))
+		userInfo, err := repository.UserInfo(int64(followUserID))
 		if err != nil {
 			return nil, err
 		}
@@ -69,21 +96,21 @@ func FollowerList(userID uint64) (*[]FollowResponse, error) {
 	}
 
 	for i := range *followerUserIDList {
-		followUserID := (*followerUserIDList)[i].ToUserID
+		followerUserID := (*followerUserIDList)[i].ToUserID
 
 		// 获取其他信息
-		userInfo, err := repository.UserInfo(int64(userID))
+		userInfo, err := repository.UserInfo(int64(followerUserID))
 		if err != nil {
 			return nil, err
 		}
 
-		isFollow, err := repository.IsFollower(userID, followUserID)
+		isFollow, err := repository.IsFollower(userID, followerUserID)
 		if err != nil {
 			return nil, err
 		}
 
 		followerList = append(followerList, FollowResponse{
-			ID:            followUserID,
+			ID:            followerUserID,
 			Name:          userInfo.UserName,
 			FollowCount:   userInfo.FollowCount,
 			FollowerCount: userInfo.FollowerCount,

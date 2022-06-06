@@ -64,7 +64,7 @@ func CreateUser(username, pwd string) (*User, error) {
 func UserInfo(userID int64) (*User, error) {
 	var result User
 
-	err := DB.Where(User{UserId: userID}).Select("user_name", "follow_count", "follower_count").Take(&result).Error
+	err := DB.Table("user").Where(User{UserId: userID}).Select("user_name", "follow_count", "follower_count").Take(&result).Error
 
 	return &result, err
 }

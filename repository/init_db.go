@@ -26,7 +26,7 @@ func Init() error {
 		return err
 	}
 	DB.AutoMigrate(&Star{})
-	DB.AutoMigrate(&User{})
+	// DB.AutoMigrate(&User{})
 	DB.AutoMigrate(&Relation{})
 
 	RDB = redis.NewClient(&redis.Options{

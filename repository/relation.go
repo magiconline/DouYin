@@ -1,22 +1,97 @@
 package repository
 
+import (
+	"fmt"
+	"time"
+
+	"gorm.io/gorm"
+)
+
 type Relation struct {
-	UserID   uint64 `gorm:"primaryKey;notNULL"` // 用户
-	ToUserID uint64 `gorm:"notNULL;index"`      // 被关注的用户
+	ID       uint64 `gorm:"primaryKey"`
+	UserID   uint64 `gorm:"notNULL;index"` // 用户
+	ToUserID uint64 `gorm:"notNULL;index"` // 被关注的用户
 	Relation bool   `gorm:"notNULL"`
 }
 
+// 获取redis锁
+// 如果锁已被占用则休眠0.1s后继续查询
+func GetRedisLock(k string, v string, expire time.Duration) error {
+	val := false
+	var err error
+
+	for !val {
+		val, err = RDB.SetNX(CTX, k, v, expire).Result()
+		if err != nil {
+			fmt.Println(err.Error())
+			return err
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	return nil
+}
+
+// 释放redis锁
+// 可重复释放
+func DeleteRedisLock(k string, v string) {
+	result, err := RDB.Get(CTX, k).Result()
+	if err != nil {
+		fmt.Printf("redis err: %s, %s 释放失败\n", err.Error(), k)
+	}
+
+	if result == v {
+		err = RDB.Del(CTX, k).Err()
+		if err != nil {
+			fmt.Printf("redis err: %s, %s 释放失败\n", err.Error(), k)
+		}
+	}
+}
+
 // 关注操作
-// action=true表示关注
-// action=false表示取消关注
+// action=true表示关注操作
+// action=false表示取消关注操作
 func Action(userID uint64, toUserID uint64, action bool) error {
+	relation := Relation{UserID: userID, ToUserID: toUserID}
+	var err error
 	if action {
-		err := DB.FirstOrCreate(&Relation{UserID: userID, ToUserID: toUserID}, Relation{UserID: userID, ToUserID: toUserID, Relation: true}).Error
+		// 关注操作
+
+		// 查询是否已创建relation记录
+		result := DB.Where(&relation).Limit(1).Find(&Relation{})
+		if result.Error != nil {
+			return result.Error
+		}
+
+		if result.RowsAffected == 0 {
+			// 未创建relation，创建新relation记录
+			relation.Relation = true
+			err = DB.Create(&relation).Error
+			if err != nil {
+				return nil
+			}
+		} else {
+			// 已创建relation，修改relation记录
+			err = DB.Model(&relation).Update("relation", true).Error
+		}
+
 		return err
 	} else {
-		err := DB.Model(&Relation{UserID: userID, ToUserID: toUserID}).Update("relation", false).Error
+		// 取消关注操作
+		err := DB.Model(&relation).Update("relation", false).Error
 		return err
 	}
+}
+
+// 更新user表follow_count
+func ChangeFollowCount(userID uint64, value int) error {
+	err := DB.Table("user").Where("user_id = ?", userID).Update("follow_count", gorm.Expr("follow_count + ?", value)).Error
+	return err
+}
+
+// 更新user表的follower_count
+func ChangeFollowerCount(userID uint64, value int) error {
+	err := DB.Table("user").Where("user_id = ? ", userID).Update("follower_count", gorm.Expr("follower_count + ?", value)).Error
+	return err
 }
 
 // 关注列表
@@ -41,5 +116,3 @@ func IsFollower(userID uint64, toUserID uint64) (bool, error) {
 	err := DB.Where(&Relation{UserID: userID, ToUserID: toUserID, Relation: true}).Limit(1).Find(&relation).Error
 	return relation.Relation, err
 }
-
-//

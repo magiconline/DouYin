@@ -10,18 +10,9 @@ import (
 // 关注操作
 func RelationAction(ctx *gin.Context) *gin.H {
 	// 获取参数
-	userIDStr := ctx.Query("user_id")
 	token := ctx.Query("token")
-	toUserIDStr := ctx.Query("to_user_Id")
+	toUserIDStr := ctx.Query("to_user_id")
 	actionTypeStr := ctx.Query("action_type")
-
-	userID, err := strconv.ParseUint(userIDStr, 10, 64)
-	if err != nil {
-		return &gin.H{
-			"status_code": 1,
-			"status_msg":  err.Error(),
-		}
-	}
 
 	toUserID, err := strconv.ParseUint(toUserIDStr, 10, 64)
 	if err != nil {
@@ -32,7 +23,7 @@ func RelationAction(ctx *gin.Context) *gin.H {
 	}
 
 	// 关注操作
-	err = service.RelationAction(userID, token, toUserID, actionTypeStr == "1")
+	err = service.RelationAction(token, toUserID, actionTypeStr == "1")
 	if err != nil {
 		return &gin.H{
 			"status_code": 1,
