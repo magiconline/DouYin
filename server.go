@@ -44,12 +44,11 @@ func main() {
 	// 初始化数据库连接
 	err = repository.Init()
 	if err != nil {
-		fmt.Println("数据库连接错误:", err)
+		fmt.Println(err.Error())
 		os.Exit(1)
-	} else {
-		fmt.Println("数据库连接成功")
 	}
 
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
 	// 托管静态资源
