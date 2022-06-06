@@ -19,7 +19,9 @@ var (
 // 初始化redis
 func Init() error {
 	var err error
-	DB, err = gorm.Open(mysql.Open(mysqlUrl), &gorm.Config{})
+	DB, err = gorm.Open(mysql.Open(mysqlUrl), &gorm.Config{
+		PrepareStmt: true,
+	})
 	if err != nil {
 		return err
 	}
@@ -29,8 +31,13 @@ func Init() error {
 
 	RDB = redis.NewClient(&redis.Options{
 		Addr:     "127.0.0.1:6379",
-		Password: "",
+		Password: "123456",
 		DB:       0,
 	})
+
+	if _, err := RDB.Ping(CTX).Result(); err != nil {
+		return err
+	}
+
 	return nil
 }
