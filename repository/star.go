@@ -42,12 +42,7 @@ func (*StarDao) AddStar(userId, videoId uint64) {
 			logger.Logger.Printf("err", err)
 			return err
 		}
-		var count int64
-		if err := tx.Table("star").Where("video_id = ?", videoId).Count(&count).Error; err != nil {
-			logger.Logger.Printf("err", err)
-			return err
-		}
-		if err := tx.Table("video").Where("video_id = ?", videoId).Update("favorite_count", count).Error; err != nil {
+		if err := tx.Table("video").Where("video_id = ?", videoId).Update("favorite_count", gorm.Expr("favorite_count + ?", 1)).Error; err != nil {
 			logger.Logger.Printf("err", err)
 			return err
 		}
@@ -63,12 +58,7 @@ func (*StarDao) DeleteStar(userId, videoId uint64) {
 			logger.Logger.Printf("err", err)
 			return err
 		}
-		var count int64
-		if err := tx.Table("star").Where("video_id = ?", videoId).Count(&count).Error; err != nil {
-			logger.Logger.Printf("err", err)
-			return err
-		}
-		if err := tx.Table("video").Where("video_id = ?", videoId).Update("favorite_count", count).Error; err != nil {
+		if err := tx.Table("video").Where("video_id = ?", videoId).Update("favorite_count", gorm.Expr("favorite_count - ?", 1)).Error; err != nil {
 			logger.Logger.Printf("err", err)
 			return err
 		}
