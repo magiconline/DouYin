@@ -45,7 +45,7 @@ func AuthorInfo(userID uint64) (*AuthorResponse, error) {
 	return &AuthorResponse{ID: uint64(author.UserId), Name: author.UserName, FollowCount: 0, FollowerCount: 0, IsFollow: false}, nil
 }
 
-// 获得视频流
+//Feed 获得视频流
 // 如果token为空字符串则表示没有输入token，返回包含所有用户的视频流
 // 如果token不为空，验证token，然后返回该用户的视频流
 func Feed(latestTime uint64, token string) (uint64, *[]FeedResponse, error) {
@@ -55,7 +55,8 @@ func Feed(latestTime uint64, token string) (uint64, *[]FeedResponse, error) {
 			return 0, nil, err
 		}
 	}
-
+	//获取当前用户
+	currentUserId, err := Token2ID(token)
 	var response []FeedResponse
 	nextTime := latestTime
 	// 获得视频列表
@@ -68,10 +69,20 @@ func Feed(latestTime uint64, token string) (uint64, *[]FeedResponse, error) {
 	// 将视频列表中填充author信息
 	for i := range *videoList {
 		userID := (*videoList)[i]["user_id"].(uint64)
-
 		author, err := AuthorInfo(userID)
 		if err != nil {
 			continue
+		}
+		//返回视频点赞状态
+		stool, err := repository.NewStarDaoInstance().IsThumbUp(currentUserId, (*videoList)[i]["video_id"].(uint64))
+		if err != nil {
+			continue
+		}
+		var isFavorite bool
+		if stool == nil {
+			isFavorite = false
+		} else {
+			isFavorite = true
 		}
 		response_i := FeedResponse{
 			ID:            (*videoList)[i]["video_id"].(uint64),
@@ -80,17 +91,16 @@ func Feed(latestTime uint64, token string) (uint64, *[]FeedResponse, error) {
 			CoverUrl:      server_ip + (*videoList)[i]["cover_url"].(string),
 			FavoriteCount: (*videoList)[i]["favorite_count"].(uint32),
 			CommentCount:  (*videoList)[i]["comment_count"].(uint32),
-			IsFavorite:    false,
+			IsFavorite:    isFavorite,
 			Title:         (*videoList)[i]["title"].(string),
 		}
 		response = append(response, response_i)
 		nextTime = (*videoList)[i]["upload_time"].(uint64)
 	}
-
 	return nextTime, &response, nil
 }
 
-// 获取userID的所有的视频列表
+// UserVideoList 获取userID的所有的视频列表
 func UserVideoList(token string, userID uint64) (*[]PublishActionResponse, error) {
 	// 检查token
 	if token != "" {
@@ -130,7 +140,7 @@ func UserVideoList(token string, userID uint64) (*[]PublishActionResponse, error
 	return &response, nil
 }
 
-// 登录用户选择视频上传
+// PublishAction 登录用户选择视频上传
 func PublishAction(data *multipart.FileHeader, token string, title string) error {
 	// 验证token
 	userID, err := Token2ID(token)

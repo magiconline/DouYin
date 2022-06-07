@@ -36,9 +36,6 @@ create table star
     video_id     bigint unsigned  not null comment '视频ID'
  );
 
-
--- 插入用户
-INSERT INTO `users` (`id`, `user_name`, `password`, `follow_count`, `follower_count`, `token`) VALUES (1, "test_user", "123", 0, 0, "abc");
 -- 插入点赞状态表
 INSERT INTO douyin.star (user_id, video_id) VALUES (1, 1);
 

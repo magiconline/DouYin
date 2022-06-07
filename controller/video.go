@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// 获得视频流，获得参数，调用service层，返回map
+//Feed 获得视频流，获得参数，调用service层，返回map
 func Feed(ctx *gin.Context) *gin.H {
 	// 获得参数
 	latestTimeStr := ctx.Query("latest_time")
@@ -44,7 +44,7 @@ func Feed(ctx *gin.Context) *gin.H {
 	}
 }
 
-// 投稿接口
+//PublishAction 投稿接口
 func PublishAction(ctx *gin.Context) *gin.H {
 	data, err := ctx.FormFile("data")
 	if err != nil {
@@ -70,7 +70,7 @@ func PublishAction(ctx *gin.Context) *gin.H {
 	}
 }
 
-// 登录用户的视频发布列表，直接列出用户所有投稿过的视频
+// PublishList 登录用户的视频发布列表，直接列出用户所有投稿过的视频
 func PublishList(ctx *gin.Context) *gin.H {
 	// 获得参数
 	token := ctx.Query("token")
