@@ -50,14 +50,14 @@ func DeleteRedisLock(k string, v string) {
 // 关注操作
 // action=true表示关注操作
 // action=false表示取消关注操作
-func Action(userID uint64, toUserID uint64, action bool) error {
+func Action(tx *gorm.DB, userID uint64, toUserID uint64, action bool) error {
 	relation := Relation{UserID: userID, ToUserID: toUserID}
 	var err error
 	if action {
 		// 关注操作
 
 		// 查询是否已创建relation记录
-		result := DB.Where(&relation).Limit(1).Find(&Relation{})
+		result := tx.Where(&relation).Limit(1).Find(&Relation{})
 		if result.Error != nil {
 			return result.Error
 		}
@@ -65,32 +65,32 @@ func Action(userID uint64, toUserID uint64, action bool) error {
 		if result.RowsAffected == 0 {
 			// 未创建relation，创建新relation记录
 			relation.Relation = true
-			err = DB.Create(&relation).Error
+			err = tx.Create(&relation).Error
 			if err != nil {
 				return nil
 			}
 		} else {
 			// 已创建relation，修改relation记录
-			err = DB.Model(&relation).Where("user_id = ? AND to_user_id = ?", userID, toUserID).Update("relation", true).Error
+			err = tx.Model(&relation).Where("user_id = ? AND to_user_id = ?", userID, toUserID).Update("relation", true).Error
 		}
 
 		return err
 	} else {
 		// 取消关注操作
-		err := DB.Model(&relation).Where("user_id = ? AND to_user_id = ?", userID, toUserID).Update("relation", false).Error
+		err := tx.Model(&relation).Where("user_id = ? AND to_user_id = ?", userID, toUserID).Update("relation", false).Error
 		return err
 	}
 }
 
 // 更新user表follow_count
-func ChangeFollowCount(userID uint64, value int) error {
-	err := DB.Table("user").Where("user_id = ?", userID).Update("follow_count", gorm.Expr("follow_count + (?)", value)).Error
+func ChangeFollowCount(tx *gorm.DB, userID uint64, value int) error {
+	err := tx.Table("user").Where("user_id = ?", userID).Update("follow_count", gorm.Expr("follow_count + (?)", value)).Error
 	return err
 }
 
 // 更新user表的follower_count
-func ChangeFollowerCount(userID uint64, value int) error {
-	err := DB.Table("user").Where("user_id = ? ", userID).Update("follower_count", gorm.Expr("follower_count + (?)", value)).Error
+func ChangeFollowerCount(tx *gorm.DB, userID uint64, value int) error {
+	err := tx.Table("user").Where("user_id = ? ", userID).Update("follower_count", gorm.Expr("follower_count + (?)", value)).Error
 	return err
 }
 
