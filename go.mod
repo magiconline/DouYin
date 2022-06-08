@@ -8,10 +8,15 @@ require (
 	gorm.io/gorm v1.23.5
 )
 
-require github.com/google/uuid v1.3.0
+require (
+	github.com/go-redis/redis/v9 v9.0.0-beta.1
+	github.com/google/uuid v1.3.0
+)
 
 require (
 	github.com/aws/aws-sdk-go v1.38.20 // indirect
+	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/u2takey/go-utils v0.3.1 // indirect
@@ -40,6 +45,6 @@ require (
 	github.com/u2takey/ffmpeg-go v0.4.1
 	github.com/ugorji/go/codec v1.1.7 // indirect
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9 // indirect
-	golang.org/x/sys v0.0.0-20200930185726-fdedc70b468f // indirect
-	gopkg.in/yaml.v2 v2.2.8 // indirect
+	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

@@ -36,15 +36,13 @@ create table star
     video_id     bigint unsigned  not null comment '视频ID'
  );
 
-
--- 插入用户
-INSERT INTO `users` (`id`, `user_name`, `password`, `follow_count`, `follower_count`, `token`) VALUES (1, "test_user", "123", 0, 0, "abc");
 -- 插入点赞状态表
 INSERT INTO douyin.star (user_id, video_id) VALUES (1, 1);
 
 -- 插入视频
-INSERT INTO `video` (`video_id`, `user_id`, `play_url`, `cover_url`, `favorite_count`, `comment_count`, `upload_time`, `title`) VALUES (1, 1, "/static/2022/05/16/抖音-记录美好生活.mp4", "/static/2022/05/16/抖音-记录美好生活.jpg", 0, 0, REPLACE(unix_timestamp(current_timestamp(3)),'.',''), "测试title");
+-- 需要插入数据库、拷贝文件、生成缩略图，sql无法模拟
+-- INSERT INTO `video` (`video_id`, `user_id`, `play_url`, `cover_url`, `favorite_count`, `comment_count`, `upload_time`, `title`) VALUES (1, 1, "/static/2022/05/16/抖音-记录美好生活.mp4", "/static/2022/05/16/抖音-记录美好生活.jpg", 0, 0, REPLACE(unix_timestamp(current_timestamp(3)),'.',''), "测试title");
 
-INSERT INTO `video` (`video_id`, `user_id`, `play_url`, `cover_url`, `favorite_count`, `comment_count`, `upload_time`, `title`) VALUES (2, 1, "/static/2022/05/16/抖音-记录美好生活(1).mp4", "/static/2022/05/16/抖音-记录美好生活.jpg", 0, 0, REPLACE(unix_timestamp(current_timestamp(3)),'.',''), "测试title");
+-- INSERT INTO `video` (`video_id`, `user_id`, `play_url`, `cover_url`, `favorite_count`, `comment_count`, `upload_time`, `title`) VALUES (2, 1, "/static/2022/05/16/抖音-记录美好生活(1).mp4", "/static/2022/05/16/抖音-记录美好生活.jpg", 0, 0, REPLACE(unix_timestamp(current_timestamp(3)),'.',''), "测试title");
 
-INSERT INTO `video` (`video_id`, `user_id`, `play_url`, `cover_url`, `favorite_count`, `comment_count`, `upload_time`, `title`) VALUES (3, 1, "/static/2022/05/16/抖音-记录美好生活(2).mp4", "/static/2022/05/16/抖音-记录美好生活.jpg", 0, 0, REPLACE(unix_timestamp(current_timestamp(3)),'.',''), "测试title");
+-- INSERT INTO `video` (`video_id`, `user_id`, `play_url`, `cover_url`, `favorite_count`, `comment_count`, `upload_time`, `title`) VALUES (3, 1, "/static/2022/05/16/抖音-记录美好生活(2).mp4", "/static/2022/05/16/抖音-记录美好生活.jpg", 0, 0, REPLACE(unix_timestamp(current_timestamp(3)),'.',''), "测试title");

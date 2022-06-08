@@ -8,7 +8,6 @@ import (
 	"mime/multipart"
 	"os"
 
-	// "DouYin/logger"
 	"github.com/disintegration/imaging"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
@@ -32,7 +31,7 @@ func InsertVideoTable(videoTable *VideoTable) error {
 	return err
 }
 
-// 插入视频
+// InsertVideo 插入视频
 func InsertVideo(path string, videoName string, video *multipart.FileHeader) error {
 	// 打开视频句柄
 	file, err := video.Open()
@@ -60,7 +59,7 @@ func InsertVideo(path string, videoName string, video *multipart.FileHeader) err
 	return err
 }
 
-// 生成并保存图像
+// InsertCover 生成并保存图像
 func InsertCover(path string, videoName string, coverName string) error {
 	buf := bytes.NewBuffer(nil)
 	err := ffmpeg.Input("."+path+videoName).
@@ -105,10 +104,9 @@ func AuthorInfo(userID uint64) (*User, error) {
 	return &user, err
 }
 
-// 根据user_id查找所有视频
+// UserVideoList 根据user_id查找所有视频
 func UserVideoList(userID uint64) (*[]map[string]interface{}, error) {
 	var videoList []map[string]interface{}
 	err := DB.Table("video").Where("user_id = ?", userID).Order("upload_time desc").Find(&videoList).Error
-
 	return &videoList, err
 }
