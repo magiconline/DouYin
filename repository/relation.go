@@ -71,26 +71,26 @@ func Action(userID uint64, toUserID uint64, action bool) error {
 			}
 		} else {
 			// 已创建relation，修改relation记录
-			err = DB.Model(&relation).Update("relation", true).Error
+			err = DB.Model(&relation).Where("user_id = ? AND to_user_id = ?", userID, toUserID).Update("relation", true).Error
 		}
 
 		return err
 	} else {
 		// 取消关注操作
-		err := DB.Model(&relation).Update("relation", false).Error
+		err := DB.Model(&relation).Where("user_id = ? AND to_user_id = ?", userID, toUserID).Update("relation", false).Error
 		return err
 	}
 }
 
 // 更新user表follow_count
 func ChangeFollowCount(userID uint64, value int) error {
-	err := DB.Table("user").Where("user_id = ?", userID).Update("follow_count", gorm.Expr("follow_count + ?", value)).Error
+	err := DB.Table("user").Where("user_id = ?", userID).Update("follow_count", gorm.Expr("follow_count + (?)", value)).Error
 	return err
 }
 
 // 更新user表的follower_count
 func ChangeFollowerCount(userID uint64, value int) error {
-	err := DB.Table("user").Where("user_id = ? ", userID).Update("follower_count", gorm.Expr("follower_count + ?", value)).Error
+	err := DB.Table("user").Where("user_id = ? ", userID).Update("follower_count", gorm.Expr("follower_count + (?)", value)).Error
 	return err
 }
 

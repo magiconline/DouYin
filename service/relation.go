@@ -40,7 +40,9 @@ func RelationAction(token string, toUserID uint64, action bool) error {
 
 	// 修改relation
 	err = repository.Action(userID, toUserID, action)
-
+	if err != nil {
+		return err
+	}
 	// 更新user表关注数和粉丝数
 	var value int
 	if action {
