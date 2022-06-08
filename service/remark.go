@@ -46,13 +46,8 @@ func QueryByVideoId(videoId int64) ([]map[string]interface{},error) {
 	return remarkList,err
 }
 
-<<<<<<< HEAD
 func InsertByCommentIdAndVideo(remark repository.Remark,videoId uint64) (error) {
 	return repository.NewRemarkDaoINstance().InsertByCommentIDAndVideo(&remark,videoId)
-=======
-func InsertByCommentIdAndVideo(remark repository.Remark) (error) {
-	return repository.NewRemarkDaoINstance().InsertByCommentIDAndVideo(&remark)
->>>>>>> 06c95b4 (Initial commit)
 }
 
 

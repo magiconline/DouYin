@@ -51,10 +51,6 @@ func Leave_remark(c *gin.Context) *gin.H {
 	//疑问？每次插入和删除后，视频界面的comment_count不能自动刷新
 	if actionTypeInt==2{
 		err :=Delete_video_remark(uint64(videoIdInt),userId,commentText)
-<<<<<<< HEAD
-=======
-		service.CountAllComment(uint64(videoIdInt))
->>>>>>> 06c95b4 (Initial commit)
 		if err != nil{
 			return  &gin.H{
 				"status_code":     1,
@@ -89,11 +85,7 @@ func Leave_remark(c *gin.Context) *gin.H {
 		Content: commentText,
 		CreateDate:  createTime,
 	}
-<<<<<<< HEAD
 	err = service.InsertByCommentIdAndVideo(remark, uint64(videoIdInt))
-=======
-	err = service.InsertByCommentIdAndVideo(remark)
->>>>>>> 06c95b4 (Initial commit)
 	if err != nil {
 		//错误返回
 		return  &gin.H{
@@ -101,10 +93,6 @@ func Leave_remark(c *gin.Context) *gin.H {
 			"status_msg":      err.Error(),
 		}
 	}
-<<<<<<< HEAD
-=======
-	service.CountAllComment(uint64(videoIdInt))
->>>>>>> 06c95b4 (Initial commit)
 
 	return &gin.H{
 		"status_code":     0,

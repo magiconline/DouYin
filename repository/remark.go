@@ -1,11 +1,6 @@
 package repository
 
 import (
-<<<<<<< HEAD
-=======
-	"fmt"
-	"gorm.io/gorm"
->>>>>>> 06c95b4 (Initial commit)
 	"strconv"
 	"sync"
 	"time"
@@ -52,28 +47,19 @@ func NewRemarkDaoINstance()*RemarkDao  {
 //根据视频id查询评论
 func  (*RemarkDao)QueryByVideoId(videoId uint64) ([]map[string]interface{},error) {
 	var  remarkList  []map[string]interface{}
-<<<<<<< HEAD
 	result := DB.Table("remark").Where("video_id = ?",videoId).Order("create_time desc").Find(&remarkList).Error
 	return remarkList,result
-=======
-	result := DB.Table("remark").Where("video_id = ?",videoId).Order("create_time desc").Find(&remarkList)
-	return remarkList,result.Error
->>>>>>> 06c95b4 (Initial commit)
 }
 
 //根据评论id查询评论
 func  (*RemarkDao)QueryByCommentId(commentId uint64) ([]map[string]interface{},error) {
 	var  remarkList  []map[string]interface{}
 	result := DB.Table("remark").Where("comment_id = ?",commentId).Order("create_time desc").Find(&remarkList)
-<<<<<<< HEAD
 
-=======
->>>>>>> 06c95b4 (Initial commit)
 	return remarkList,result.Error
 }
 
 
-<<<<<<< HEAD
 //插入评论,计算videoid 下的评论总条数,同时更新到video列表
 func (*RemarkDao)InsertByCommentIDAndVideo(remarkdata *Remark,videoId uint64) (error) {
 	var count int64
@@ -84,13 +70,6 @@ func (*RemarkDao)InsertByCommentIDAndVideo(remarkdata *Remark,videoId uint64) (e
 	if err != nil {
 		tx.Rollback()
 		return nil
-=======
-//插入评论
-func (*RemarkDao)InsertByCommentIDAndVideo(remarkdata *Remark) (error) {
-	if err := DB.Create(remarkdata).Error; err != nil {
-		fmt.Println("插入失败", err)
-		return err
->>>>>>> 06c95b4 (Initial commit)
 	}
 	return nil
 
@@ -107,7 +86,6 @@ func VideoCommentList(videoId uint64) (*[]map[string]interface{}, error) {
 
 
 // 根据videoid和userid和comment_text删除评论,comment_id为主键
-<<<<<<< HEAD
 func DeleteByVdUdAndContent(videoId uint64,userId uint64,content string)(error){
 	var count int64
 	tx := DB.Begin()
@@ -128,22 +106,6 @@ func CountCommentlist(videoId uint64)(err error) {
 	if err !=nil {
 		return err
 	}
-=======
-func DeleteByVdUdAndContent(VideoId uint64,UserId uint64,Content string)(error){
-
-	err := DB.Table("remark").Where("video_id = ?",VideoId).Where("user_id = ?", UserId).Where("comment_text = ?",Content).Delete(&Remark{})
-
-	return err.Error
-
-}
-
-
-//计算videoid 下的评论总条数,同时更新到video列表
-func CountCommentlist(videoId uint64)(err error) {
-	var count int64
-	DB.Table("remark").Where("video_id = ?" ,videoId).Count(&count)
-	DB.Table("video").Where("video_id = ?",videoId).Update("comment_count",count)
->>>>>>> 06c95b4 (Initial commit)
 	return err
 }
 
@@ -156,25 +118,3 @@ func FindUserbyIDComment(userid string) (*User, error) {
 }
 
 
-<<<<<<< HEAD
-=======
-//定义事务
-func Tx(funcs ...func(db *gorm.DB) error)(err error)  {
-	tx :=DB.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-			err = fmt.Errorf("%v",err)
-		}
-	}()
-	for _, f := range funcs {
-		err = f(tx)
-		if err != nil {
-			tx.Rollback()
-			return
-		}
-	}
-	err = tx.Commit().Error
-	return
-}
->>>>>>> 06c95b4 (Initial commit)
