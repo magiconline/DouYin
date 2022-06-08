@@ -2,6 +2,7 @@ package service
 
 import (
 	"DouYin/repository"
+	"fmt"
 )
 
 func AddStar(userId, videoId uint64) {
@@ -10,6 +11,17 @@ func AddStar(userId, videoId uint64) {
 
 func DeleteStar(userId, videoId uint64) {
 	repository.NewStarDaoInstance().DeleteStar(userId, videoId)
+}
+
+//IsThumbUp 返回点赞状态
+func IsThumbUp(userId, videoId uint64) bool {
+	stool, _ := repository.NewStarDaoInstance().IsThumbUp(userId, videoId)
+	fmt.Println(stool)
+	if stool == nil {
+		return false
+	} else {
+		return true
+	}
 }
 
 //StarVideoList 获取userID的所有的视频列表

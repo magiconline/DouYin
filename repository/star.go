@@ -90,18 +90,8 @@ func (*StarDao) StarList(userID uint64) (*[]map[string]interface{}, error) {
 //IsThumbUp 返回点赞状态
 func (*StarDao) IsThumbUp(userID, videoID uint64) (*Star, error) {
 	var star Star
-	err := DB.Table("star").Where("user_id = ? and video_id = ?", userID, videoID).Find(&star).Error
-	return &star, err
+	if result := DB.Table("star").Where("user_id = ? and video_id = ?", userID, videoID).First(&star); result.Error != nil {
+		return nil, result.Error
+	}
+	return &star, nil
 }
-
-/*//FavoriteCount 返回视频获赞总数
-func (*StarDao) FavoriteCount(videoID uint64) (int64, error) {
-	var count int64
-	DB.Model(&Star{}).Where("video_id = ?", videoID).Count(&count)
-	return count, nil
-}*/
-
-////UpdateFavoriteCount 更新视频获赞总数
-//func (*StarDao) UpdateFavoriteCount(videoID, favoriteCount uint64) {
-//	DB.Model(&VideoTable{}).Where("video_id = ?", videoID).Update("favorite_count", favoriteCount)
-//}

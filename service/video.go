@@ -59,13 +59,11 @@ func Feed(latestTime uint64, token string) (uint64, *[]FeedResponse, error) {
 	currentUserId, err := Token2ID(token)
 	var response []FeedResponse
 	nextTime := latestTime // 如果没有新视频则nextTime = latestTime
-	// 获得视频列表
 	videoList, err := repository.FeedAll(latestTime)
 	if err != nil {
 		// 错误处理
 		return latestTime, nil, err
 	}
-
 	// 将视频列表中填充author信息
 	for i := range *videoList {
 		userID := (*videoList)[i]["user_id"].(uint64)
@@ -74,10 +72,7 @@ func Feed(latestTime uint64, token string) (uint64, *[]FeedResponse, error) {
 			continue
 		}
 		//返回视频点赞状态
-		stool, err := repository.NewStarDaoInstance().IsThumbUp(currentUserId, (*videoList)[i]["video_id"].(uint64))
-		if err != nil {
-			continue
-		}
+		stool, _ := repository.NewStarDaoInstance().IsThumbUp(currentUserId, (*videoList)[i]["video_id"].(uint64))
 		var isFavorite bool
 		if stool == nil {
 			isFavorite = false
