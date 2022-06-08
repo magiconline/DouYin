@@ -2,6 +2,7 @@ package service
 
 import (
 	"DouYin/repository"
+	"fmt"
 	"mime/multipart"
 	"time"
 
@@ -104,7 +105,8 @@ func UserVideoList(token string, userID uint64) (*[]PublishActionResponse, error
 			return nil, err
 		}
 	}
-
+	//获取当前用户
+	currentUserId, err := Token2ID(token)
 	author, err := AuthorInfo(userID)
 	if err != nil {
 		return nil, err
@@ -115,10 +117,19 @@ func UserVideoList(token string, userID uint64) (*[]PublishActionResponse, error
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("视频数量：", len(*videoList))
 
 	var response []PublishActionResponse
 	// 将视频列表中填充author信息
 	for i := range *videoList {
+		//返回视频点赞状态
+		stool, _ := repository.NewStarDaoInstance().IsThumbUp(currentUserId, (*videoList)[i]["video_id"].(uint64))
+		var isFavorite bool
+		if stool == nil {
+			isFavorite = false
+		} else {
+			isFavorite = true
+		}
 		response_i := PublishActionResponse{
 			ID:            (*videoList)[i]["video_id"].(uint64),
 			Author:        *author,
@@ -126,7 +137,7 @@ func UserVideoList(token string, userID uint64) (*[]PublishActionResponse, error
 			CoverUrl:      server_ip + (*videoList)[i]["cover_url"].(string),
 			FavoriteCount: (*videoList)[i]["favorite_count"].(uint32),
 			CommentCount:  (*videoList)[i]["comment_count"].(uint32),
-			IsFavorite:    false,
+			IsFavorite:    isFavorite,
 			Title:         (*videoList)[i]["title"].(string),
 		}
 		response = append(response, response_i)
