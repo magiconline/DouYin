@@ -53,12 +53,15 @@ func Feed(latestTime uint64, token string) (uint64, *[]FeedResponse, error) {
 	}
 	//获取当前用户
 	currentUserId, err := Token2ID(token)
+	if err != nil {
+		return 0, nil, err
+	}
 	var response []FeedResponse
 	nextTime := latestTime // 如果没有新视频则nextTime = latestTime
 	videoList, err := repository.FeedAll(latestTime)
 	if err != nil {
 		// 错误处理
-		return latestTime, nil, err
+		return 0, nil, err
 	}
 	// 将视频列表中填充author信息
 	for i := range *videoList {
