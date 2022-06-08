@@ -18,7 +18,7 @@ import (
 func Feed(ctx *gin.Context) *gin.H {
 	// 获得参数
 	latestTimeStr := ctx.Query("latest_time")
-	token := ctx.DefaultQuery("token", "")
+	token := ctx.Query("token")
 
 	// 类型转换
 	latestTimeInt, err := strconv.Atoi(latestTimeStr)
