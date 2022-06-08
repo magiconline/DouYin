@@ -28,6 +28,7 @@ func RelationAction(token string, toUserID uint64, action bool) error {
 		return err
 	}
 
+	// 生成锁信息
 	k := fmt.Sprintf("%d_%d", userID, toUserID)
 	v := uuid.NewString()
 
@@ -35,11 +36,18 @@ func RelationAction(token string, toUserID uint64, action bool) error {
 	if err = repository.GetRedisLock(k, v, 10*time.Second); err != nil {
 		return err
 	}
+
 	// 释放锁
 	defer repository.DeleteRedisLock(k, v)
 
+	// 开启事务更新relation表和user表
+	tx := repository.DB.Begin()
 	// 修改relation
-	err = repository.Action(userID, toUserID, action)
+	err = repository.Action(tx, userID, toUserID, action)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
 
 	// 更新user表关注数和粉丝数
 	var value int
@@ -49,12 +57,14 @@ func RelationAction(token string, toUserID uint64, action bool) error {
 		value = -1
 	}
 
-	err1 := repository.ChangeFollowCount(userID, value)
-	err2 := repository.ChangeFollowerCount(toUserID, value)
+	err1 := repository.ChangeFollowCount(tx, userID, value)
+	err2 := repository.ChangeFollowerCount(tx, toUserID, value)
 	if err1 != nil || err2 != nil {
+		tx.Rollback()
 		return errors.New("user.follow_count | user.follower_count 更新失败")
 	}
 
+	tx.Commit()
 	return nil
 }
 

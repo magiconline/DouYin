@@ -2,7 +2,6 @@ package controller
 
 import (
 	"DouYin/service"
-	"fmt"
 	"strconv"
 
 	"DouYin/logger"
@@ -25,7 +24,6 @@ func Feed(ctx *gin.Context) *gin.H {
 			"status_msg":  err.Error(),
 		}
 	}
-	fmt.Println("最新时间：", latestTimeInt)
 	nextTime, videoList, err := service.Feed(uint64(latestTimeInt), token)
 	// 获得视频流错误
 	if err != nil {

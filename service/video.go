@@ -2,11 +2,6 @@ package service
 
 import (
 	"DouYin/repository"
-	"fmt"
-	"mime/multipart"
-	"time"
-
-	uuid "github.com/google/uuid"
 )
 
 // 静态资源ip
@@ -58,12 +53,15 @@ func Feed(latestTime uint64, token string) (uint64, *[]FeedResponse, error) {
 	}
 	//获取当前用户
 	currentUserId, err := Token2ID(token)
+	if err != nil {
+		return 0, nil, err
+	}
 	var response []FeedResponse
 	nextTime := latestTime // 如果没有新视频则nextTime = latestTime
 	videoList, err := repository.FeedAll(latestTime)
 	if err != nil {
 		// 错误处理
-		return latestTime, nil, err
+		return 0, nil, err
 	}
 	// 将视频列表中填充author信息
 	for i := range *videoList {
@@ -105,8 +103,7 @@ func UserVideoList(token string, userID uint64) (*[]PublishActionResponse, error
 			return nil, err
 		}
 	}
-	//获取当前用户
-	currentUserId, err := Token2ID(token)
+
 	author, err := AuthorInfo(userID)
 	if err != nil {
 		return nil, err
@@ -117,19 +114,10 @@ func UserVideoList(token string, userID uint64) (*[]PublishActionResponse, error
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("视频数量：", len(*videoList))
 
 	var response []PublishActionResponse
 	// 将视频列表中填充author信息
 	for i := range *videoList {
-		//返回视频点赞状态
-		stool, _ := repository.NewStarDaoInstance().IsThumbUp(currentUserId, (*videoList)[i]["video_id"].(uint64))
-		var isFavorite bool
-		if stool == nil {
-			isFavorite = false
-		} else {
-			isFavorite = true
-		}
 		response_i := PublishActionResponse{
 			ID:            (*videoList)[i]["video_id"].(uint64),
 			Author:        *author,
@@ -137,51 +125,11 @@ func UserVideoList(token string, userID uint64) (*[]PublishActionResponse, error
 			CoverUrl:      server_ip + (*videoList)[i]["cover_url"].(string),
 			FavoriteCount: (*videoList)[i]["favorite_count"].(uint32),
 			CommentCount:  (*videoList)[i]["comment_count"].(uint32),
-			IsFavorite:    isFavorite,
+			IsFavorite:    false,
 			Title:         (*videoList)[i]["title"].(string),
 		}
 		response = append(response, response_i)
 	}
 
 	return &response, nil
-}
-
-// PublishAction 登录用户选择视频上传
-func PublishAction(data *multipart.FileHeader, token string, title string) error {
-	// 验证token
-	userID, err := Token2ID(token)
-	if err != nil {
-		return err
-	}
-
-	// 生成保存路径
-	curTime := time.Now()
-	path := "/static/" + curTime.Format("2006/01/02") + "/"
-	name := uuid.NewString()
-	videoName := name + ".mp4"
-	coverName := name + ".jpg"
-
-	// 保存视频
-	err = repository.InsertVideo(path, videoName, data)
-	if err != nil {
-		return err
-	}
-
-	// 生成并保存缩略图
-	err = repository.InsertCover(path, videoName, coverName)
-	if err != nil {
-		return err
-	}
-
-	// 插入数据库
-	videoTable := repository.VideoTable{
-		UserId:     userID,
-		PlayUrl:    path + videoName,
-		CoverUrl:   path + coverName,
-		UploadTime: uint64(curTime.UnixMilli()),
-		Title:      title,
-	}
-
-	err = repository.InsertVideoTable(&videoTable)
-	return err
 }
