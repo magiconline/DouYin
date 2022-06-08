@@ -9,39 +9,43 @@ import (
 )
 
 func Favorite(ctx *gin.Context) *gin.H {
-	userIdStr := ctx.Query("user_id")
 	videoIdStr := ctx.Query("video_id")
-	//获取token
 	token := ctx.Query("token")
 	//1.点赞 2.取消点赞
 	actionTypeStr := ctx.Query("action_type")
+	if token == "" {
+		return &gin.H{
+			"status_code": 1,
+			"status_msg":  "用户未登录",
+		}
+	}
 	_, err := service.ParseToken(token)
 	if err != nil {
 		return &gin.H{
 			"status_code": 1,
-			"status_msg":  "token解析失败",
+			"status_msg":  err,
 		}
 	}
-	userIdInt, err := strconv.ParseUint(userIdStr, 10, 64)
+	currentUserID, err := service.Token2ID(token)
 	if err != nil {
 		logger.Logger.Println("error:", err)
 		return &gin.H{
 			"status_code": 1,
-			"status_msg":  "用户ID格式错误",
+			"status_msg":  err,
 		}
 	}
 	videoIdInt, err1 := strconv.ParseUint(videoIdStr, 10, 64)
 	if err1 != nil {
 		return &gin.H{
 			"status_code": 2,
-			"status_msg":  "视频ID格式错误",
+			"status_msg":  err1,
 		}
 	}
 	actionTypeInt, err2 := strconv.ParseUint(actionTypeStr, 10, 8)
 	if err2 != nil {
 		return &gin.H{
 			"status_code": 3,
-			"status_msg":  "点赞格式传入错误",
+			"status_msg":  err2,
 		}
 	}
 	if actionTypeInt != 1 && actionTypeInt != 2 {
@@ -51,13 +55,29 @@ func Favorite(ctx *gin.Context) *gin.H {
 		}
 	}
 	if actionTypeInt == 1 {
-		service.AddStar(uint64(userIdInt), uint64(videoIdInt))
+		//查询数据库，获取点赞状态
+		flag := service.IsThumbUp(currentUserID, videoIdInt)
+		if flag == true {
+			return &gin.H{
+				"status_code": 5,
+				"status_msg":  "请勿重复点赞！",
+			}
+		}
+		service.AddStar(currentUserID, videoIdInt)
 		return &gin.H{
 			"status_code": 0,
 			"status_msg":  "点赞成功！",
 		}
 	} else {
-		service.DeleteStar(uint64(userIdInt), uint64(videoIdInt))
+		//查询数据库，获取点赞状态
+		flag := service.IsThumbUp(currentUserID, videoIdInt)
+		if flag == false {
+			return &gin.H{
+				"status_code": 6,
+				"status_msg":  "当前暂无点赞数据！",
+			}
+		}
+		service.DeleteStar(currentUserID, videoIdInt)
 		return &gin.H{
 			"status_code": 0,
 			"status_msg":  "取消点赞成功！",
@@ -71,7 +91,13 @@ func ThumbListVideo(ctx *gin.Context) *gin.H {
 	token := ctx.Query("token")
 	userIDStr := ctx.Query("user_id")
 	fmt.Println("token：", token)
-	// 类型转换
+	if token == "" {
+		return &gin.H{
+			"status_code": 1,
+			"status_msg":  "用户未登录",
+		}
+	}
+	// 类型转换,查看用户ID
 	userID, err := strconv.ParseUint(userIDStr, 10, 64)
 	if err != nil {
 		return &gin.H{
@@ -80,7 +106,7 @@ func ThumbListVideo(ctx *gin.Context) *gin.H {
 		}
 	}
 	// 获得信息
-	videoList, err := service.StarVideoList(userID)
+	videoList, err := service.StarVideoList(token, userID)
 	if err != nil {
 		// 错误处理
 		return &gin.H{

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"image"
 
-	// "DouYin/logger"
 	"github.com/disintegration/imaging"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
@@ -74,10 +73,9 @@ func AuthorInfo(userID uint64) (*User, error) {
 	return &user, err
 }
 
-// 根据user_id查找所有视频
+// UserVideoList 根据user_id查找所有视频
 func UserVideoList(userID uint64) (*[]map[string]interface{}, error) {
 	var videoList []map[string]interface{}
 	err := DB.Table("video").Where("user_id = ?", userID).Order("upload_time desc").Find(&videoList).Error
-
 	return &videoList, err
 }

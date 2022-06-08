@@ -13,41 +13,64 @@ func DeleteStar(userId, videoId uint64) {
 	repository.NewStarDaoInstance().DeleteStar(userId, videoId)
 }
 
-// StarVideoList 获取点赞视频列表
-func StarVideoList(userId uint64) (*[]map[string]interface{}, error) {
-	//获取点赞的视频Id列表
-	starVideoList, err := repository.NewStarDaoInstance().StarList(userId)
-	var authorId *[]map[string]interface{}
-	fmt.Println(starVideoList)
-	if err != nil {
-		// 错误处理，返回空列表
-		return starVideoList, err
+//IsThumbUp 返回点赞状态
+func IsThumbUp(userId, videoId uint64) bool {
+	stool, _ := repository.NewStarDaoInstance().IsThumbUp(userId, videoId)
+	fmt.Println(stool)
+	if stool == nil {
+		return false
+	} else {
+		return true
 	}
-	// 将视频列表中填充author信息
-	for i := range *starVideoList {
-		videoId := uint64((*starVideoList)[i]["video_id"].(int64))
-		authorId, err = repository.NewStarDaoInstance().AuthorId(videoId)
-		authorIdInfo := (*authorId)[0]["user_id"].(uint64)
-		var author *map[string]interface{}
-		author, err = repository.NewStarDaoInstance().AuthorInfo(authorIdInfo)
-		fmt.Println("author：", author)
+}
+
+//StarVideoList 获取userID的所有的视频列表
+func StarVideoList(token string, userID uint64) (*[]PublishActionResponse, error) {
+	// 检查token
+	if token != "" {
+		_, err := Token2ID(token)
 		if err != nil {
-			// 错误处理
+			return nil, err
 		}
-		(*author)["id"] = (*author)["id"]
-		(*author)["name"] = (*author)["user_name"]
-		(*author)["is_follow"] = false
-		delete(*author, "user_name")
-		(*authorId)[i]["author"] = author
-		(*authorId)[i]["id"] = videoId
-		// 将相对url转为完整url
-		(*authorId)[i]["play_url"] = server_ip + (*authorId)[i]["play_url"].(string)
-		(*authorId)[i]["cover_url"] = server_ip + (*authorId)[i]["cover_url"].(string)
-		(*authorId)[i]["favorite_count"] = (*authorId)[i]["favorite_count"].(uint32)
-		(*authorId)[i]["is_favorite"] = true
-		(*authorId)[i]["title"] = "测试"
-		delete((*authorId)[i], "video_id")
-		delete((*authorId)[i], "upload_time")
 	}
-	return authorId, nil
+	//根据userID获取点赞表
+	var response []PublishActionResponse
+	//根据用户ID获取视频ID列表
+	starList, err := repository.NewStarDaoInstance().StarList(userID)
+	if err != nil {
+		return nil, err
+	}
+	for i := range *starList {
+		//视频ID
+		videoId := uint64((*starList)[i]["video_id"].(int64))
+		//从视频ID获取视频信息
+		videoInfo, err := repository.NewStarDaoInstance().VideoInfo(videoId)
+		author, err := AuthorInfo(videoInfo.UserId)
+		if err != nil {
+			continue
+		}
+		//返回视频点赞状态
+		stool, err := repository.NewStarDaoInstance().IsThumbUp(userID, videoId)
+		if err != nil {
+			continue
+		}
+		var isFavorite bool
+		if stool == nil {
+			isFavorite = false
+		} else {
+			isFavorite = true
+		}
+		response_i := PublishActionResponse{
+			ID:            videoInfo.VideoId,
+			Author:        *author,
+			PlayUrl:       server_ip + videoInfo.PlayUrl,
+			CoverUrl:      server_ip + videoInfo.CoverUrl,
+			FavoriteCount: videoInfo.FavoriteCount,
+			CommentCount:  videoInfo.CommentCount,
+			IsFavorite:    isFavorite,
+			Title:         videoInfo.Title,
+		}
+		response = append(response, response_i)
+	}
+	return &response, nil
 }

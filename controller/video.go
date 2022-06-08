@@ -14,7 +14,7 @@ import (
 	uuid "github.com/google/uuid"
 )
 
-// 获得视频流，获得参数，调用service层，返回map
+//Feed 获得视频流，获得参数，调用service层，返回map
 func Feed(ctx *gin.Context) *gin.H {
 	// 获得参数
 	latestTimeStr := ctx.Query("latest_time")
@@ -30,7 +30,6 @@ func Feed(ctx *gin.Context) *gin.H {
 		}
 	}
 	nextTime, videoList, err := service.Feed(uint64(latestTimeInt), token)
-
 	// 获得视频流错误
 	if err != nil {
 		logger.Logger.Println("error:", err)
@@ -39,7 +38,6 @@ func Feed(ctx *gin.Context) *gin.H {
 			"status_msg":  err.Error(),
 		}
 	}
-
 	// 正常返回
 	return &gin.H{
 		"status_code": 0,
@@ -49,7 +47,7 @@ func Feed(ctx *gin.Context) *gin.H {
 	}
 }
 
-// 投稿接口
+//PublishAction 投稿接口
 func PublishAction(ctx *gin.Context) *gin.H {
 	// 获取参数
 	token := ctx.PostForm("token")
@@ -135,7 +133,7 @@ func PublishAction(ctx *gin.Context) *gin.H {
 	}
 }
 
-// 登录用户的视频发布列表，直接列出用户所有投稿过的视频
+// PublishList 登录用户的视频发布列表，直接列出用户所有投稿过的视频
 func PublishList(ctx *gin.Context) *gin.H {
 	// 获得参数
 	token := ctx.Query("token")
