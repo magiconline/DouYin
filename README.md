@@ -39,4 +39,5 @@ https://www.cnblogs.com/jian0110/p/12721924.html
 
 # 测试
 https://www.1024sou.com/article/915651.html  
-https://gin-gonic.com/zh-cn/docs/testing/
+https://gin-gonic.com/zh-cn/docs/testing/  
+`go test -bench . -benchmem -cpuprofile prof.cpu -memprofile prof.mem`
