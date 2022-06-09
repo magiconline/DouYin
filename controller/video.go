@@ -49,9 +49,6 @@ func Feed(ctx *gin.Context) *gin.H {
 
 //PublishAction 投稿接口
 func PublishAction(ctx *gin.Context) *gin.H {
-	// 获取参数
-	token := ctx.PostForm("token")
-	title := ctx.PostForm("title")
 	data, err := ctx.FormFile("data")
 	if err != nil {
 		return &gin.H{
@@ -59,6 +56,8 @@ func PublishAction(ctx *gin.Context) *gin.H {
 			"status_msg":  err.Error(),
 		}
 	}
+	token := ctx.PostForm("token")
+	title := ctx.PostForm("title")
 
 	// 通过文件后缀名验证格式
 	if arr := strings.Split(data.Filename, "."); arr[len(arr)-1] != "mp4" {
