@@ -7,7 +7,7 @@ import (
 )
 
 var jwtSecret = []byte("16849841325189456f487") //密钥
-var jwtEffectTime = 2000 * time.Hour            //有效时间
+var jwtEffectTime = 2 * time.Hour               //有效时间
 
 type Claims struct {
 	ID                 uint
@@ -57,17 +57,17 @@ func Token2ID(token string) (uint64, error) {
 	//超时 返回新token
 	//校验错误 返回err
 	if err != nil {
-		// if ve, ok := err.(*jwt.ValidationError); ok {
-		// 	//token 超出有效期
-		// 	if ve.Errors&jwt.ValidationErrorExpired != 0 {
-		// 		token, err1 := RefreshToken(token)
-		// 		if err1 == nil {
-		// 			return Token2ID(token)
-		// 		} else {
-		// 			return 0, err1
-		// 		}
-		// 	}
-		// }
+		if ve, ok := err.(*jwt.ValidationError); ok {
+			//token 超出有效期
+			if ve.Errors&jwt.ValidationErrorExpired != 0 {
+				token, err1 := RefreshToken(token)
+				if err1 == nil {
+					return Token2ID(token)
+				} else {
+					return 0, err1
+				}
+			}
+		}
 		return 0, err
 	}
 	return uint64(claims.ID), nil

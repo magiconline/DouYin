@@ -24,20 +24,7 @@ https://zhuanlan.zhihu.com/p/111824045
    1. ~~对应user的粉丝count +- 1~~
    2. 检查user_id是否存在
    3. 自己关注自己
-   4. 关注列表| 粉丝列表token验证失败
 2. 使用联结查询
-3. ~~SQL安全~~
+3. SQL安全
 4. 性能测试
 5. 缓存
-
-# 数据库对不存在的记录加锁查询
-https://blog.csdn.net/u013269532/article/details/96841410  
-https://www.cnblogs.com/jian0110/p/12721924.html  
-行锁是基于索引的。
-如果有索引，对不存在的数据会升级为范围锁；
-如果没有索引，会升级为表锁。
-
-# 测试
-https://www.1024sou.com/article/915651.html  
-https://gin-gonic.com/zh-cn/docs/testing/  
-`go test -bench . -benchmem -cpuprofile prof.cpu -memprofile prof.mem`

@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"DouYin/service"
+	"DouYin-main/service"
 	"strconv"
 
 	"github.com/gin-gonic/gin"

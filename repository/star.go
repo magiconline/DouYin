@@ -1,8 +1,7 @@
 package repository
 
 import (
-	"DouYin/logger"
-	"gorm.io/gorm"
+	"DouYin-main/logger"
 	"sync"
 )
 
@@ -30,54 +29,38 @@ func NewStarDaoInstance() *StarDao {
 	return starDao
 }
 
-// AddStar 当进行点赞时，插入数据库,同时更新点赞数
+// AddStar 当进行点赞时，插入数据库。
 func (*StarDao) AddStar(userId, videoId uint64) {
 	star := Star{
 		UserId:  userId,
 		VideoId: videoId,
 	}
-	//开启事务
-	DB.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Table("star").Create(&star).Error; err != nil {
-			logger.Logger.Printf("err", err)
-			return err
-		}
-		if err := tx.Table("video").Where("video_id = ?", videoId).Update("favorite_count", gorm.Expr("favorite_count + ?", 1)).Error; err != nil {
-			logger.Logger.Printf("err", err)
-			return err
-		}
-		return nil
-	})
+	if err := DB.Table("star").Create(&star).Error; err != nil {
+		logger.Logger.Printf("err", err)
+		return
+	}
 }
 
 // DeleteStar 当进行取消点赞时，删除数据库数据。
 func (*StarDao) DeleteStar(userId, videoId uint64) {
-	//开启事务
-	DB.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Table("star").Where("user_id = ? and video_id = ?", userId, videoId).Delete(&Star{}).Error; err != nil {
-			logger.Logger.Printf("err", err)
-			return err
-		}
-		if err := tx.Table("video").Where("video_id = ?", videoId).Update("favorite_count", gorm.Expr("favorite_count - ?", 1)).Error; err != nil {
-			logger.Logger.Printf("err", err)
-			return err
-		}
-		return nil
-	})
+	if err := DB.Table("star").Where("user_id = ? and video_id = ?", userId, videoId).Delete(&Star{}).Error; err != nil {
+		logger.Logger.Printf("err", err)
+		return
+	}
 }
 
-// VideoInfo 根据视频ID获取视频信息
-func (*StarDao) VideoInfo(videoID uint64) (*VideoTable, error) {
-	var video VideoTable
-	result := DB.Table("video").Where("video_id = ?", videoID).Find(&video)
-	return &video, result.Error
+// AuthorId 根据视频ID获取作者ID
+func (*StarDao) AuthorId(videoID uint64) (*[]map[string]interface{}, error) {
+	var authorID []map[string]interface{}
+	result := DB.Table("video").Where("video_id = ?", videoID).Find(&authorID)
+	return &authorID, result.Error
 }
 
 // AuthorInfo userId(user_id, user_name, follow_count, follower_count)字段
-func (*StarDao) AuthorInfo(userId uint64) (*User, error) {
-	var user User
-	err := DB.Table("user").Select("user_id", "user_name", "follow_count", "follower_count").Where("user_id = ?", userId).First(&user).Error
-	return &user, err
+func (*StarDao) AuthorInfo(userId uint64) (*map[string]interface{}, error) {
+	var author []map[string]interface{}
+	result := DB.Table("user").Select("user_id", "user_name", "follow_count", "follower_count").Where("user_id = ?", userId).Find(&author)
+	return &author[0], result.Error
 }
 
 // StarList StarVideoList 根据user_id查找用户点赞列表
@@ -85,13 +68,4 @@ func (*StarDao) StarList(userID uint64) (*[]map[string]interface{}, error) {
 	var starList []map[string]interface{}
 	result := DB.Table("star").Where("user_id = ?", userID).Find(&starList)
 	return &starList, result.Error
-}
-
-//IsThumbUp 返回点赞状态
-func (*StarDao) IsThumbUp(userID, videoID uint64) (*Star, error) {
-	var star Star
-	if result := DB.Table("star").Where("user_id = ? and video_id = ?", userID, videoID).First(&star); result.Error != nil {
-		return nil, result.Error
-	}
-	return &star, nil
 }
