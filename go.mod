@@ -8,10 +8,7 @@ require (
 	gorm.io/gorm v1.23.5
 )
 
-require (
-	github.com/go-redis/redis/v9 v9.0.0-beta.1
-	github.com/google/uuid v1.3.0
-)
+require github.com/google/uuid v1.3.0
 
 require (
 	github.com/aws/aws-sdk-go v1.38.20 // indirect
@@ -32,6 +29,7 @@ require (
 	github.com/go-playground/locales v0.13.0 // indirect
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
+	github.com/go-redis/redis/v9 v9.0.0-beta.1
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang/protobuf v1.4.2 // indirect
@@ -45,6 +43,6 @@ require (
 	github.com/u2takey/ffmpeg-go v0.4.1
 	github.com/ugorji/go/codec v1.1.7 // indirect
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9 // indirect
-	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
+	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

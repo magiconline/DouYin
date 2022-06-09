@@ -3,6 +3,7 @@ package controller
 import (
 	"DouYin/repository"
 	"DouYin/service"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -18,7 +19,7 @@ func UserLogin(c *gin.Context) *gin.H {
 	//2.对请求参数进行表单验证，以保证数据库的安全---待完成
 
 	// 3.数据库查询用户名
-	_, err1 := repository.FindUserbyName(username)
+	err1 := repository.FindUserbyName(username)
 	if err1 == gorm.ErrRecordNotFound {
 		return &gin.H{
 			"status_code": 1,
@@ -66,9 +67,19 @@ func UserLogin(c *gin.Context) *gin.H {
 func UserRegister(c *gin.Context) *gin.H {
 	username := c.Query("username")
 	pwd := c.Query("password")
-	_, err1 := repository.FindUserbyName(username)
-	//若数据库中不存在此email
-	// if err == gorm.ErrRecordNotFound {
+
+	k := username
+	v := "null"
+	if err := repository.GetRedisLock(k, v, 10*time.Second); err != nil {
+		return &gin.H{
+			"status_code": 1,
+			"status_msg":  err.Error(),
+		}
+	}
+	defer repository.DeleteRedisLock(k, v)
+
+	err1 := repository.FindUserbyName(username)
+	//若数据库中不存在此username
 	if err1 == gorm.ErrRecordNotFound {
 		u, err := repository.CreateUser(username, pwd)
 		//若创建新用户不成功
