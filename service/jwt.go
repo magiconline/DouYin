@@ -7,7 +7,7 @@ import (
 )
 
 var jwtSecret = []byte("16849841325189456f487") //密钥
-var jwtEffectTime = 2 * time.Hour               //有效时间
+var jwtEffectTime = 2000 * time.Hour            //有效时间
 
 type Claims struct {
 	ID                 uint
