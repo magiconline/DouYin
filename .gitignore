@@ -8,6 +8,3 @@
 # 日志文件
 /log
 __debug_bin
-
-# 测试结果文件
-DouYin.test

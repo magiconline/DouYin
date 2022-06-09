@@ -34,7 +34,6 @@ require (
 require (
 	github.com/disintegration/imaging v1.6.2
 	github.com/gin-contrib/sse v0.1.0 // indirect
-	github.com/go-playground/assert/v2 v2.0.1
 	// github.com/go-ini/ini v1.66.4 // indirect
 	github.com/go-playground/locales v0.13.0 // indirect
 	github.com/go-playground/universal-translator v0.17.0 // indirect
