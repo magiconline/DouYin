@@ -1,0 +1,7 @@
+日志初始化成功
+启动服务器
+error: token is expired by 28h2m37s
+error: token contains an invalid number of segments
+日志初始化成功
+启动服务器
+err%!(EXTRA *mysql.MySQLError=Error 1690: BIGINT UNSIGNED value is out of range in '(`douyin`.`video`.`favorite_count` - ?)')
