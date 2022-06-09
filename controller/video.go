@@ -25,7 +25,6 @@ func Feed(ctx *gin.Context) *gin.H {
 		}
 	}
 	nextTime, videoList, err := service.Feed(uint64(latestTimeInt), token)
-
 	// 获得视频流错误
 	if err != nil {
 		logger.Logger.Println("error:", err)
@@ -34,7 +33,6 @@ func Feed(ctx *gin.Context) *gin.H {
 			"status_msg":  err.Error(),
 		}
 	}
-
 	// 正常返回
 	return &gin.H{
 		"status_code": 0,

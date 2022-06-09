@@ -23,37 +23,9 @@ func GetOutBoundIP() string {
 	return ip
 }
 
-func main() {
-	// 获得本机ip+port
-	ip := GetOutBoundIP()
-	port := ":8080"
-	addr := "http://" + ip + port
-	fmt.Println("start server at ", addr)
-
-	// 设置静态资源ip
-	service.SetServerIP(addr)
-
-	// 初始化日志
-	err := logger.Init("./log")
-	if err != nil {
-		fmt.Println("日志初始化失败：", err)
-		os.Exit(1)
-	}
-	logger.Logger.Println("日志初始化成功")
-
-	// 初始化数据库连接
-	err = repository.Init()
-	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
-	}
-
-	// 设置release模式
-	// gin.SetMode(gin.ReleaseMode)
+// 设置路由
+func setupRouter() *gin.Engine {
 	r := gin.Default()
-
-	// 托管静态资源
-	r.Static("/static", "./static")
 
 	// 路由
 	r.POST("/douyin/user/login/", func(ctx *gin.Context) {
@@ -104,6 +76,41 @@ func main() {
 		body := controller.FollowerList(ctx)
 		ctx.JSON(200, body)
 	})
+
+	return r
+}
+
+func main() {
+	// 获得本机ip+port
+	ip := GetOutBoundIP()
+	port := ":8080"
+	addr := "http://" + ip + port
+	fmt.Println("start server at ", addr)
+
+	// 设置静态资源ip
+	service.SetServerIP(addr)
+
+	// 初始化日志
+	err := logger.Init("./log")
+	if err != nil {
+		fmt.Println("日志初始化失败：", err)
+		os.Exit(1)
+	}
+	logger.Logger.Println("日志初始化成功")
+
+	// 初始化数据库连接
+	err = repository.Init()
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+
+	// 设置release模式
+	// gin.SetMode(gin.ReleaseMode)
+	r := setupRouter()
+
+	// 托管静态资源
+	r.Static("/static", "./static")
 
 	logger.Logger.Println("启动服务器")
 	r.Run(port)

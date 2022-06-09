@@ -2,10 +2,6 @@ package service
 
 import (
 	"DouYin/repository"
-	"mime/multipart"
-	"time"
-
-	uuid "github.com/google/uuid"
 )
 
 // 静态资源ip
@@ -57,15 +53,16 @@ func Feed(latestTime uint64, token string) (uint64, *[]FeedResponse, error) {
 	}
 	//获取当前用户
 	currentUserId, err := Token2ID(token)
+	if err != nil {
+		return 0, nil, err
+	}
 	var response []FeedResponse
 	nextTime := latestTime // 如果没有新视频则nextTime = latestTime
-	// 获得视频列表
 	videoList, err := repository.FeedAll(latestTime)
 	if err != nil {
 		// 错误处理
-		return latestTime, nil, err
+		return 0, nil, err
 	}
-
 	// 将视频列表中填充author信息
 	for i := range *videoList {
 		userID := (*videoList)[i]["user_id"].(uint64)
@@ -74,10 +71,7 @@ func Feed(latestTime uint64, token string) (uint64, *[]FeedResponse, error) {
 			continue
 		}
 		//返回视频点赞状态
-		stool, err := repository.NewStarDaoInstance().IsThumbUp(currentUserId, (*videoList)[i]["video_id"].(uint64))
-		if err != nil {
-			continue
-		}
+		stool, _ := repository.NewStarDaoInstance().IsThumbUp(currentUserId, (*videoList)[i]["video_id"].(uint64))
 		var isFavorite bool
 		if stool == nil {
 			isFavorite = false
@@ -138,44 +132,4 @@ func UserVideoList(token string, userID uint64) (*[]PublishActionResponse, error
 	}
 
 	return &response, nil
-}
-
-// PublishAction 登录用户选择视频上传
-func PublishAction(data *multipart.FileHeader, token string, title string) error {
-	// 验证token
-	userID, err := Token2ID(token)
-	if err != nil {
-		return err
-	}
-
-	// 生成保存路径
-	curTime := time.Now()
-	path := "/static/" + curTime.Format("2006/01/02") + "/"
-	name := uuid.NewString()
-	videoName := name + ".mp4"
-	coverName := name + ".jpg"
-
-	// 保存视频
-	err = repository.InsertVideo(path, videoName, data)
-	if err != nil {
-		return err
-	}
-
-	// 生成并保存缩略图
-	err = repository.InsertCover(path, videoName, coverName)
-	if err != nil {
-		return err
-	}
-
-	// 插入数据库
-	videoTable := repository.VideoTable{
-		UserId:     userID,
-		PlayUrl:    path + videoName,
-		CoverUrl:   path + coverName,
-		UploadTime: uint64(curTime.UnixMilli()),
-		Title:      title,
-	}
-
-	err = repository.InsertVideoTable(&videoTable)
-	return err
 }

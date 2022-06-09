@@ -55,12 +55,28 @@ func Favorite(ctx *gin.Context) *gin.H {
 		}
 	}
 	if actionTypeInt == 1 {
+		//查询数据库，获取点赞状态
+		flag := service.IsThumbUp(currentUserID, videoIdInt)
+		if flag == true {
+			return &gin.H{
+				"status_code": 5,
+				"status_msg":  "请勿重复点赞！",
+			}
+		}
 		service.AddStar(currentUserID, videoIdInt)
 		return &gin.H{
 			"status_code": 0,
 			"status_msg":  "点赞成功！",
 		}
 	} else {
+		//查询数据库，获取点赞状态
+		flag := service.IsThumbUp(currentUserID, videoIdInt)
+		if flag == false {
+			return &gin.H{
+				"status_code": 6,
+				"status_msg":  "当前暂无点赞数据！",
+			}
+		}
 		service.DeleteStar(currentUserID, videoIdInt)
 		return &gin.H{
 			"status_code": 0,

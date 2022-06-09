@@ -1,7 +1,9 @@
 package repository
 
 // "DouYin/json"
-import "strconv"
+import (
+	"strconv"
+)
 
 type User struct {
 	// gorm.Model
@@ -32,12 +34,10 @@ func FindUserbyNameandPwd(name, pwd string) (*User, error) {
 // 	return &user, err
 // }
 
-func FindUserbyName(name string) error {
+func FindUserbyName(name string) (*User, error) {
 	var user User
-	if err := DB.Table("user").Where("user_name = ? ", name).First(&user).Error; err != nil {
-		return err
-	}
-	return nil
+	err := DB.Table("user").Where("user_name = ? ", name).First(&user).Error
+	return &user, err
 }
 
 //根据userid查找用户
