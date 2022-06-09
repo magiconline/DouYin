@@ -4,7 +4,11 @@ import (
 	"bytes"
 	"fmt"
 	"image"
+	"io"
+	"mime/multipart"
+	"os"
 
+	// "DouYin/logger"
 	"github.com/disintegration/imaging"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
@@ -25,6 +29,34 @@ func InsertVideoTable(videoTable *VideoTable) error {
 	if err != nil {
 		fmt.Println("Insert VideoTable error:", err)
 	}
+	return err
+}
+
+// 插入视频
+func InsertVideo(path string, videoName string, video *multipart.FileHeader) error {
+	// 打开视频句柄
+	file, err := video.Open()
+	if err != nil {
+		return err
+	}
+
+	defer file.Close()
+
+	// 检测文件夹是否创建
+	err = os.MkdirAll("."+path, 0777)
+	if err != nil {
+		return err
+	}
+
+	// 本地创建文件，如果文件已存在则会被清空
+	localFile, err := os.Create("." + path + videoName)
+	if err != nil {
+		return err
+	}
+	defer localFile.Close()
+
+	// 拷贝文件
+	_, err = io.Copy(localFile, file)
 	return err
 }
 
@@ -73,9 +105,10 @@ func AuthorInfo(userID uint64) (*User, error) {
 	return &user, err
 }
 
-// UserVideoList 根据user_id查找所有视频
+// 根据user_id查找所有视频
 func UserVideoList(userID uint64) (*[]map[string]interface{}, error) {
 	var videoList []map[string]interface{}
 	err := DB.Table("video").Where("user_id = ?", userID).Order("upload_time desc").Find(&videoList).Error
+
 	return &videoList, err
 }

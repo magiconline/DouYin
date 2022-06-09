@@ -1,10 +1,10 @@
 package main
 
 import (
-	"DouYin/controller"
-	"DouYin/logger"
-	"DouYin/repository"
-	"DouYin/service"
+	"DouYin-main/controller"
+	"DouYin-main/logger"
+	"DouYin-main/repository"
+	"DouYin-main/service"
 	"fmt"
 	"net"
 	"os"
@@ -21,63 +21,6 @@ func GetOutBoundIP() string {
 	localAddr := conn.LocalAddr().(*net.UDPAddr)
 	ip := strings.Split(localAddr.String(), ":")[0]
 	return ip
-}
-
-// 设置路由
-func setupRouter() *gin.Engine {
-	r := gin.Default()
-
-	// 路由
-	r.POST("/douyin/user/login/", func(ctx *gin.Context) {
-		body := controller.UserLogin(ctx)
-		ctx.JSON(200, body)
-	})
-	r.POST("/douyin/user/register/", func(ctx *gin.Context) {
-		body := controller.UserRegister(ctx)
-		ctx.JSON(200, body)
-	})
-	r.GET("/douyin/user/", func(ctx *gin.Context) {
-		body := controller.UserInfo(ctx)
-		ctx.JSON(200, body)
-	})
-	r.GET("/douyin/feed/", func(ctx *gin.Context) {
-		body := controller.Feed(ctx)
-		ctx.JSON(200, body)
-	})
-
-	r.POST("/douyin/publish/action/", func(ctx *gin.Context) {
-		body := controller.PublishAction(ctx)
-		ctx.JSON(200, body)
-	})
-
-	r.GET("/douyin/publish/list/", func(ctx *gin.Context) {
-		body := controller.PublishList(ctx)
-		ctx.JSON(200, body)
-	})
-
-	r.POST("/douyin/favorite/action/", func(ctx *gin.Context) {
-		body := controller.Favorite(ctx)
-		ctx.JSON(200, body)
-	})
-	r.GET("/douyin/favorite/list/", func(ctx *gin.Context) {
-		body := controller.ThumbListVideo(ctx)
-		ctx.JSON(200, body)
-	})
-
-	r.POST("/douyin/relation/action/", func(ctx *gin.Context) {
-		body := controller.RelationAction(ctx)
-		ctx.JSON(200, body)
-	})
-	r.GET("/douyin/relation/follow/list/", func(ctx *gin.Context) {
-		body := controller.FollowList(ctx)
-		ctx.JSON(200, body)
-	})
-	r.GET("/douyin/relation/follower/list/", func(ctx *gin.Context) {
-		body := controller.FollowerList(ctx)
-		ctx.JSON(200, body)
-	})
-
-	return r
 }
 
 func main() {
@@ -107,10 +50,78 @@ func main() {
 
 	// 设置release模式
 	// gin.SetMode(gin.ReleaseMode)
-	r := setupRouter()
+	r := gin.Default()
 
 	// 托管静态资源
 	r.Static("/static", "./static")
+
+	// 路由
+	r.POST("/douyin/user/login/", func(ctx *gin.Context) {
+		body := controller.UserLogin(ctx)
+		ctx.JSON(200, body)
+	})
+	r.POST("/douyin/user/register/", func(ctx *gin.Context) {
+		body := controller.UserRegister(ctx)
+		ctx.JSON(200, body)
+	})
+	r.GET("/douyin/user/", func(ctx *gin.Context) {
+		body := controller.UserInfo(ctx)
+		ctx.JSON(200, body)
+	})
+	r.GET("/douyin/feed/", func(ctx *gin.Context) {
+		body := controller.Feed(ctx)
+		ctx.JSON(200, body)
+	})
+
+	r.POST("/douyin/publish/action/", func(ctx *gin.Context) {
+		body := controller.PublishAction(ctx)
+		ctx.JSON(200, body)
+	})
+
+	r.GET("/douyin/publish/list/", func(ctx *gin.Context) {
+		body := controller.PublishList(ctx)
+		ctx.JSON(200, body)
+	})
+
+
+	/*
+	   评论方面
+	*/
+	//留评论
+	r.POST("/douyin/comment/action/", func(ctx *gin.Context) {
+		body := controller.Leave_remark(ctx)
+		ctx.JSON(200, body)
+	})
+	//查看视频的所有评论，按发布时间倒序
+	r.GET("/douyin/comment/list/", func(ctx *gin.Context) {
+		body := controller.View_video_remark(ctx)
+		ctx.JSON(200, body)
+	})
+
+
+
+
+	r.POST("/douyin/favorite/action/", func(ctx *gin.Context) {
+		body := controller.Favorite(ctx)
+		ctx.JSON(200, body)
+	})
+	r.GET("/douyin/favorite/list/", func(ctx *gin.Context) {
+		body := controller.ThumbListVideo(ctx)
+		ctx.JSON(200, body)
+	})
+
+	r.POST("/douyin/relation/action/", func(ctx *gin.Context) {
+		body := controller.RelationAction(ctx)
+		ctx.JSON(200, body)
+	})
+	r.GET("/douyin/relation/follow/list/", func(ctx *gin.Context) {
+		body := controller.FollowList(ctx)
+		ctx.JSON(200, body)
+	})
+	r.GET("/douyin/relation/follower/list/", func(ctx *gin.Context) {
+		body := controller.FollowerList(ctx)
+		ctx.JSON(200, body)
+	})
 
 	logger.Logger.Println("启动服务器")
 	r.Run(port)
