@@ -55,6 +55,18 @@ func setupRouter() *gin.Engine {
 		ctx.JSON(200, body)
 	})
 
+
+	//留评论
+	r.POST("/douyin/comment/action/", func(ctx *gin.Context) {
+		body := controller.Leave_remark(ctx)
+		ctx.JSON(200, body)
+	})
+	//查看视频的所有评论，按发布时间倒序
+	r.GET("/douyin/comment/list/", func(ctx *gin.Context) {
+		body := controller.View_video_remark(ctx)
+		ctx.JSON(200, body)
+	})
+
 	r.POST("/douyin/favorite/action/", func(ctx *gin.Context) {
 		body := controller.Favorite(ctx)
 		ctx.JSON(200, body)

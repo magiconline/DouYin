@@ -1,5 +1,7 @@
 package cache
 
+// import "github.com/gin-gonic/gin"
+
 // import (
 // 	_"github.com/go-sql-driver/mysql"
 // 	"github.com/jmoiron/sqlx"
@@ -26,4 +28,7 @@ package cache
 // 		return err
 // 	}
 // 	//4.将数据写入redis
+// }
+// func FindUserFromRedis(userID int64) *gin.H {
+// 	reply, err := RDB.Do()
 // }
