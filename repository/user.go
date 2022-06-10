@@ -34,10 +34,10 @@ func FindUserbyNameandPwd(name, pwd string) (*User, error) {
 // 	return &user, err
 // }
 
-func FindUserbyName(name string) (*User, error) {
+func FindUserbyName(name string) error {
 	var user User
 	err := DB.Table("user").Where("user_name = ? ", name).First(&user).Error
-	return &user, err
+	return err
 }
 
 //根据userid查找用户
