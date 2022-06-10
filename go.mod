@@ -8,14 +8,12 @@ require (
 	gorm.io/gorm v1.23.5
 )
 
-
 require github.com/google/uuid v1.3.0
 
 require (
+	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/go-redis/redis/v9 v9.0.0-beta.1
-	github.com/google/uuid v1.3.0
 )
-
 
 require (
 	github.com/aws/aws-sdk-go v1.38.20 // indirect

@@ -28,7 +28,7 @@ func InsertVideoTable(videoTable *VideoTable) error {
 	return err
 }
 
-// 生成并保存图像
+// InsertCover 生成并保存图像
 func InsertCover(path string, videoName string, coverName string) error {
 	buf := bytes.NewBuffer(nil)
 	err := ffmpeg.Input("."+path+videoName).
@@ -36,7 +36,6 @@ func InsertCover(path string, videoName string, coverName string) error {
 		Output("pipe:", ffmpeg.KwArgs{"vframes": 1, "format": "image2", "vcodec": "mjpeg"}).
 		WithOutput(buf).
 		Run()
-
 	if err != nil {
 		return err
 	}

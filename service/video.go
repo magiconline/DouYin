@@ -2,6 +2,7 @@ package service
 
 import (
 	"DouYin/repository"
+	"fmt"
 )
 
 // 静态资源ip
@@ -51,11 +52,9 @@ func Feed(latestTime uint64, token string) (uint64, *[]FeedResponse, error) {
 			return 0, nil, err
 		}
 	}
+	fmt.Println("当前时间戳：", latestTime)
 	//获取当前用户
-	currentUserId, err := Token2ID(token)
-	if err != nil {
-		return 0, nil, err
-	}
+	currentUserId, _ := Token2ID(token)
 	var response []FeedResponse
 	nextTime := latestTime // 如果没有新视频则nextTime = latestTime
 	videoList, err := repository.FeedAll(latestTime)

@@ -44,21 +44,12 @@ func StarVideoList(token string, userID uint64) (*[]PublishActionResponse, error
 		//视频ID
 		videoId := uint64((*starList)[i]["video_id"].(int64))
 		//从视频ID获取视频信息
-		videoInfo, err := repository.NewStarDaoInstance().VideoInfo(videoId)
-		author, err := AuthorInfo(videoInfo.UserId)
-		if err != nil {
+		videoInfo, _ := repository.NewStarDaoInstance().VideoInfo(videoId)
+		author, _ := AuthorInfo(videoInfo.UserId)
+		//返回视频点赞状态 返回err 说明未点赞
+		_, err1 := repository.NewStarDaoInstance().IsThumbUp(userID, videoId)
+		if err1 != nil {
 			continue
-		}
-		//返回视频点赞状态
-		stool, err := repository.NewStarDaoInstance().IsThumbUp(userID, videoId)
-		if err != nil {
-			continue
-		}
-		var isFavorite bool
-		if stool == nil {
-			isFavorite = false
-		} else {
-			isFavorite = true
 		}
 		response_i := PublishActionResponse{
 			ID:            videoInfo.VideoId,
@@ -67,7 +58,7 @@ func StarVideoList(token string, userID uint64) (*[]PublishActionResponse, error
 			CoverUrl:      server_ip + videoInfo.CoverUrl,
 			FavoriteCount: videoInfo.FavoriteCount,
 			CommentCount:  videoInfo.CommentCount,
-			IsFavorite:    isFavorite,
+			IsFavorite:    true,
 			Title:         videoInfo.Title,
 		}
 		response = append(response, response_i)

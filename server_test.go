@@ -59,3 +59,26 @@ func BenchmarkFeed(b *testing.B) {
 
 	})
 }
+
+func TestFavorite(t *testing.T) {
+	// 初始化请求
+	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MiwiZXhwIjoxNjYyMDI3MjIxLCJpc3MiOiJ6amN5In0.DFQ5TEQ8Q293CYO6K5eESq5my4VwFpTjPwAQzwvBvTM"
+	videoId := 2
+	actionType := 2
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", fmt.Sprintf("/douyin/favorite/action/?token=%v&video_id=%v&action_type=%v", token, videoId, actionType), nil)
+	r.ServeHTTP(w, req)
+}
+func BenchmarkFavorite(b *testing.B) {
+	// 初始化请求
+	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MiwiZXhwIjoxNjYyMDI3MjIxLCJpc3MiOiJ6amN5In0.DFQ5TEQ8Q293CYO6K5eESq5my4VwFpTjPwAQzwvBvTM"
+	videoId := 2
+	actionType := 2
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", fmt.Sprintf("/douyin/favorite/action/?token=%v&video_id=%v&action_type=%v", token, videoId, actionType), nil)
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			r.ServeHTTP(w, req)
+		}
+	})
+}

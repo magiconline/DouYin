@@ -15,7 +15,7 @@ var (
 	CTX      = context.Background()
 )
 
-// 初始化mysql
+// Init 初始化mysql
 // 初始化redis
 func Init() error {
 	var err error

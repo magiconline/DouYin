@@ -101,8 +101,8 @@ func ThumbListVideo(ctx *gin.Context) *gin.H {
 	userID, err := strconv.ParseUint(userIDStr, 10, 64)
 	if err != nil {
 		return &gin.H{
-			"status_code": 1,
-			"status_msg":  "failed",
+			"status_code": 2,
+			"status_msg":  err.Error(),
 		}
 	}
 	// 获得信息
@@ -110,8 +110,8 @@ func ThumbListVideo(ctx *gin.Context) *gin.H {
 	if err != nil {
 		// 错误处理
 		return &gin.H{
-			"status_code": 1,
-			"status_msg":  "failed",
+			"status_code": 3,
+			"status_msg":  err.Error(),
 		}
 	}
 	return &gin.H{
