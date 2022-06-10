@@ -22,10 +22,10 @@ https://zhuanlan.zhihu.com/p/111824045
 # TODO
 1. 测试关注功能
    1. ~~对应user的粉丝count +- 1~~
-   2. 检查user_id是否存在
-   3. 自己关注自己
-   4. 关注列表| 粉丝列表token验证失败
-2. 使用联结查询
+   2. ~~检查user_id是否存在~~
+   3. ~~自己关注自己~~
+   4. ~~关注列表| 粉丝列表token验证失败~~
+2. ~~使用联结查询~~
 3. ~~SQL安全~~
 4. 性能测试
 5. 缓存
@@ -33,9 +33,45 @@ https://zhuanlan.zhihu.com/p/111824045
 # 数据库对不存在的记录加锁查询
 https://blog.csdn.net/u013269532/article/details/96841410  
 https://www.cnblogs.com/jian0110/p/12721924.html  
-行锁是基于索引的。
-如果有索引，对不存在的数据会升级为范围锁；
-如果没有索引，会升级为表锁。
+~~行锁是基于索引的。如果有索引，对不存在的数据会升级为范围锁；如果没有索引，会升级为表锁。~~
+- 默认没有加锁，事务可以并发。
+- 使用FirstOrCreate
+
+mysql> begin;  
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> select * from relations where user_id=10 and to_user_id=6;  
+Empty set (0.00 sec)
+
+mysql> insert into relations (user_id, to_user_id, relation) values (10, 6, 1);  
+Query OK, 1 row affected (0.00 sec)
+
+mysql> commit;  
+Query OK, 0 rows affected (0.00 sec)
+
+--------------------------------------------------
+
+mysql> begin;  
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> select * from relations where user_id=10 and to_user_id=6;  
+Empty set (0.00 sec)
+
+mysql> insert into relations (user_id, to_user_id, relation) values (10, 6, 1);  
+Query OK, 1 row affected (0.00 sec)
+
+mysql> commit;  
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> select * from relations where user_id=10 and to_user_id=6;  
++----+---------+------------+----------+  
+| id | user_id | to_user_id | relation |  
++----+---------+------------+----------+  
+| 16 |      10 |          6 |        1 |  
+| 17 |      10 |          6 |        1 |  
++----+---------+------------+----------+  
+2 rows in set (0.00 sec)
+
 
 # 测试
 https://www.1024sou.com/article/915651.html  

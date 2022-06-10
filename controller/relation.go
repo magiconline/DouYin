@@ -52,17 +52,11 @@ func FollowList(ctx *gin.Context) *gin.H {
 	}
 
 	// 验证token
-	tokenUserID, err := service.Token2ID(token)
+	_, err = service.Token2ID(token)
 	if err != nil {
 		return &gin.H{
 			"status_code": 1,
 			"status_msg":  err.Error(),
-		}
-	}
-	if tokenUserID != userID {
-		return &gin.H{
-			"status_code": 1,
-			"status_msg":  "token验证失败",
 		}
 	}
 
@@ -96,17 +90,11 @@ func FollowerList(ctx *gin.Context) *gin.H {
 	}
 
 	// 验证token
-	tokenUserID, err := service.Token2ID(token)
+	_, err = service.Token2ID(token)
 	if err != nil {
 		return &gin.H{
 			"status_code": 1,
 			"status_msg":  err.Error(),
-		}
-	}
-	if tokenUserID != userID {
-		return &gin.H{
-			"status_code": 1,
-			"status_msg":  "token验证失败",
 		}
 	}
 
