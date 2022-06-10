@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	"image"
+	"io"
+	"mime/multipart"
+	"os"
 
 	"github.com/disintegration/imaging"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
@@ -28,6 +31,34 @@ func InsertVideoTable(videoTable *VideoTable) error {
 	return err
 }
 
+// InsertVideo 插入视频
+func InsertVideo(path string, videoName string, video *multipart.FileHeader) error {
+	// 打开视频句柄
+	file, err := video.Open()
+	if err != nil {
+		return err
+	}
+
+	defer file.Close()
+
+	// 检测文件夹是否创建
+	err = os.MkdirAll("."+path, 0777)
+	if err != nil {
+		return err
+	}
+
+	// 本地创建文件，如果文件已存在则会被清空
+	localFile, err := os.Create("." + path + videoName)
+	if err != nil {
+		return err
+	}
+	defer localFile.Close()
+
+	// 拷贝文件
+	_, err = io.Copy(localFile, file)
+	return err
+}
+
 // InsertCover 生成并保存图像
 func InsertCover(path string, videoName string, coverName string) error {
 	buf := bytes.NewBuffer(nil)
@@ -36,6 +67,7 @@ func InsertCover(path string, videoName string, coverName string) error {
 		Output("pipe:", ffmpeg.KwArgs{"vframes": 1, "format": "image2", "vcodec": "mjpeg"}).
 		WithOutput(buf).
 		Run()
+
 	if err != nil {
 		return err
 	}
