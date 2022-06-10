@@ -40,15 +40,16 @@ func ParseToken(token string) (*Claims, error) {
 	tokenClaims, err := jwt.ParseWithClaims(token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return jwtSecret, nil
 	})
-
-	if tokenClaims != nil {
-		if claims, ok := tokenClaims.Claims.(*Claims); ok && tokenClaims.Valid {
-			//claims中包含用户信息
-			return claims, nil
-		}
+	if err != nil {
+		return nil, err
+	}
+	if claims, ok := tokenClaims.Claims.(*Claims); ok && tokenClaims.Valid {
+		//claims中包含用户信息
+		return claims, nil
 	}
 
 	return nil, err
+
 }
 
 // 根据token获得userID

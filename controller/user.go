@@ -128,7 +128,7 @@ func UserInfo(c *gin.Context) *gin.H {
 	userid := c.Query("user_id")
 	token := c.Query("token")
 
-	type userinformation struct {
+	type UserInformation struct {
 		UserId        int64  `gorm:"column:user_id"`
 		UserName      string `gorm:"column:user_name"`
 		FollowCount   int    `gorm:"column:follow_count"`
@@ -143,12 +143,12 @@ func UserInfo(c *gin.Context) *gin.H {
 		}
 	}
 
-	if token == "" {
-		return &gin.H{
-			"status_code": 1,
-			"status_msg":  "token不存在",
-		}
-	}
+	// if token == "" {
+	// 	return &gin.H{
+	// 		"status_code": 1,
+	// 		"status_msg":  "token不存在",
+	// 	}
+	// }
 
 	_, err = service.ParseToken(token)
 	if err != nil {
