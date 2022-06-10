@@ -128,6 +128,13 @@ func UserInfo(c *gin.Context) *gin.H {
 	userid := c.Query("user_id")
 	token := c.Query("token")
 
+	type userinformation struct {
+		UserId        int64  `gorm:"column:user_id"`
+		UserName      string `gorm:"column:user_name"`
+		FollowCount   int    `gorm:"column:follow_count"`
+		FollowerCount int    `gorm:"column:follower_count"`
+	}
+
 	user, err := repository.FindUserbyID(userid)
 	if err == gorm.ErrRecordNotFound {
 		return &gin.H{
