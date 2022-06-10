@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	mysqlUrl = "root:123456@tcp(127.0.0.1:3306)/douyin"
+	mysqlUrl = "root:123456@tcp(127.0.0.1:3306)/douyin?charset=utf8mb4&parseTime=true&loc=Local"
 	DB       *gorm.DB
 	RDB      *redis.Client
 	CTX      = context.Background()
