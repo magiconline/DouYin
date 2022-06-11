@@ -17,3 +17,9 @@ https://www.apifox.cn/apidoc/shared-8cc50618-0da6-4d5e-a398-76f3b8f766c5/api-183
 https://www.1024sou.com/article/915651.html  
 https://gin-gonic.com/zh-cn/docs/testing/  
 `go test -bench . -benchmem -cpuprofile prof.cpu -memprofile prof.mem`
+
+统计代码覆盖率：  
+`go test -coverpkg=./... -coverprofile=cover.out`  
+
+转换为html  
+`go tool cover -html=cover.out -o cover.html`
