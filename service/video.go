@@ -2,7 +2,7 @@ package service
 
 import (
 	"DouYin/repository"
-	"fmt"
+	"time"
 )
 
 // 静态资源ip
@@ -46,22 +46,37 @@ func AuthorInfo(userID uint64) (*AuthorResponse, error) {
 // 如果token为空字符串则表示没有输入token，返回包含所有用户的视频流
 // 如果token不为空，验证token，然后返回该用户的视频流
 func Feed(latestTime uint64, token string) (uint64, *[]FeedResponse, error) {
+	var currentUserId uint64
+	var err error
+	//获取当前用户, 验证token
 	if token != "" {
-		_, err := Token2ID(token)
+		currentUserId, err = Token2ID(token)
 		if err != nil {
 			return 0, nil, err
 		}
 	}
-	fmt.Println("当前时间戳：", latestTime)
+
 	//获取当前用户
-	currentUserId, _ := Token2ID(token)
+	currentUserId, _ = Token2ID(token)
+
+
 	var response []FeedResponse
-	nextTime := latestTime // 如果没有新视频则nextTime = latestTime
+	var nextTime = latestTime
+
+	// 获取视频列表
 	videoList, err := repository.FeedAll(latestTime)
 	if err != nil {
-		// 错误处理
 		return 0, nil, err
 	}
+
+	// 如果已经浏览了所有的视频，没有新视频，则从头开始，latestTime = now
+	if len(*videoList) == 0 {
+		videoList, err = repository.FeedAll(uint64(time.Now().UnixMilli()))
+		if err != nil {
+			return 0, nil, err
+		}
+	}
+
 	// 将视频列表中填充author信息
 	for i := range *videoList {
 		userID := (*videoList)[i]["user_id"].(uint64)

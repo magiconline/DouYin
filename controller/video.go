@@ -51,6 +51,7 @@ func Feed(ctx *gin.Context) *gin.H {
 func PublishAction(ctx *gin.Context) *gin.H {
 	data, err := ctx.FormFile("data")
 	if err != nil {
+		logger.Println(err.Error())
 		return &gin.H{
 			"status_code": 1,
 			"status_msg":  err.Error(),
@@ -61,6 +62,7 @@ func PublishAction(ctx *gin.Context) *gin.H {
 
 	// 通过文件后缀名验证格式
 	if arr := strings.Split(data.Filename, "."); arr[len(arr)-1] != "mp4" {
+		logger.Println(err.Error())
 		return &gin.H{
 			"status_code": 1,
 			"status_msg":  "视频格式不支持",
@@ -71,6 +73,7 @@ func PublishAction(ctx *gin.Context) *gin.H {
 	// 验证token
 	userID, err := service.Token2ID(token)
 	if err != nil {
+		logger.Println(err.Error())
 		return &gin.H{
 			"status_code": 1,
 			"status_msg":  err.Error(),
@@ -86,6 +89,7 @@ func PublishAction(ctx *gin.Context) *gin.H {
 
 	err = os.MkdirAll("."+path, 0777)
 	if err != nil {
+		logger.Println(err.Error())
 		return &gin.H{
 			"status_code": 1,
 			"status_msg":  err.Error(),
@@ -95,6 +99,7 @@ func PublishAction(ctx *gin.Context) *gin.H {
 	// 保存视频
 	err = ctx.SaveUploadedFile(data, "."+path+videoName)
 	if err != nil {
+		logger.Println(err.Error())
 		return &gin.H{
 			"status_code": 1,
 			"status_msg":  err.Error(),
@@ -103,6 +108,7 @@ func PublishAction(ctx *gin.Context) *gin.H {
 
 	// 生成并保存封面
 	if err = repository.InsertCover(path, videoName, coverName); err != nil {
+		logger.Println(err.Error())
 		return &gin.H{
 			"status_code": 1,
 			"status_msg":  err.Error(),
@@ -120,6 +126,7 @@ func PublishAction(ctx *gin.Context) *gin.H {
 
 	err = repository.InsertVideoTable(&videoTable)
 	if err != nil {
+		logger.Println(err.Error())
 		return &gin.H{
 			"status_code": 1,
 			"status_msg":  err.Error(),
@@ -141,6 +148,7 @@ func PublishList(ctx *gin.Context) *gin.H {
 	// 类型转换
 	userID, err := strconv.ParseUint(userIDStr, 10, 0)
 	if err != nil {
+		logger.Println(err.Error())
 		return &gin.H{
 			"status_code": 1,
 			"status_msg":  err.Error(),
@@ -149,6 +157,7 @@ func PublishList(ctx *gin.Context) *gin.H {
 	// 获得信息
 	videoList, err := service.UserVideoList(token, userID)
 	if err != nil {
+		logger.Println(err.Error())
 		return &gin.H{
 			"status_code": 1,
 			"status_msg":  err.Error(),

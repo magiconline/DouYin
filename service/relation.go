@@ -28,8 +28,22 @@ func RelationAction(token string, toUserID uint64, action bool) error {
 		return err
 	}
 
+	// 如果自己关注自己则返回错误
+	if userID == toUserID {
+		return errors.New("禁止关注自己")
+	}
+
+	// 检查userID是否存在
+	exist, err := repository.UserIDExist(userID, toUserID)
+	if err != nil {
+		return err
+	}
+	if !exist {
+		return errors.New("用户user_id不存在")
+	}
+
 	// 生成锁信息
-	k := fmt.Sprintf("%d_%d", userID, toUserID)
+	k := fmt.Sprintf("relation_%d_%d", userID, toUserID)
 	v := uuid.NewString()
 
 	// 获得锁

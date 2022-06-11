@@ -2,10 +2,14 @@ package repository
 
 import (
 	"context"
+	"log"
+	"os"
+	"time"
 
 	"github.com/go-redis/redis/v9"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var (
@@ -18,15 +22,31 @@ var (
 // Init 初始化mysql
 // 初始化redis
 func Init() error {
-	var err error
+	// 打开或创建日志文件
+	gormLogFile, err := os.OpenFile("./log/gorm.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		return err
+	}
+
+	gormLogger := logger.New(
+		log.New(gormLogFile, "", log.LstdFlags),
+		logger.Config{
+			SlowThreshold:             time.Second,
+			LogLevel:                  logger.Silent,
+			IgnoreRecordNotFoundError: true,
+			Colorful:                  false,
+		},
+	)
+
 	DB, err = gorm.Open(mysql.Open(mysqlUrl), &gorm.Config{
 		PrepareStmt: true,
+		Logger:      gormLogger,
 	})
 	if err != nil {
 		return err
 	}
+
 	DB.AutoMigrate(&Star{})
-	// DB.AutoMigrate(&User{})
 	DB.AutoMigrate(&Relation{})
 
 	RDB = redis.NewClient(&redis.Options{

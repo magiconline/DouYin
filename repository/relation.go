@@ -23,7 +23,6 @@ func GetRedisLock(k string, v string, expire time.Duration) error {
 	for !val {
 		val, err = RDB.SetNX(CTX, k, v, expire).Result()
 		if err != nil {
-			fmt.Println(err.Error())
 			return err
 		}
 		time.Sleep(100 * time.Millisecond)
@@ -115,4 +114,10 @@ func IsFollower(userID uint64, toUserID uint64) (bool, error) {
 	relation := &Relation{}
 	err := DB.Where(&Relation{UserID: userID, ToUserID: toUserID, Relation: true}).Limit(1).Find(&relation).Error
 	return relation.Relation, err
+}
+
+func UserIDExist(userID uint64, toUserID uint64) (bool, error) {
+	var count int64 = 0
+	err := DB.Table("user").Where("user_id  IN ?", []uint64{userID, toUserID}).Count(&count).Error
+	return count == 2, err
 }
