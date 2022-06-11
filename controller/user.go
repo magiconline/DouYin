@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"DouYin/logger"
 	"DouYin/repository"
 	"DouYin/service"
 
@@ -20,6 +21,7 @@ func UserLogin(c *gin.Context) *gin.H {
 	// 3.数据库查询用户名
 	_, err1 := repository.FindUserbyName(username)
 	if err1 == gorm.ErrRecordNotFound {
+		logger.Println(err1.Error())
 		return &gin.H{
 			"status_code": 1,
 			"status_msg":  "用户名不存在,请注册",
@@ -28,11 +30,13 @@ func UserLogin(c *gin.Context) *gin.H {
 		user, err := repository.FindUserbyNameandPwd(username, pwd)
 		//如果数据库查不到或者密码错误
 		if err == gorm.ErrRecordNotFound {
+			logger.Println(err.Error())
 			return &gin.H{
 				"status_code": 1,
 				"status_msg":  "用户密码错误",
 			}
 		} else if err != nil {
+			logger.Println(err.Error())
 			return &gin.H{
 				"status_code": 1,
 				"status_msg":  "数据库查询出错，请重新登录",
@@ -42,6 +46,7 @@ func UserLogin(c *gin.Context) *gin.H {
 		//token
 		token, err := service.GenerateToken(uint(user.UserId))
 		if err != nil {
+			logger.Println(err.Error())
 			return &gin.H{
 				"status_code": 1,
 				"status_msg":  "token生成失败请重新登录",
@@ -56,6 +61,7 @@ func UserLogin(c *gin.Context) *gin.H {
 			"token":       token,
 		}
 	}
+	logger.Println(err1.Error())
 	return &gin.H{
 		"status_code": 1,
 		"status_msg":  "数据库查询出错",
