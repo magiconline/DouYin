@@ -1,63 +1,109 @@
 package main
 
 import (
-	"DouYin/repository"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
-	"net/http/httptest"
-	"os"
+	"regexp"
 	"testing"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/go-playground/assert/v2"
 )
 
-var r *gin.Engine
+// 测试没有token
+func TestFeedWithoutToken(t *testing.T) {
+	timeStamp := time.Now().UnixMilli()
+	response, err := http.Get(fmt.Sprintf("http://127.0.0.1:8080/douyin/feed/?latest_time=%v", timeStamp))
+	assert.Equal(t, err, nil)
+	assert.Equal(t, response.StatusCode, 200)
 
-func TestMain(m *testing.M) {
-	// 初始化数据库连接
-	err := repository.Init()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	bodyBytes, err := ioutil.ReadAll(response.Body)
+	assert.Equal(t, err, nil)
+
+	body := make(map[string]interface{})
+	err = json.Unmarshal(bodyBytes, &body)
+	assert.Equal(t, err, nil)
+
+	if int(body["status_code"].(float64)) != 0 {
+		t.Errorf("status_code: %v != 0, status_msg: %v", body["status_code"], body["status_msg"])
+		t.FailNow()
 	}
 
-	// 初始化服务器
-	gin.SetMode(gin.ReleaseMode)
-	file, _ := os.Open("log")
-	gin.DefaultWriter = file
-	r = setupRouter()
-
-	code := m.Run()
-
-	file.Close()
-	os.Exit(code)
 }
 
-func TestFeed(t *testing.T) {
-	// 初始化请求
+// 测试错误token
+func TestFeedWithWrongToken(t *testing.T) {
 	timeStamp := time.Now().UnixMilli()
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", fmt.Sprintf("/douyin/feed/?latest_time=%v", timeStamp), nil)
+	token := "123"
 
-	r.ServeHTTP(w, req)
+	response, err := http.Get(fmt.Sprintf("http://127.0.0.1:8080/douyin/feed/?latest_time=%v&token=%v", timeStamp, token))
 
-	assert.Equal(t, 200, w.Code)
+	assert.Equal(t, err, nil)
+	assert.Equal(t, response.StatusCode, 200)
+
+	bodyBytes, err := ioutil.ReadAll(response.Body)
+	assert.Equal(t, err, nil)
+
+	body := make(map[string]interface{})
+	err = json.Unmarshal(bodyBytes, &body)
+	assert.Equal(t, err, nil)
+
+	assert.Equal(t, int(body["status_code"].(float64)), 1)
+	assert.Equal(t, body["status_msg"].(string), "token contains an invalid number of segments")
 }
 
-func BenchmarkFeed(b *testing.B) {
-	// 初始化请求
+// 测试过期token
+func TestFeedWithExpiredToken(t *testing.T) {
+	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MiwiZXhwIjoxNjU0NzAwNzcyLCJpc3MiOiJ6amN5In0.X9VuPerdOP8TNFxVpWY3vLVFPHdVE72un8TiimFMFPk"
 	timeStamp := time.Now().UnixMilli()
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", fmt.Sprintf("/douyin/feed/?latest_time=%v", timeStamp), nil)
 
-	b.RunParallel(func(pb *testing.PB) {
-		for pb.Next() {
-			r.ServeHTTP(w, req)
-		}
+	response, err := http.Get(fmt.Sprintf("http://127.0.0.1:8080/douyin/feed/?latest_time=%v&token=%v", timeStamp, token))
 
-	})
+	assert.Equal(t, err, nil)
+	assert.Equal(t, response.StatusCode, 200)
+
+	bodyBytes, err := ioutil.ReadAll(response.Body)
+	assert.Equal(t, err, nil)
+
+	body := make(map[string]interface{})
+	err = json.Unmarshal(bodyBytes, &body)
+	assert.Equal(t, err, nil)
+
+	assert.Equal(t, int(body["status_code"].(float64)), 1)
+
+	result, err := regexp.Match("token is expired by.*", []byte(body["status_msg"].(string)))
+	if err != nil {
+		t.Fatal(err.Error())
+		t.FailNow()
+	}
+	if result != true {
+		t.Fatalf("status_msg: %v != token is expired by*", body["status_msg"].(string))
+		t.FailNow()
+	}
+}
+
+// 测试访问完所有视频
+func TestFeedWithEndTime(t *testing.T) {
+	timeStamp := 0
+	response, err := http.Get(fmt.Sprintf("http://127.0.0.1:8080/douyin/feed/?latest_time=%v", timeStamp))
+
+	assert.Equal(t, err, nil)
+	assert.Equal(t, response.StatusCode, 200)
+
+	bodyBytes, err := ioutil.ReadAll(response.Body)
+	assert.Equal(t, err, nil)
+
+	body := make(map[string]interface{})
+	err = json.Unmarshal(bodyBytes, &body)
+	assert.Equal(t, err, nil)
+
+	assert.Equal(t, int(body["status_code"].(float64)), 0)
+
+	l := len(body["video_list"].([]interface{}))
+	assert.NotEqual(t, l, 0)
+	assert.NotEqual(t, body["next_time"], timeStamp)
 }
 
 func TestRegister(t *testing.T) {
