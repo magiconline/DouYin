@@ -56,10 +56,6 @@ func Feed(latestTime uint64, token string) (uint64, *[]FeedResponse, error) {
 		}
 	}
 
-	//获取当前用户
-	currentUserId, _ = Token2ID(token)
-
-
 	var response []FeedResponse
 	var nextTime = latestTime
 
@@ -128,10 +124,19 @@ func UserVideoList(token string, userID uint64) (*[]PublishActionResponse, error
 	if err != nil {
 		return nil, err
 	}
+	currentUserId, err := Token2ID(token)
 
 	var response []PublishActionResponse
 	// 将视频列表中填充author信息
 	for i := range *videoList {
+		//返回视频点赞状态
+		stool, _ := repository.NewStarDaoInstance().IsThumbUp(currentUserId, (*videoList)[i]["video_id"].(uint64))
+		var isFavorite bool
+		if stool == nil {
+			isFavorite = false
+		} else {
+			isFavorite = true
+		}
 		response_i := PublishActionResponse{
 			ID:            (*videoList)[i]["video_id"].(uint64),
 			Author:        *author,
@@ -139,7 +144,7 @@ func UserVideoList(token string, userID uint64) (*[]PublishActionResponse, error
 			CoverUrl:      server_ip + (*videoList)[i]["cover_url"].(string),
 			FavoriteCount: (*videoList)[i]["favorite_count"].(uint32),
 			CommentCount:  (*videoList)[i]["comment_count"].(uint32),
-			IsFavorite:    false,
+			IsFavorite:    isFavorite,
 			Title:         (*videoList)[i]["title"].(string),
 		}
 		response = append(response, response_i)

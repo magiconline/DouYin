@@ -1,10 +1,12 @@
 package main
 
 import (
+	"DouYin/service"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"regexp"
 	"testing"
 	"time"
@@ -106,6 +108,35 @@ func TestFeedWithEndTime(t *testing.T) {
 	assert.NotEqual(t, body["next_time"], timeStamp)
 }
 
+// 测试点赞接口
+func TestFavorite(t *testing.T) {
+	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MSwiZXhwIjoxNjYyMDM2NTkzLCJpc3MiOiJ6amN5In0.HWHm5JzbcIBeiXVOWXyKV6uQNB1po6CyK8bPQRMGvSc"
+	videoId := "1"
+	//点赞操作
+	actionType := "1"
+	response, err := http.PostForm("http://127.0.0.1:8080/douyin/favorite/action/",
+		url.Values{"token": {token}, "video_id": {videoId}, "action_type": {actionType}})
+	if err != nil {
+		fmt.Println("err:", err.Error())
+	}
+	fmt.Println("response", response.StatusCode)
+	/*	assert.Equal(t, err, nil)
+		assert.Equal(t, response.StatusCode, 200)
+
+		bodyBytes, err := ioutil.ReadAll(response.Body)
+		assert.Equal(t, err, nil)
+
+		body := make(map[string]interface{})
+		err = json.Unmarshal(bodyBytes, &body)
+		assert.Equal(t, err, nil)
+
+		assert.Equal(t, int(body["status_code"].(float64)), 0)
+
+		l := len(body["video_list"].([]interface{}))
+		assert.NotEqual(t, l, 0)
+		assert.NotEqual(t, body["next_time"], timeStamp)*/
+}
+
 // func BenchmarkFeed(b *testing.B) {
 // 	// 初始化请求
 // 	timeStamp := time.Now().UnixMilli()
@@ -150,25 +181,15 @@ func BenchmarkFeed(b *testing.B) {
 	})
 }
 
-/*func TestFavorite(t *testing.T) {
-	// 初始化请求
+//获取点赞列表
+func BenchmarkStarVideo(b *testing.B) {
 	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MSwiZXhwIjoxNjYyMDM2NTkzLCJpc3MiOiJ6amN5In0.HWHm5JzbcIBeiXVOWXyKV6uQNB1po6CyK8bPQRMGvSc"
-	videoId := 2
-	actionType := 2
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", fmt.Sprintf("/douyin/favorite/action/?token=%v&video_id=%v&action_type=%v", token, videoId, actionType), nil)
-	r.ServeHTTP(w, req)
-}
-func BenchmarkFavorite(b *testing.B) {
-	// 初始化请求
-	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MSwiZXhwIjoxNjYyMDM2NTkzLCJpc3MiOiJ6amN5In0.HWHm5JzbcIBeiXVOWXyKV6uQNB1po6CyK8bPQRMGvSc"
-	videoId := 2
-	actionType := 2
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", fmt.Sprintf("/douyin/favorite/action/?token=%v&video_id=%v&action_type=%v", token, videoId, actionType), nil)
-	b.RunParallel(func(pb *testing.PB) {
-		for pb.Next() {
-			r.ServeHTTP(w, req)
+	userId, _ := service.Token2ID(token)
+	req := fmt.Sprintf("http://127.0.0.1:8080/douyin/favorite/list/?token=%v&user_id=%v", token, userId)
+
+	b.RunParallel(func(p *testing.PB) {
+		for p.Next() {
+			http.Get(req)
 		}
 	})
-}*/
+}
