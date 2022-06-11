@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"DouYin/logger"
 	"DouYin/service"
 	"strconv"
 
@@ -16,6 +17,7 @@ func RelationAction(ctx *gin.Context) *gin.H {
 
 	toUserID, err := strconv.ParseUint(toUserIDStr, 10, 64)
 	if err != nil {
+		logger.Println(err.Error())
 		return &gin.H{
 			"status_code": 1,
 			"status_msg":  err.Error(),
@@ -25,6 +27,7 @@ func RelationAction(ctx *gin.Context) *gin.H {
 	// 关注操作
 	err = service.RelationAction(token, toUserID, actionTypeStr == "1")
 	if err != nil {
+		logger.Println(err.Error())
 		return &gin.H{
 			"status_code": 1,
 			"status_msg":  err.Error(),
@@ -45,6 +48,7 @@ func FollowList(ctx *gin.Context) *gin.H {
 
 	userID, err := strconv.ParseUint(userIDStr, 10, 64)
 	if err != nil {
+		logger.Println(err.Error())
 		return &gin.H{
 			"status_code": 1,
 			"status_msg":  err.Error(),
@@ -54,6 +58,7 @@ func FollowList(ctx *gin.Context) *gin.H {
 	// 验证token
 	_, err = service.Token2ID(token)
 	if err != nil {
+		logger.Println(err.Error())
 		return &gin.H{
 			"status_code": 1,
 			"status_msg":  err.Error(),
@@ -63,6 +68,7 @@ func FollowList(ctx *gin.Context) *gin.H {
 	// 获取关注列表
 	followList, err := service.FollowList(userID)
 	if err != nil {
+		logger.Println(err.Error())
 		return &gin.H{
 			"status_code": 1,
 			"status_msg":  err.Error(),
@@ -83,6 +89,7 @@ func FollowerList(ctx *gin.Context) *gin.H {
 
 	userID, err := strconv.ParseUint(userIDStr, 10, 64)
 	if err != nil {
+		logger.Println(err.Error())
 		return &gin.H{
 			"status_code": 1,
 			"status_msg":  err.Error(),
@@ -92,6 +99,7 @@ func FollowerList(ctx *gin.Context) *gin.H {
 	// 验证token
 	_, err = service.Token2ID(token)
 	if err != nil {
+		logger.Println(err.Error())
 		return &gin.H{
 			"status_code": 1,
 			"status_msg":  err.Error(),
@@ -101,6 +109,7 @@ func FollowerList(ctx *gin.Context) *gin.H {
 	// 获取粉丝列表
 	followerList, err := service.FollowerList(userID)
 	if err != nil {
+		logger.Println(err.Error())
 		return &gin.H{
 			"status_code": 1,
 			"status_msg":  err.Error(),
