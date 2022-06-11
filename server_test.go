@@ -62,7 +62,7 @@ func BenchmarkFeed(b *testing.B) {
 
 func TestFavorite(t *testing.T) {
 	// 初始化请求
-	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MiwiZXhwIjoxNjYyMDI3MjIxLCJpc3MiOiJ6amN5In0.DFQ5TEQ8Q293CYO6K5eESq5my4VwFpTjPwAQzwvBvTM"
+	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MSwiZXhwIjoxNjYyMDM2NTkzLCJpc3MiOiJ6amN5In0.HWHm5JzbcIBeiXVOWXyKV6uQNB1po6CyK8bPQRMGvSc"
 	videoId := 2
 	actionType := 2
 	w := httptest.NewRecorder()
@@ -71,7 +71,7 @@ func TestFavorite(t *testing.T) {
 }
 func BenchmarkFavorite(b *testing.B) {
 	// 初始化请求
-	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MiwiZXhwIjoxNjYyMDI3MjIxLCJpc3MiOiJ6amN5In0.DFQ5TEQ8Q293CYO6K5eESq5my4VwFpTjPwAQzwvBvTM"
+	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MSwiZXhwIjoxNjYyMDM2NTkzLCJpc3MiOiJ6amN5In0.HWHm5JzbcIBeiXVOWXyKV6uQNB1po6CyK8bPQRMGvSc"
 	videoId := 2
 	actionType := 2
 	w := httptest.NewRecorder()
