@@ -45,12 +45,16 @@ func AuthorInfo(userID uint64) (*AuthorResponse, error) {
 // 如果token为空字符串则表示没有输入token，返回包含所有用户的视频流
 // 如果token不为空，验证token，然后返回该用户的视频流
 func Feed(latestTime uint64, token string) (uint64, *[]FeedResponse, error) {
-
+	var currentUserId uint64
+	var err error
 	//获取当前用户, 验证token
-	currentUserId, err := Token2ID(token)
-	if err != nil {
-		return 0, nil, err
+	if token != "" {
+		currentUserId, err = Token2ID(token)
+		if err != nil {
+			return 0, nil, err
+		}
 	}
+
 	var response []FeedResponse
 	nextTime := latestTime // 如果没有新视频则nextTime = latestTime
 	videoList, err := repository.FeedAll(latestTime)
