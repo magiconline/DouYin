@@ -5,8 +5,8 @@ import (
 	"DouYin/repository"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"regexp"
 	"testing"
@@ -69,10 +69,6 @@ func TestMain(m *testing.M) {
 	// 托管静态资源
 	r.Static("/static", "./static")
 
-	// 启动服务器
-	logger.Println("启动服务器")
-	fmt.Printf("启动服务器: %v%v\n", ip, port)
-
 	code := m.Run()
 
 	os.Exit(code)
@@ -81,15 +77,16 @@ func TestMain(m *testing.M) {
 // 测试没有token
 func TestFeedWithoutToken(t *testing.T) {
 	timeStamp := time.Now().UnixMilli()
-	response, err := http.Get(fmt.Sprintf("http://127.0.0.1:8080/douyin/feed/?latest_time=%v", timeStamp))
-	assert.Equal(t, err, nil)
-	assert.Equal(t, response.StatusCode, 200)
 
-	bodyBytes, err := ioutil.ReadAll(response.Body)
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("GET", fmt.Sprintf("/douyin/feed/?latest_time=%v", timeStamp), nil)
 	assert.Equal(t, err, nil)
+
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
 
 	body := make(map[string]interface{})
-	err = json.Unmarshal(bodyBytes, &body)
+	err = json.Unmarshal(response.Body.Bytes(), &body)
 	assert.Equal(t, err, nil)
 
 	if int(body["status_code"].(float64)) != 0 {
@@ -104,16 +101,15 @@ func TestFeedWithWrongToken(t *testing.T) {
 	timeStamp := time.Now().UnixMilli()
 	token := "123"
 
-	response, err := http.Get(fmt.Sprintf("http://127.0.0.1:8080/douyin/feed/?latest_time=%v&token=%v", timeStamp, token))
-
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("GET", fmt.Sprintf("/douyin/feed/?latest_time=%v&token=%v", timeStamp, token), nil)
 	assert.Equal(t, err, nil)
-	assert.Equal(t, response.StatusCode, 200)
 
-	bodyBytes, err := ioutil.ReadAll(response.Body)
-	assert.Equal(t, err, nil)
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
 
 	body := make(map[string]interface{})
-	err = json.Unmarshal(bodyBytes, &body)
+	err = json.Unmarshal(response.Body.Bytes(), &body)
 	assert.Equal(t, err, nil)
 
 	assert.Equal(t, int(body["status_code"].(float64)), 1)
@@ -125,16 +121,15 @@ func TestFeedWithExpiredToken(t *testing.T) {
 	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MiwiZXhwIjoxNjU0NzAwNzcyLCJpc3MiOiJ6amN5In0.X9VuPerdOP8TNFxVpWY3vLVFPHdVE72un8TiimFMFPk"
 	timeStamp := time.Now().UnixMilli()
 
-	response, err := http.Get(fmt.Sprintf("http://127.0.0.1:8080/douyin/feed/?latest_time=%v&token=%v", timeStamp, token))
-
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("GET", fmt.Sprintf("/douyin/feed/?latest_time=%v&token=%v", timeStamp, token), nil)
 	assert.Equal(t, err, nil)
-	assert.Equal(t, response.StatusCode, 200)
 
-	bodyBytes, err := ioutil.ReadAll(response.Body)
-	assert.Equal(t, err, nil)
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
 
 	body := make(map[string]interface{})
-	err = json.Unmarshal(bodyBytes, &body)
+	err = json.Unmarshal(response.Body.Bytes(), &body)
 	assert.Equal(t, err, nil)
 
 	assert.Equal(t, int(body["status_code"].(float64)), 1)
@@ -153,16 +148,16 @@ func TestFeedWithExpiredToken(t *testing.T) {
 // 测试访问完所有视频
 func TestFeedWithEndTime(t *testing.T) {
 	timeStamp := 0
-	response, err := http.Get(fmt.Sprintf("http://127.0.0.1:8080/douyin/feed/?latest_time=%v", timeStamp))
 
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("GET", fmt.Sprintf("http://127.0.0.1:8080/douyin/feed/?latest_time=%v", timeStamp), nil)
 	assert.Equal(t, err, nil)
-	assert.Equal(t, response.StatusCode, 200)
 
-	bodyBytes, err := ioutil.ReadAll(response.Body)
-	assert.Equal(t, err, nil)
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
 
 	body := make(map[string]interface{})
-	err = json.Unmarshal(bodyBytes, &body)
+	err = json.Unmarshal(response.Body.Bytes(), &body)
 	assert.Equal(t, err, nil)
 
 	assert.Equal(t, int(body["status_code"].(float64)), 0)
@@ -190,15 +185,15 @@ func TestRegister(t *testing.T) {
 	}
 
 	// 注册
-	response, err := http.Post(fmt.Sprintf("http://127.0.0.1:8080/douyin/user/register/?username=%v&password=%v", username, password), "", nil)
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/user/register/?username=%v&password=%v", username, password), nil)
 	assert.Equal(t, err, nil)
-	assert.Equal(t, response.StatusCode, 200)
 
-	bodyBytes, err := ioutil.ReadAll(response.Body)
-	assert.Equal(t, err, nil)
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
 
 	body := make(map[string]interface{})
-	err = json.Unmarshal(bodyBytes, &body)
+	err = json.Unmarshal(response.Body.Bytes(), &body)
 	assert.Equal(t, err, nil)
 
 	assert.Equal(t, int(body["status_code"].(float64)), 0)
@@ -221,15 +216,15 @@ func TestRegisterAgain(t *testing.T) {
 	}
 
 	// 注册
-	response, err := http.Post(fmt.Sprintf("http://127.0.0.1:8080/douyin/user/register/?username=%v&password=%v", username, password), "", nil)
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/user/register/?username=%v&password=%v", username, password), nil)
 	assert.Equal(t, err, nil)
-	assert.Equal(t, response.StatusCode, 200)
 
-	bodyBytes, err := ioutil.ReadAll(response.Body)
-	assert.Equal(t, err, nil)
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
 
 	body := make(map[string]interface{})
-	err = json.Unmarshal(bodyBytes, &body)
+	err = json.Unmarshal(response.Body.Bytes(), &body)
 	assert.Equal(t, err, nil)
 
 	assert.Equal(t, int(body["status_code"].(float64)), 1)
@@ -253,15 +248,15 @@ func TestLogin(t *testing.T) {
 	}
 
 	// 登录
-	response, err := http.Post(fmt.Sprintf("http://127.0.0.1:8080/douyin/user/login/?username=%v&password=%v", username, password), "", nil)
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/user/login/?username=%v&password=%v", username, password), nil)
 	assert.Equal(t, err, nil)
-	assert.Equal(t, response.StatusCode, 200)
 
-	bodyBytes, err := ioutil.ReadAll(response.Body)
-	assert.Equal(t, err, nil)
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
 
 	body := make(map[string]interface{})
-	err = json.Unmarshal(bodyBytes, &body)
+	err = json.Unmarshal(response.Body.Bytes(), &body)
 	assert.Equal(t, err, nil)
 
 	assert.Equal(t, int(body["status_code"].(float64)), 0)
@@ -283,22 +278,22 @@ func TestLoginWithWrongPassword(t *testing.T) {
 		err := repository.DB.Table("user").Create(&repository.User{UserName: username, Password: password}).Error
 		assert.Equal(t, err, nil)
 	} else {
-		// 获得password
+		// 设置password
 		err := repository.DB.Table("user").Where("user_name = ?", username).Update("password", password).Error
 		assert.Equal(t, err, nil)
 	}
 
 	// 登录
 	// 拼接时密码+123
-	response, err := http.Post(fmt.Sprintf("http://127.0.0.1:8080/douyin/user/login/?username=%v&password=%v123", username, password), "", nil)
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/user/login/?username=%v&password=%v123", username, password), nil)
 	assert.Equal(t, err, nil)
-	assert.Equal(t, response.StatusCode, 200)
 
-	bodyBytes, err := ioutil.ReadAll(response.Body)
-	assert.Equal(t, err, nil)
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
 
 	body := make(map[string]interface{})
-	err = json.Unmarshal(bodyBytes, &body)
+	err = json.Unmarshal(response.Body.Bytes(), &body)
 	assert.Equal(t, err, nil)
 
 	assert.Equal(t, int(body["status_code"].(float64)), 1)
@@ -323,15 +318,15 @@ func TestLoginWithouRegister(t *testing.T) {
 	}
 
 	// 登录
-	response, err := http.Post(fmt.Sprintf("http://127.0.0.1:8080/douyin/user/login/?username=%v&password=%v", username, password), "", nil)
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/user/login/?username=%v&password=%v", username, password), nil)
 	assert.Equal(t, err, nil)
-	assert.Equal(t, response.StatusCode, 200)
 
-	bodyBytes, err := ioutil.ReadAll(response.Body)
-	assert.Equal(t, err, nil)
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
 
 	body := make(map[string]interface{})
-	err = json.Unmarshal(bodyBytes, &body)
+	err = json.Unmarshal(response.Body.Bytes(), &body)
 	assert.Equal(t, err, nil)
 
 	assert.Equal(t, int(body["status_code"].(float64)), 1)
@@ -349,17 +344,17 @@ func TestLoginWithouRegister(t *testing.T) {
 
 // --------------------benchmark----------------------------------------
 
-func BenchmarkFeed(b *testing.B) {
-	b.SetParallelism(10)
+// func BenchmarkFeed(b *testing.B) {
+// 	b.SetParallelism(10)
 
-	req := fmt.Sprintf("http://127.0.0.1:8080/douyin/feed/?latest_time=%v", time.Now().UnixMilli())
+// 	req := fmt.Sprintf("http://127.0.0.1:8080/douyin/feed/?latest_time=%v", time.Now().UnixMilli())
 
-	b.RunParallel(func(p *testing.PB) {
-		for p.Next() {
-			http.Get(req)
-		}
-	})
-}
+// 	b.RunParallel(func(p *testing.PB) {
+// 		for p.Next() {
+// 			http.Get(req)
+// 		}
+// 	})
+// }
 
 // func BenchmarkRegister(b *testing.B) {
 
