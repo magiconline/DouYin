@@ -56,8 +56,7 @@ func Feed(latestTime uint64, token string) (uint64, *[]FeedResponse, error) {
 		}
 	}
 	fmt.Println("当前时间戳：", latestTime)
-	//获取当前用户
-	currentUserId, _ := Token2ID(token)
+
 	var response []FeedResponse
 	var nextTime = latestTime
 
