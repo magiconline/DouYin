@@ -106,20 +106,46 @@ func TestFeedWithEndTime(t *testing.T) {
 	assert.NotEqual(t, body["next_time"], timeStamp)
 }
 
-func TestRegister(t *testing.T) {
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", fmt.Sprintf("/douyin/register/?username=test02&password=123456"), nil)
-	r.ServeHTTP(w, req)
-	assert.Equal(t, 200, w.Code)
-}
+// func BenchmarkFeed(b *testing.B) {
+// 	// 初始化请求
+// 	timeStamp := time.Now().UnixMilli()
+// 	w := httptest.NewRecorder()
+// 	req, _ := http.NewRequest("GET", fmt.Sprintf("/douyin/feed/?latest_time=%v", timeStamp), nil)
 
-func BenchmarkRedister(b *testing.B) {
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", fmt.Sprintf("/douyin/register/?username=test03&password=123456"), nil)
-	b.RunParallel(func(pb *testing.PB) {
-		for pb.Next() {
-			r.ServeHTTP(w, req)
+// 	b.RunParallel(func(pb *testing.PB) {
+// 		for pb.Next() {
+// 			// r.ServeHTTP(w, req)
+// 		}
+
+// 	})
+// }
+
+// func TestRegister(t *testing.T) {
+// 	w := httptest.NewRecorder()
+// 	req, _ := http.NewRequest("POST", fmt.Sprintf("/douyin/register/?username=test02&password=123456"), nil)
+// 	// r.ServeHTTP(w, req)
+// 	assert.Equal(t, 200, w.Code)
+// }
+
+// func BenchmarkRedister(b *testing.B) {
+// 	w := httptest.NewRecorder()
+// 	req, _ := http.NewRequest("POST", fmt.Sprintf("/douyin/register/?username=test03&password=123456"), nil)
+// 	b.RunParallel(func(pb *testing.PB) {
+// 		for pb.Next() {
+// 			// r.ServeHTTP(w, req)
+// 		}
+
+// 	})
+// }
+
+// --------------------benchmark----------------------------------------
+
+func BenchmarkFeed(b *testing.B) {
+	req := fmt.Sprintf("http://127.0.0.1:8080/douyin/feed/?latest_time=%v", time.Now().UnixMilli())
+
+	b.RunParallel(func(p *testing.PB) {
+		for p.Next() {
+			http.Get(req)
 		}
-
 	})
 }
