@@ -151,6 +151,7 @@ func main() {
 
 	// 启动服务器
 	logger.Println("启动服务器")
+	fmt.Printf("启动服务器: %v%v\n", ip, port)
 
 	err = r.Run(port)
 	if err != nil {
