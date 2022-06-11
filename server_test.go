@@ -1,11 +1,14 @@
 package main
 
 import (
+	"DouYin/logger"
 	"DouYin/repository"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"regexp"
 	"testing"
 	"time"
 
@@ -16,53 +19,346 @@ import (
 var r *gin.Engine
 
 func TestMain(m *testing.M) {
-	// 初始化数据库连接
-	err := repository.Init()
-	if err != nil {
-		fmt.Println(err)
+	// 创建日志文件夹
+	err := os.Mkdir("./log", 0750)
+	if err != nil && !os.IsExist(err) {
+		fmt.Println("日志文件夹创建失败")
 		os.Exit(1)
 	}
 
-	// 初始化服务器
+	// 初始化项目日志
+	err = logger.Init("./log/log.log")
+	if err != nil {
+		fmt.Println("日志初始化失败,", err)
+		os.Exit(1)
+	}
+	logger.Println("项目日志初始化成功")
+
+	// 初始化静态资源 URL 前缀
+	ip, err := getOutBoundIP()
+	if err != nil {
+		logger.Fatalln("获取本机ip失败,", err.Error())
+	}
+
+	port := ":8080"
+
+	setIP(ip, port)
+
+	// 初始化数据库连接
+	err = repository.Init()
+	if err != nil {
+		logger.Fatalln("数据库初始化失败,", err.Error())
+	}
+
+	// 设置release模式
 	gin.SetMode(gin.ReleaseMode)
-	file, _ := os.Open("log")
+
+	// 初始化gin日志
+	file, err := os.OpenFile("./log/gin.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		logger.Fatalln("gin日志初始化失败,", err.Error())
+	}
 	gin.DefaultWriter = file
-	r = setupRouter()
+
+	// 创建服务器
+	r = gin.Default()
+
+	// 设置路由
+	setupRouter(r)
+
+	// 托管静态资源
+	r.Static("/static", "./static")
 
 	code := m.Run()
 
-	file.Close()
 	os.Exit(code)
 }
 
-func TestFeed(t *testing.T) {
-	// 初始化请求
+// 测试没有token
+func TestFeedWithoutToken(t *testing.T) {
 	timeStamp := time.Now().UnixMilli()
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", fmt.Sprintf("/douyin/feed/?latest_time=%v", timeStamp), nil)
 
-	r.ServeHTTP(w, req)
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("GET", fmt.Sprintf("/douyin/feed/?latest_time=%v", timeStamp), nil)
+	assert.Equal(t, err, nil)
 
-	assert.Equal(t, 200, w.Code)
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
+
+	body := make(map[string]interface{})
+	err = json.Unmarshal(response.Body.Bytes(), &body)
+	assert.Equal(t, err, nil)
+
+	if int(body["status_code"].(float64)) != 0 {
+		t.Errorf("status_code: %v != 0, status_msg: %v", body["status_code"], body["status_msg"])
+		t.FailNow()
+	}
+
 }
 
-func BenchmarkFeed(b *testing.B) {
-	// 初始化请求
+// 测试错误token
+func TestFeedWithWrongToken(t *testing.T) {
 	timeStamp := time.Now().UnixMilli()
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", fmt.Sprintf("/douyin/feed/?latest_time=%v", timeStamp), nil)
+	token := "123"
 
-	b.RunParallel(func(pb *testing.PB) {
-		for pb.Next() {
-			r.ServeHTTP(w, req)
-		}
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("GET", fmt.Sprintf("/douyin/feed/?latest_time=%v&token=%v", timeStamp, token), nil)
+	assert.Equal(t, err, nil)
 
-	})
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
+
+	body := make(map[string]interface{})
+	err = json.Unmarshal(response.Body.Bytes(), &body)
+	assert.Equal(t, err, nil)
+
+	assert.Equal(t, int(body["status_code"].(float64)), 1)
+	assert.Equal(t, body["status_msg"].(string), "token contains an invalid number of segments")
 }
 
-func TestFavorite(t *testing.T) {
+// 测试过期token
+func TestFeedWithExpiredToken(t *testing.T) {
+	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MiwiZXhwIjoxNjU0NzAwNzcyLCJpc3MiOiJ6amN5In0.X9VuPerdOP8TNFxVpWY3vLVFPHdVE72un8TiimFMFPk"
+	timeStamp := time.Now().UnixMilli()
+
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("GET", fmt.Sprintf("/douyin/feed/?latest_time=%v&token=%v", timeStamp, token), nil)
+	assert.Equal(t, err, nil)
+
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
+
+	body := make(map[string]interface{})
+	err = json.Unmarshal(response.Body.Bytes(), &body)
+	assert.Equal(t, err, nil)
+
+	assert.Equal(t, int(body["status_code"].(float64)), 1)
+
+	result, err := regexp.Match("token is expired by.*", []byte(body["status_msg"].(string)))
+	if err != nil {
+		t.Fatal(err.Error())
+		t.FailNow()
+	}
+	if result != true {
+		t.Fatalf("status_msg: %v != token is expired by*", body["status_msg"].(string))
+		t.FailNow()
+	}
+}
+
+// 测试访问完所有视频
+func TestFeedWithEndTime(t *testing.T) {
+	timeStamp := 0
+
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("GET", fmt.Sprintf("http://127.0.0.1:8080/douyin/feed/?latest_time=%v", timeStamp), nil)
+	assert.Equal(t, err, nil)
+
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
+
+	body := make(map[string]interface{})
+	err = json.Unmarshal(response.Body.Bytes(), &body)
+	assert.Equal(t, err, nil)
+
+	assert.Equal(t, int(body["status_code"].(float64)), 0)
+
+	l := len(body["video_list"].([]interface{}))
+	assert.NotEqual(t, l, 0)
+	assert.NotEqual(t, body["next_time"], timeStamp)
+}
+
+// 正常注册
+func TestRegister(t *testing.T) {
+	username := "testFirst"
+	password := "123456"
+
+	// 检查是否被注册
+	var count int64
+	err := repository.DB.Table("user").Where("user_name = ?", username).Count(&count).Error
+	assert.Equal(t, err, nil)
+
+	// 已注册则删除
+	if count != 0 {
+		result := repository.DB.Table("user").Where("user_name = ?", username).Delete(&repository.User{})
+		assert.Equal(t, result.Error, nil)
+		assert.Equal(t, result.RowsAffected, int64(1))
+	}
+
+	// 注册
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/user/register/?username=%v&password=%v", username, password), nil)
+	assert.Equal(t, err, nil)
+
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
+
+	body := make(map[string]interface{})
+	err = json.Unmarshal(response.Body.Bytes(), &body)
+	assert.Equal(t, err, nil)
+
+	assert.Equal(t, int(body["status_code"].(float64)), 0)
+}
+
+// 重复注册
+func TestRegisterAgain(t *testing.T) {
+	username := "testAgain"
+	password := "123456"
+
+	// 检查是否被注册
+	var count int64
+	err := repository.DB.Table("user").Where("user_name = ?", username).Count(&count).Error
+	assert.Equal(t, err, nil)
+
+	// 没注册则进行注册
+	if count == 0 {
+		err := repository.DB.Table("user").Create(&repository.User{UserName: username, Password: password}).Error
+		assert.Equal(t, err, nil)
+	}
+
+	// 注册
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/user/register/?username=%v&password=%v", username, password), nil)
+	assert.Equal(t, err, nil)
+
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
+
+	body := make(map[string]interface{})
+	err = json.Unmarshal(response.Body.Bytes(), &body)
+	assert.Equal(t, err, nil)
+
+	assert.Equal(t, int(body["status_code"].(float64)), 1)
+	assert.Equal(t, body["status_msg"].(string), "该用户名已被注册")
+}
+
+// 测试已注册用户登录
+func TestLogin(t *testing.T) {
+	username := "testLogin"
+	password := "123456"
+
+	// 检查是否被注册
+	var count int64
+	err := repository.DB.Table("user").Where("user_name = ?", username).Count(&count).Error
+	assert.Equal(t, err, nil)
+
+	// 没注册则进行注册
+	if count == 0 {
+		err := repository.DB.Table("user").Create(&repository.User{UserName: username, Password: password}).Error
+		assert.Equal(t, err, nil)
+	}
+
+	// 登录
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/user/login/?username=%v&password=%v", username, password), nil)
+	assert.Equal(t, err, nil)
+
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
+
+	body := make(map[string]interface{})
+	err = json.Unmarshal(response.Body.Bytes(), &body)
+	assert.Equal(t, err, nil)
+
+	assert.Equal(t, int(body["status_code"].(float64)), 0)
+
+}
+
+// 测试密码错误登录
+func TestLoginWithWrongPassword(t *testing.T) {
+	username := "testLogin"
+	password := "123456"
+
+	// 检查是否被注册
+	var count int64
+	err := repository.DB.Table("user").Where("user_name = ?", username).Count(&count).Error
+	assert.Equal(t, err, nil)
+
+	// 没注册则进行注册
+	if count == 0 {
+		err := repository.DB.Table("user").Create(&repository.User{UserName: username, Password: password}).Error
+		assert.Equal(t, err, nil)
+	} else {
+		// 设置password
+		err := repository.DB.Table("user").Where("user_name = ?", username).Update("password", password).Error
+		assert.Equal(t, err, nil)
+	}
+
+	// 登录
+	// 拼接时密码+123
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/user/login/?username=%v&password=%v123", username, password), nil)
+	assert.Equal(t, err, nil)
+
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
+
+	body := make(map[string]interface{})
+	err = json.Unmarshal(response.Body.Bytes(), &body)
+	assert.Equal(t, err, nil)
+
+	assert.Equal(t, int(body["status_code"].(float64)), 1)
+	assert.Equal(t, body["status_msg"].(string), "用户密码错误")
+
+}
+
+// 测试未注册用户登录
+func TestLoginWithouRegister(t *testing.T) {
+	username := "testLogin"
+	password := "123456"
+
+	// 检查是否被注册
+	var count int64
+	err := repository.DB.Table("user").Where("user_name = ?", username).Count(&count).Error
+	assert.Equal(t, err, nil)
+
+	// 注册过则删除
+	if count == 1 {
+		err := repository.DB.Table("user").Where("user_name = ?", username).Delete(&repository.User{UserName: username}).Error
+		assert.Equal(t, err, nil)
+	}
+
+	// 登录
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/user/login/?username=%v&password=%v", username, password), nil)
+	assert.Equal(t, err, nil)
+
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
+
+	body := make(map[string]interface{})
+	err = json.Unmarshal(response.Body.Bytes(), &body)
+	assert.Equal(t, err, nil)
+
+	assert.Equal(t, int(body["status_code"].(float64)), 1)
+	assert.Equal(t, body["status_msg"].(string), "用户名不存在,请注册")
+
+}
+
+//
+
+// 测试关注操作
+
+// 测试关注列表
+
+// 测试粉丝列表
+
+// --------------------benchmark----------------------------------------
+
+// func BenchmarkFeed(b *testing.B) {
+// 	b.SetParallelism(10)
+
+// 	req := fmt.Sprintf("http://127.0.0.1:8080/douyin/feed/?latest_time=%v", time.Now().UnixMilli())
+
+// 	b.RunParallel(func(p *testing.PB) {
+// 		for p.Next() {
+// 			http.Get(req)
+// 		}
+// 	})
+// }
+
+/*func TestFavorite(t *testing.T) {
 	// 初始化请求
-	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MiwiZXhwIjoxNjYyMDI3MjIxLCJpc3MiOiJ6amN5In0.DFQ5TEQ8Q293CYO6K5eESq5my4VwFpTjPwAQzwvBvTM"
+	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MSwiZXhwIjoxNjYyMDM2NTkzLCJpc3MiOiJ6amN5In0.HWHm5JzbcIBeiXVOWXyKV6uQNB1po6CyK8bPQRMGvSc"
 	videoId := 2
 	actionType := 2
 	w := httptest.NewRecorder()
@@ -71,7 +367,7 @@ func TestFavorite(t *testing.T) {
 }
 func BenchmarkFavorite(b *testing.B) {
 	// 初始化请求
-	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MiwiZXhwIjoxNjYyMDI3MjIxLCJpc3MiOiJ6amN5In0.DFQ5TEQ8Q293CYO6K5eESq5my4VwFpTjPwAQzwvBvTM"
+	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MSwiZXhwIjoxNjYyMDM2NTkzLCJpc3MiOiJ6amN5In0.HWHm5JzbcIBeiXVOWXyKV6uQNB1po6CyK8bPQRMGvSc"
 	videoId := 2
 	actionType := 2
 	w := httptest.NewRecorder()
@@ -81,4 +377,4 @@ func BenchmarkFavorite(b *testing.B) {
 			r.ServeHTTP(w, req)
 		}
 	})
-}
+}*/

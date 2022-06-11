@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"DouYin/logger"
 	"bytes"
 	"fmt"
 	"image"
@@ -26,7 +27,7 @@ type VideoTable struct {
 func InsertVideoTable(videoTable *VideoTable) error {
 	err := DB.Table("video").Create(&videoTable).Error
 	if err != nil {
-		fmt.Println("Insert VideoTable error:", err)
+		logger.Println(err.Error())
 	}
 	return err
 }
