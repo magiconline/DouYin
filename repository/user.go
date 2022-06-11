@@ -10,8 +10,8 @@ type User struct {
 	UserId        int64  `gorm:"column:user_id; primary_key; AUTO_INCREMENT"`
 	UserName      string `gorm:"column:user_name"`
 	Password      string `gorm:"column:password"`
-	FollowCount   int    `gorm:"column:follow_count"`
-	FollowerCount int    `gorm:"column:follower_count"`
+	FollowCount   uint64 `gorm:"column:follow_count"`
+	FollowerCount uint64 `gorm:"column:follower_count"`
 }
 
 //根据email pwd查找用户

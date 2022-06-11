@@ -2,6 +2,8 @@ package service
 
 import (
 	"DouYin/repository"
+	"fmt"
+	"strconv"
 	"time"
 )
 
@@ -34,12 +36,40 @@ type FeedResponse struct {
 
 type PublishActionResponse FeedResponse
 
+// 获取userID对应的信息
+//
 func AuthorInfo(userID uint64) (*AuthorResponse, error) {
+	key := fmt.Sprintf("user_%v", userID)
+
+	// 查询redis
+	rdbAuthor, err := repository.RDB.HGetAll(repository.CTX, key).Result()
+
+	if err == nil && len(rdbAuthor) != 0 {
+		// redis可用并且查到缓存
+		followCount, _ := strconv.ParseUint(rdbAuthor["follow_count"], 10, 0)
+		followerCount, _ := strconv.ParseUint(rdbAuthor["follower_count"], 10, 0)
+		return &AuthorResponse{
+			ID:            userID,
+			Name:          rdbAuthor["user_name"],
+			FollowCount:   followCount,
+			FollowerCount: followerCount,
+		}, nil
+	}
+
+	// redis不可用或没有缓存，查询mysql
 	author, err := repository.AuthorInfo(userID)
 	if err != nil {
 		return nil, err
 	}
-	return &AuthorResponse{ID: uint64(author.UserId), Name: author.UserName, FollowCount: 0, FollowerCount: 0, IsFollow: false}, nil
+
+	// 更新redis, 不关心是否成功
+	repository.RDB.HSet(repository.CTX, key,
+		"user_name", author.UserName,
+		"follow_count", strconv.FormatUint(uint64(author.FollowCount), 10),
+		"follower_count", strconv.FormatUint(uint64(author.FollowerCount), 10),
+	)
+
+	return &AuthorResponse{ID: uint64(author.UserId), Name: author.UserName, FollowCount: author.FollowCount, FollowerCount: author.FollowerCount, IsFollow: false}, nil
 }
 
 //Feed 获得视频流
@@ -48,6 +78,9 @@ func AuthorInfo(userID uint64) (*AuthorResponse, error) {
 func Feed(latestTime uint64, token string) (uint64, *[]FeedResponse, error) {
 	var currentUserId uint64
 	var err error
+	var response []FeedResponse
+	var nextTime = latestTime
+
 	//获取当前用户, 验证token
 	if token != "" {
 		currentUserId, err = Token2ID(token)
@@ -55,13 +88,6 @@ func Feed(latestTime uint64, token string) (uint64, *[]FeedResponse, error) {
 			return 0, nil, err
 		}
 	}
-
-	//获取当前用户
-	currentUserId, _ = Token2ID(token)
-
-
-	var response []FeedResponse
-	var nextTime = latestTime
 
 	// 获取视频列表
 	videoList, err := repository.FeedAll(latestTime)
@@ -83,6 +109,11 @@ func Feed(latestTime uint64, token string) (uint64, *[]FeedResponse, error) {
 		author, err := AuthorInfo(userID)
 		if err != nil {
 			continue
+		}
+
+		// 根据是否有token 查询author.isfollow
+		if token != "" {
+			author.IsFollow, _ = repository.IsFollower(currentUserId, userID)
 		}
 		//返回视频点赞状态
 		stool, _ := repository.NewStarDaoInstance().IsThumbUp(currentUserId, (*videoList)[i]["video_id"].(uint64))
@@ -111,8 +142,11 @@ func Feed(latestTime uint64, token string) (uint64, *[]FeedResponse, error) {
 // UserVideoList 获取userID的所有的视频列表
 func UserVideoList(token string, userID uint64) (*[]PublishActionResponse, error) {
 	// 检查token
+	var currentUserId uint64
+	var err error
+
 	if token != "" {
-		_, err := Token2ID(token)
+		currentUserId, err = Token2ID(token)
 		if err != nil {
 			return nil, err
 		}
@@ -122,6 +156,7 @@ func UserVideoList(token string, userID uint64) (*[]PublishActionResponse, error
 	if err != nil {
 		return nil, err
 	}
+	author.IsFollow, _ = repository.IsFollower(currentUserId, userID)
 
 	// 根据userID查找数据库，按上传时间排序
 	videoList, err := repository.UserVideoList(userID)
