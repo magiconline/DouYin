@@ -3,9 +3,9 @@ package controller
 import (
 	"DouYin/logger"
 	"DouYin/service"
-	"fmt"
-	"github.com/gin-gonic/gin"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 func Favorite(ctx *gin.Context) *gin.H {
@@ -90,7 +90,7 @@ func ThumbListVideo(ctx *gin.Context) *gin.H {
 	// 获得参数
 	token := ctx.Query("token")
 	userIDStr := ctx.Query("user_id")
-	fmt.Println("token：", token)
+	// fmt.Println("token：", token)
 	if token == "" {
 		return &gin.H{
 			"status_code": 1,

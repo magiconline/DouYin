@@ -115,7 +115,6 @@ func main() {
 	ip, err := getOutBoundIP()
 	if err != nil {
 		logger.Fatalln("获取本机ip失败,", err.Error())
-		os.Exit(1)
 	}
 
 	port := ":8080"
@@ -126,7 +125,6 @@ func main() {
 	err = repository.Init()
 	if err != nil {
 		logger.Fatalln("数据库初始化失败,", err.Error())
-		os.Exit(1)
 	}
 
 	// 设置release模式
@@ -136,7 +134,6 @@ func main() {
 	file, err := os.OpenFile("./log/gin.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		logger.Fatalln("gin日志初始化失败,", err.Error())
-		os.Exit(1)
 	}
 	gin.DefaultWriter = file
 
@@ -156,6 +153,5 @@ func main() {
 	err = r.Run(port)
 	if err != nil {
 		logger.Logger.Fatal("服务器启动失败,", err.Error())
-		os.Exit(1)
 	}
 }

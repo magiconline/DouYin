@@ -2,7 +2,6 @@ package service
 
 import (
 	"DouYin/repository"
-	"fmt"
 )
 
 func AddStar(userId, videoId uint64) {
@@ -16,7 +15,7 @@ func DeleteStar(userId, videoId uint64) {
 //IsThumbUp 返回点赞状态
 func IsThumbUp(userId, videoId uint64) bool {
 	stool, _ := repository.NewStarDaoInstance().IsThumbUp(userId, videoId)
-	fmt.Println(stool)
+	// fmt.Println(stool)
 	if stool == nil {
 		return false
 	} else {
