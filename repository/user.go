@@ -42,12 +42,12 @@ func FindUserbyName(name string) (int, error) {
 }
 
 //根据userid查找用户
-func FindUserbyID(userid string) (int, error) {
-	var user User
-	id, _ := strconv.Atoi(userid)
-	res := DB.Table("user").Where("user_id = ?", id).Limit(1).Find(&user)
-	return int(res.RowsAffected), res.Error
-}
+// func FindUserbyID(userid string) (int, error) {
+// 	var user User
+// 	id, err := strconv.ParseUint(userid, 10, 64)
+// 	res := DB.Table("user").Where("user_id = ?", id).Limit(1).Find(&user)
+// 	return int(res.RowsAffected), res.Error
+// }
 
 // 创建用户
 func CreateUser(username, pwd string) (*User, error) {

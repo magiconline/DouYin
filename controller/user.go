@@ -84,9 +84,10 @@ func UserRegister(c *gin.Context) *gin.H {
 		}
 		token, err := service.GenerateToken(u.UserId)
 		if err != nil {
+			logger.Println(err.Error())
 			return &gin.H{
 				"status_code": 1,
-				"status_msg":  "token生成失败请重新登录",
+				"status_msg":  err.Error(),
 			}
 		}
 		return &gin.H{
@@ -98,9 +99,10 @@ func UserRegister(c *gin.Context) *gin.H {
 	} else {
 		//若查找返回的err不是不存在而是别的
 		if err1 != nil {
+			logger.Println(err1.Error())
 			return &gin.H{
 				"status_code": 1,
-				"status_msg":  "数据库查询用户操作错误",
+				"status_msg":  err1.Error(),
 			}
 		}
 		if numOfRowsAffected > 0 {
