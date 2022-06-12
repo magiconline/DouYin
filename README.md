@@ -29,3 +29,6 @@ https://gin-gonic.com/zh-cn/docs/testing/
   - k: "user_{user_id}"
   - v: ["user_name", "follow_count", "follower_count"]
 
+- 关注信息 
+  - k: "relation_{user_id}_{user_id}"
+  - v: 1 or 0

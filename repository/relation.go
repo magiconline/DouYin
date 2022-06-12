@@ -114,8 +114,19 @@ func FollowerList(userID uint64) (*[]Relation, error) {
 
 // 判断userID是否关注了toUserID
 func IsFollower(userID uint64, toUserID uint64) (bool, error) {
+	key := fmt.Sprintf("relation_%v_%v", userID, toUserID)
+	result, err := RDB.Get(CTX, key).Result()
+	if err == nil {
+		// 缓存命中
+		return result == "1", nil
+	}
+
 	relation := &Relation{}
-	err := DB.Where(&Relation{UserID: userID, ToUserID: toUserID, Relation: true}).Limit(1).Find(&relation).Error
+	err = DB.Where(&Relation{UserID: userID, ToUserID: toUserID, Relation: true}).Limit(1).Find(&relation).Error
+
+	// 更新缓存
+	RDB.Set(CTX, key, relation.Relation, 0)
+
 	return relation.Relation, err
 }
 

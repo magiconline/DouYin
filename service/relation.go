@@ -43,7 +43,7 @@ func RelationAction(token string, toUserID uint64, action bool) error {
 	}
 
 	// 生成锁信息
-	k := fmt.Sprintf("relation_%d_%d", userID, toUserID)
+	k := fmt.Sprintf("lock_relation_%d_%d", userID, toUserID)
 	v := uuid.NewString()
 
 	// 获得锁
@@ -90,9 +90,13 @@ func RelationAction(token string, toUserID uint64, action bool) error {
 	tx.Commit()
 
 	// 删除redis缓存
+	// 删除user缓存
 	key1 := fmt.Sprintf("user_%v", userID)
 	key2 := fmt.Sprintf("user_%v", toUserID)
-	_, err = repository.RDB.Del(repository.CTX, key1, key2).Result()
+	// 删除relation缓存
+	key3 := fmt.Sprintf("relation_%v_%v", userID, toUserID)
+
+	_, err = repository.RDB.Del(repository.CTX, key1, key2, key3).Result()
 	if err != nil {
 		return err
 	}

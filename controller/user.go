@@ -30,7 +30,7 @@ func UserLogin(c *gin.Context) *gin.H {
 		user, err := repository.FindUserbyNameandPwd(username, pwd)
 		//如果数据库查不到或者密码错误
 		if err == gorm.ErrRecordNotFound {
-			logger.Println(err.Error())
+			// logger.Println(err.Error())
 			return &gin.H{
 				"status_code": 1,
 				"status_msg":  "用户密码错误",
