@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	mysqlUrl = "root:123456@tcp(127.0.0.1:3306)/douyin?charset=utf8mb4&parseTime=true&loc=Local"
+	mysqlUrl = "root:1234@tcp(127.0.0.1:3306)/douyin?charset=utf8mb4&parseTime=true&loc=Local"
 	DB       *gorm.DB
 	RDB      *redis.Client
 	CTX      = context.Background()
@@ -51,7 +51,7 @@ func Init() error {
 
 	RDB = redis.NewClient(&redis.Options{
 		Addr:     "127.0.0.1:6379",
-		Password: "123456",
+		Password: "",
 		DB:       0,
 	})
 
