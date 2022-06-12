@@ -65,16 +65,26 @@ func (*RemarkDao)InsertByCommentIDAndVideo(remarkdata *Remark,videoId uint64) (i
 	//cid为获取新插入的评论commetn_id
 	var cid int64
 	cid = 0 //初始化
+	var count int64
+	count = 0
 	//开启事务
 	DB.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(remarkdata).Error ; err != nil{
 			logger.Logger.Println("err",err)
 			return err
 		}
-		if err := tx.Table("video").Where("video_id = ?", videoId).Update("comment_count", gorm.Expr("comment_count + ?", 1)).Error ; err != nil{
+		if result := tx.Table("remark").Where("video_id = ?", videoId).Count(&count) ; result.Error != nil{
+			logger.Logger.Println("err",result.Error)
+			return result.Error
+		}
+		if err := tx.Table("video").Where("video_id = ?", videoId).Update("comment_count", count).Error ; err != nil{
 			logger.Logger.Println("err",err)
 			return err
 		}
+		//if err := tx.Table("video").Where("video_id = ?", videoId).Update("comment_count", gorm.Expr("comment_count + ?", 1)).Error ; err != nil{
+		//	logger.Logger.Println("err",err)
+		//	return err
+		//}
 			return nil
 		})
 	if err := DB.Table("remark").Select("comment_id").Where("video_id = ?",remarkdata.VideoId).Where("comment_text = ?",remarkdata.CommentText).Where("user_id=?",remarkdata.UserId).Limit(1).Take(&cid).Error; err != nil{
@@ -112,6 +122,8 @@ func VideoCommentList(videoId uint64) (*[]map[string]interface{}, error) {
 // 根据commentId 删除评论
 func DeleteByComentID(commentId uint64 ,videoId uint64)error{
 	var reamrk Remark
+	var count int64
+	count = 0
 	if result := DB.Table("remark").Where("comment_id = ?",commentId).Limit(1).Take(&reamrk); result.Error != nil{
 		logger.Logger.Println("err",result.Error)
 		return result.Error
@@ -121,10 +133,18 @@ func DeleteByComentID(commentId uint64 ,videoId uint64)error{
 			logger.Logger.Println("err",err)
 			return err
 		}
-		if err := tx.Table("video").Where("video_id = ?", videoId).Update("comment_count", gorm.Expr("comment_count - ?", 1)).Error ; err != nil{
+		if result := tx.Table("remark").Where("video_id = ?", videoId).Count(&count) ; result.Error != nil{
+			logger.Logger.Println("err",result.Error)
+			return result.Error
+		}
+		if err := tx.Table("video").Where("video_id = ?", videoId).Update("comment_count", count).Error ; err != nil{
 			logger.Logger.Println("err",err)
 			return err
 		}
+		//if err := tx.Table("video").Where("video_id = ?", videoId).Update("comment_count", gorm.Expr("comment_count - ?", 1)).Error ; err != nil{
+		//	logger.Logger.Println("err",err)
+		//	return err
+		//}
 		return nil
 	})
 	return nil
