@@ -24,7 +24,7 @@ type CommentActionResponse CommentResponse
 
 //获取userid对应的相应值
 func UserInfo(userId uint64) (*UserResponse, error) {
-	user, err := repository.UserInfo(int64(userId))
+	user, err := repository.UserInfo(userId)
 	if err != nil {
 		return nil, err
 	}
