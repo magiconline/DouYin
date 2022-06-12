@@ -57,43 +57,43 @@
 				
 				<option value="file0">DouYin/controller/relation.go (23.8%)</option>
 				
-				<option value="file1">DouYin/controller/remark.go (87.5%)</option>
+				<option value="file1">DouYin/controller/remark.go (87.2%)</option>
 				
-				<option value="file2">DouYin/controller/star.go (78.6%)</option>
+				<option value="file2">DouYin/controller/star.go (18.0%)</option>
 				
-				<option value="file3">DouYin/controller/user.go (57.4%)</option>
+				<option value="file3">DouYin/controller/user.go (48.1%)</option>
 				
-				<option value="file4">DouYin/controller/video.go (15.8%)</option>
+				<option value="file4">DouYin/controller/video.go (64.9%)</option>
 				
 				<option value="file5">DouYin/logger/logger.go (80.0%)</option>
 				
-				<option value="file6">DouYin/repository/init_db.go (75.0%)</option>
+				<option value="file6">DouYin/repository/init_db.go (76.9%)</option>
 				
 				<option value="file7">DouYin/repository/redis.go (0.0%)</option>
 				
-				<option value="file8">DouYin/repository/relation.go (70.8%)</option>
+				<option value="file8">DouYin/repository/relation.go (73.6%)</option>
 				
-				<option value="file9">DouYin/repository/remark.go (51.1%)</option>
+				<option value="file9">DouYin/repository/remark.go (47.7%)</option>
 				
 				<option value="file10">DouYin/repository/remarkRedis.go (0.0%)</option>
 				
-				<option value="file11">DouYin/repository/star.go (71.2%)</option>
+				<option value="file11">DouYin/repository/star.go (19.6%)</option>
 				
-				<option value="file12">DouYin/repository/user.go (73.1%)</option>
+				<option value="file12">DouYin/repository/user.go (86.4%)</option>
 				
-				<option value="file13">DouYin/repository/video.go (12.0%)</option>
+				<option value="file13">DouYin/repository/video.go (72.0%)</option>
 				
-				<option value="file14">DouYin/server.go (47.4%)</option>
+				<option value="file14">DouYin/server.go (50.0%)</option>
 				
 				<option value="file15">DouYin/service/jwt.go (55.6%)</option>
 				
-				<option value="file16">DouYin/service/relation.go (43.5%)</option>
+				<option value="file16">DouYin/service/relation.go (44.3%)</option>
 				
 				<option value="file17">DouYin/service/remark.go (82.6%)</option>
 				
-				<option value="file18">DouYin/service/star.go (87.5%)</option>
+				<option value="file18">DouYin/service/star.go (38.1%)</option>
 				
-				<option value="file19">DouYin/service/video.go (50.0%)</option>
+				<option value="file19">DouYin/service/video.go (71.4%)</option>
 				
 				</select>
 			</div>
@@ -356,8 +356,7 @@ func View_video_remark(c *gin.Context) *gin.H <span class="cov8" title="1">{
                 "status_code":  0,
                 "status_msg":   "success",
                 "comment_list": comment_list,
-        }
-        return nil</span>
+        }</span>
         //1.收到请求参数，获取参数中关于评论的各项参数
         //2.对请求参数进行验证，有错误就返回错误json
         //3.从数据库中根据video_id查询所有评论条数放到list
@@ -383,7 +382,7 @@ import (
         "github.com/gin-gonic/gin"
 )
 
-func Favorite(ctx *gin.Context) *gin.H <span class="cov8" title="1">{
+func Favorite(ctx *gin.Context) *gin.H <span class="cov0" title="0">{
         videoIdStr := ctx.Query("video_id")
         token := ctx.Query("token")
         //1.点赞 2.取消点赞
@@ -394,14 +393,14 @@ func Favorite(ctx *gin.Context) *gin.H <span class="cov8" title="1">{
                         "status_msg":  "用户未登录",
                 }
         }</span>
-        <span class="cov8" title="1">_, err := service.ParseToken(token)
+        <span class="cov0" title="0">_, err := service.ParseToken(token)
         if err != nil </span><span class="cov0" title="0">{
                 return &amp;gin.H{
                         "status_code": 1,
                         "status_msg":  err,
                 }
         }</span>
-        <span class="cov8" title="1">currentUserID, err := service.Token2ID(token)
+        <span class="cov0" title="0">currentUserID, err := service.Token2ID(token)
         if err != nil </span><span class="cov0" title="0">{
                 logger.Logger.Println("error:", err)
                 return &amp;gin.H{
@@ -409,53 +408,79 @@ func Favorite(ctx *gin.Context) *gin.H <span class="cov8" title="1">{
                         "status_msg":  err,
                 }
         }</span>
-        <span class="cov8" title="1">videoIdInt, err1 := strconv.ParseUint(videoIdStr, 10, 64)
+        <span class="cov0" title="0">videoIdInt, err1 := strconv.ParseUint(videoIdStr, 10, 64)
         if err1 != nil </span><span class="cov0" title="0">{
                 return &amp;gin.H{
                         "status_code": 2,
                         "status_msg":  err1,
                 }
         }</span>
-        <span class="cov8" title="1">actionTypeInt, err2 := strconv.ParseUint(actionTypeStr, 10, 8)
+        <span class="cov0" title="0">actionTypeInt, err2 := strconv.ParseUint(actionTypeStr, 10, 8)
         if err2 != nil </span><span class="cov0" title="0">{
                 return &amp;gin.H{
                         "status_code": 3,
                         "status_msg":  err2,
                 }
         }</span>
-        <span class="cov8" title="1">if actionTypeInt != 1 &amp;&amp; actionTypeInt != 2 </span><span class="cov0" title="0">{
+        <span class="cov0" title="0">if actionTypeInt != 1 &amp;&amp; actionTypeInt != 2 </span><span class="cov0" title="0">{
                 return &amp;gin.H{
                         "status_code": 4,
                         "status_msg":  "传入参数为1或者2！",
                 }
         }</span>
-        <span class="cov8" title="1">if actionTypeInt == 1 </span><span class="cov8" title="1">{
+        <span class="cov0" title="0">if actionTypeInt == 1 </span><span class="cov0" title="0">{
                 //查询数据库，获取点赞状态
-                flag := service.IsThumbUp(currentUserID, videoIdInt)
-                if flag == true </span><span class="cov8" title="1">{
+                flag, err := service.IsThumbUp(currentUserID, videoIdInt)
+                if err != nil </span><span class="cov0" title="0">{
+                        return &amp;gin.H{
+                                "status_code": 1,
+                                "status_msg":  err,
+                        }
+                }</span>
+                <span class="cov0" title="0">if flag </span><span class="cov0" title="0">{
                         return &amp;gin.H{
                                 "status_code": 5,
                                 "status_msg":  "请勿重复点赞！",
                         }
                 }</span>
-                <span class="cov8" title="1">service.AddStar(currentUserID, videoIdInt)
-                return &amp;gin.H{
-                        "status_code": 0,
-                        "status_msg":  "点赞成功！",
+                <span class="cov0" title="0">err = service.AddStar(currentUserID, videoIdInt)
+                if err != nil </span><span class="cov0" title="0">{
+                        return &amp;gin.H{
+                                "status_code": 7,
+                                "status_msg":  "点赞失败！",
+                        }
+                }</span> else<span class="cov0" title="0"> {
+                        return &amp;gin.H{
+                                "status_code": 0,
+                                "status_msg":  "点赞成功！",
+                        }
                 }</span>
-        } else<span class="cov8" title="1"> {
+        } else<span class="cov0" title="0"> {
                 //查询数据库，获取点赞状态
-                flag := service.IsThumbUp(currentUserID, videoIdInt)
-                if flag == false </span><span class="cov8" title="1">{
+                flag, err := service.IsThumbUp(currentUserID, videoIdInt)
+                if err != nil </span><span class="cov0" title="0">{
+                        return &amp;gin.H{
+                                "status_code": 1,
+                                "status_msg":  err.Error(),
+                        }
+                }</span>
+                <span class="cov0" title="0">if !flag </span><span class="cov0" title="0">{
                         return &amp;gin.H{
                                 "status_code": 6,
                                 "status_msg":  "当前暂无点赞数据！",
                         }
                 }</span>
-                <span class="cov8" title="1">service.DeleteStar(currentUserID, videoIdInt)
-                return &amp;gin.H{
-                        "status_code": 0,
-                        "status_msg":  "取消点赞成功！",
+                <span class="cov0" title="0">err = service.DeleteStar(currentUserID, videoIdInt)
+                if err != nil </span><span class="cov0" title="0">{
+                        return &amp;gin.H{
+                                "status_code": 7,
+                                "status_msg":  "取消点赞失败！",
+                        }
+                }</span> else<span class="cov0" title="0"> {
+                        return &amp;gin.H{
+                                "status_code": 0,
+                                "status_msg":  "取消点赞成功！",
+                        }
                 }</span>
         }
 }
@@ -503,9 +528,9 @@ import (
         "DouYin/logger"
         "DouYin/repository"
         "DouYin/service"
+        "strconv"
 
         "github.com/gin-gonic/gin"
-        "gorm.io/gorm"
 )
 
 //登录
@@ -518,18 +543,16 @@ func UserLogin(c *gin.Context) *gin.H <span class="cov8" title="1">{
         //2.对请求参数进行表单验证，以保证数据库的安全---待完成
 
         // 3.数据库查询用户名
-        _, err1 := repository.FindUserbyName(username)
-        if err1 == gorm.ErrRecordNotFound </span><span class="cov8" title="1">{
-                logger.Println(err1.Error())
+        numOfRowsAffected, err1 := repository.FindUserbyName(username)
+        if numOfRowsAffected == 0 </span><span class="cov8" title="1">{
                 return &amp;gin.H{
                         "status_code": 1,
                         "status_msg":  "用户名不存在,请注册",
                 }
         }</span> else<span class="cov8" title="1"> if err1 == nil </span><span class="cov8" title="1">{
-                user, err := repository.FindUserbyNameandPwd(username, pwd)
+                user, num1OfRowsAffected, err := repository.FindUserbyNameandPwd(username, pwd)
                 //如果数据库查不到或者密码错误
-                if err == gorm.ErrRecordNotFound </span><span class="cov8" title="1">{
-                        logger.Println(err.Error())
+                if num1OfRowsAffected == 0 </span><span class="cov8" title="1">{
                         return &amp;gin.H{
                                 "status_code": 1,
                                 "status_msg":  "用户密码错误",
@@ -571,10 +594,10 @@ func UserLogin(c *gin.Context) *gin.H <span class="cov8" title="1">{
 func UserRegister(c *gin.Context) *gin.H <span class="cov8" title="1">{
         username := c.Query("username")
         pwd := c.Query("password")
-        _, err1 := repository.FindUserbyName(username)
+        numOfRowsAffected, err1 := repository.FindUserbyName(username)
         //若数据库中不存在此email
         // if err == gorm.ErrRecordNotFound {
-        if err1 == gorm.ErrRecordNotFound </span><span class="cov8" title="1">{
+        if numOfRowsAffected == 0 </span><span class="cov8" title="1">{
                 u, err := repository.CreateUser(username, pwd)
                 //若创建新用户不成功
                 if err != nil </span><span class="cov0" title="0">{
@@ -585,9 +608,10 @@ func UserRegister(c *gin.Context) *gin.H <span class="cov8" title="1">{
                 }</span>
                 <span class="cov8" title="1">token, err := service.GenerateToken(u.UserId)
                 if err != nil </span><span class="cov0" title="0">{
+                        logger.Println(err.Error())
                         return &amp;gin.H{
                                 "status_code": 1,
-                                "status_msg":  "token生成失败请重新登录",
+                                "status_msg":  err.Error(),
                         }
                 }</span>
                 <span class="cov8" title="1">return &amp;gin.H{
@@ -599,12 +623,13 @@ func UserRegister(c *gin.Context) *gin.H <span class="cov8" title="1">{
         } else<span class="cov8" title="1"> {
                 //若查找返回的err不是不存在而是别的
                 if err1 != nil </span><span class="cov0" title="0">{
+                        logger.Println(err1.Error())
                         return &amp;gin.H{
                                 "status_code": 1,
-                                "status_msg":  "数据库查询用户操作错误",
+                                "status_msg":  err1.Error(),
                         }
                 }</span>
-                <span class="cov8" title="1">if err1 == nil </span><span class="cov8" title="1">{
+                <span class="cov8" title="1">if numOfRowsAffected &gt; 0 </span><span class="cov8" title="1">{
                         return &amp;gin.H{
                                 "status_code": 1,
                                 "status_msg":  "该用户名已被注册",
@@ -619,39 +644,34 @@ func UserRegister(c *gin.Context) *gin.H <span class="cov8" title="1">{
 }
 
 func UserInfo(c *gin.Context) *gin.H <span class="cov0" title="0">{
-        userid := c.Query("user_id")
+        useridStr := c.Query("user_id")
         token := c.Query("token")
-
-        type UserInformation struct {
-                UserId        int64  `gorm:"column:user_id"`
-                UserName      string `gorm:"column:user_name"`
-                FollowCount   int    `gorm:"column:follow_count"`
-                FollowerCount int    `gorm:"column:follower_count"`
-        }
-
-        user, err := repository.FindUserbyID(userid)
-        if err == gorm.ErrRecordNotFound </span><span class="cov0" title="0">{
-                return &amp;gin.H{
-                        "status_code": 1,
-                        "status_msg":  "用户不存在",
-                }
-        }</span>
-
-        // if token == "" {
-        //         return &amp;gin.H{
-        //                 "status_code": 1,
-        //                 "status_msg":  "token不存在",
-        //         }
-        // }
-
-        <span class="cov0" title="0">_, err = service.ParseToken(token)
+        UserID, err := strconv.ParseUint(useridStr, 10, 64)
         if err != nil </span><span class="cov0" title="0">{
+                logger.Println(err.Error())
                 return &amp;gin.H{
                         "status_code": 1,
-                        "status_msg":  "token解析失败",
+                        "status_msg":  err.Error(),
                 }
         }</span>
 
+        <span class="cov0" title="0">_, err1 := service.ParseToken(token)
+        if err1 != nil </span><span class="cov0" title="0">{
+                logger.Println(err1.Error())
+                return &amp;gin.H{
+                        "status_code": 1,
+                        "status_msg":  err1.Error(),
+                }
+        }</span>
+
+        <span class="cov0" title="0">user, err := repository.UserInfo(UserID)
+        if err != nil </span><span class="cov0" title="0">{
+                logger.Println(err.Error())
+                return &amp;gin.H{
+                        "status_code": 1,
+                        "status_msg":  err.Error(),
+                }
+        }</span>
         <span class="cov0" title="0">return &amp;gin.H{
                 "status_code": 0,
                 "status_msg":  "sucess",
@@ -715,7 +735,7 @@ func Feed(ctx *gin.Context) *gin.H <span class="cov8" title="1">{
 }
 
 //PublishAction 投稿接口
-func PublishAction(ctx *gin.Context) *gin.H <span class="cov0" title="0">{
+func PublishAction(ctx *gin.Context) *gin.H <span class="cov8" title="1">{
         data, err := ctx.FormFile("data")
         if err != nil </span><span class="cov0" title="0">{
                 logger.Println(err.Error())
@@ -724,7 +744,7 @@ func PublishAction(ctx *gin.Context) *gin.H <span class="cov0" title="0">{
                         "status_msg":  err.Error(),
                 }
         }</span>
-        <span class="cov0" title="0">token := ctx.PostForm("token")
+        <span class="cov8" title="1">token := ctx.PostForm("token")
         title := ctx.PostForm("title")
 
         // 通过文件后缀名验证格式
@@ -738,7 +758,7 @@ func PublishAction(ctx *gin.Context) *gin.H <span class="cov0" title="0">{
         }</span>
 
         // 验证token
-        <span class="cov0" title="0">userID, err := service.Token2ID(token)
+        <span class="cov8" title="1">userID, err := service.Token2ID(token)
         if err != nil </span><span class="cov0" title="0">{
                 logger.Println(err.Error())
                 return &amp;gin.H{
@@ -748,7 +768,7 @@ func PublishAction(ctx *gin.Context) *gin.H <span class="cov0" title="0">{
         }</span>
 
         // 生成保存路径
-        <span class="cov0" title="0">curTime := time.Now()
+        <span class="cov8" title="1">curTime := time.Now()
         path := "/static/" + curTime.Format("2006/01/02") + "/"
         name := uuid.NewString()
         videoName := name + ".mp4"
@@ -764,7 +784,7 @@ func PublishAction(ctx *gin.Context) *gin.H <span class="cov0" title="0">{
         }</span>
 
         // 保存视频
-        <span class="cov0" title="0">err = ctx.SaveUploadedFile(data, "."+path+videoName)
+        <span class="cov8" title="1">err = ctx.SaveUploadedFile(data, "."+path+videoName)
         if err != nil </span><span class="cov0" title="0">{
                 logger.Println(err.Error())
                 return &amp;gin.H{
@@ -774,7 +794,7 @@ func PublishAction(ctx *gin.Context) *gin.H <span class="cov0" title="0">{
         }</span>
 
         // 生成并保存封面
-        <span class="cov0" title="0">if err = repository.InsertCover(path, videoName, coverName); err != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if err = repository.InsertCover(path, videoName, coverName); err != nil </span><span class="cov0" title="0">{
                 logger.Println(err.Error())
                 return &amp;gin.H{
                         "status_code": 1,
@@ -783,7 +803,7 @@ func PublishAction(ctx *gin.Context) *gin.H <span class="cov0" title="0">{
         }</span>
 
         // 插入数据库
-        <span class="cov0" title="0">videoTable := repository.VideoTable{
+        <span class="cov8" title="1">videoTable := repository.VideoTable{
                 UserId:     userID,
                 PlayUrl:    path + videoName,
                 CoverUrl:   path + coverName,
@@ -792,7 +812,6 @@ func PublishAction(ctx *gin.Context) *gin.H <span class="cov0" title="0">{
         }
 
         err = repository.InsertVideoTable(&amp;videoTable)
-
         if err != nil </span><span class="cov0" title="0">{
                 logger.Println(err.Error())
                 return &amp;gin.H{
@@ -801,14 +820,14 @@ func PublishAction(ctx *gin.Context) *gin.H <span class="cov0" title="0">{
                 }
         }</span>
 
-        <span class="cov0" title="0">return &amp;gin.H{
+        <span class="cov8" title="1">return &amp;gin.H{
                 "status_code": 0,
                 "status_msg":  "success",
         }</span>
 }
 
 // PublishList 登录用户的视频发布列表，直接列出用户所有投稿过的视频
-func PublishList(ctx *gin.Context) *gin.H <span class="cov0" title="0">{
+func PublishList(ctx *gin.Context) *gin.H <span class="cov8" title="1">{
         // 获得参数
         token := ctx.Query("token")
         userIDStr := ctx.Query("user_id")
@@ -823,7 +842,7 @@ func PublishList(ctx *gin.Context) *gin.H <span class="cov0" title="0">{
                 }
         }</span>
         // 获得信息
-        <span class="cov0" title="0">videoList, err := service.UserVideoList(token, userID)
+        <span class="cov8" title="1">videoList, err := service.UserVideoList(token, userID)
         if err != nil </span><span class="cov0" title="0">{
                 logger.Println(err.Error())
                 return &amp;gin.H{
@@ -832,7 +851,7 @@ func PublishList(ctx *gin.Context) *gin.H <span class="cov0" title="0">{
                 }
         }</span>
 
-        <span class="cov0" title="0">return &amp;gin.H{
+        <span class="cov8" title="1">return &amp;gin.H{
                 "status_code": 0,
                 "status_msg":  "success",
                 "video_list":  videoList,
@@ -859,7 +878,7 @@ func Init(logFilePath string) error <span class="cov8" title="1">{
                 return err
         }</span>
 
-        <span class="cov8" title="1">Logger = *log.New(logFile, "", log.Ldate|log.Ltime|log.Lshortfile)
+        <span class="cov8" title="1">Logger = *log.New(logFile, "", log.Ldate|log.Ltime|log.Llongfile)
 
         return nil</span>
 }
@@ -923,20 +942,6 @@ func Init() error <span class="cov8" title="1">{
         })
 
         if _, err := RDB.Ping(CTX).Result(); err != nil </span><span class="cov0" title="0">{
-                return err
-        }</span>
-
-        <span class="cov8" title="1">err = initRedisVariable()
-        if err != nil </span><span class="cov0" title="0">{
-                return err
-        }</span>
-        <span class="cov8" title="1">return nil</span>
-}
-
-func initRedisVariable() error <span class="cov8" title="1">{
-        // 用来标示缓存中最新的video 信息
-        err := RDB.SetNX(CTX, "video_latestTime", 0, 0).Err()
-        if err != nil </span><span class="cov0" title="0">{
                 return err
         }</span>
 
@@ -1149,10 +1154,21 @@ func FollowerList(userID uint64) (*[]Relation, error) <span class="cov0" title="
 
 // 判断userID是否关注了toUserID
 func IsFollower(userID uint64, toUserID uint64) (bool, error) <span class="cov8" title="1">{
-        relation := &amp;Relation{}
-        err := DB.Where(&amp;Relation{UserID: userID, ToUserID: toUserID, Relation: true}).Limit(1).Find(&amp;relation).Error
-        return relation.Relation, err
-}</span>
+        key := fmt.Sprintf("relation_%v_%v", userID, toUserID)
+        result, err := RDB.Get(CTX, key).Result()
+        if err == nil </span><span class="cov8" title="1">{
+                // 缓存命中
+                return result == "1", nil
+        }</span>
+
+        <span class="cov8" title="1">relation := &amp;Relation{}
+        err = DB.Where(&amp;Relation{UserID: userID, ToUserID: toUserID, Relation: true}).Limit(1).Find(&amp;relation).Error
+
+        // 更新缓存
+        RDB.Set(CTX, key, relation.Relation, 0)
+
+        return relation.Relation, err</span>
+}
 
 func UserIDExist(userID uint64, toUserID uint64) (bool, error) <span class="cov8" title="1">{
         var count int64 = 0
@@ -1165,27 +1181,27 @@ func UserIDExist(userID uint64, toUserID uint64) (bool, error) <span class="cov8
 
 import (
         "DouYin/logger"
-        "gorm.io/gorm"
         "sync"
         "time"
+
+        "gorm.io/gorm"
 )
 
 type Remark struct {
-        Id                                 int64                `gorm:"column:comment_id"`                        //评论id
-        VideoId         int64                `gorm:"column:video_id"`                        //视频id
-        UserId                        int64                `gorm:"column:user_id"`                                //发出该评论的用户id
-        ActionType      int32                `gorm:"column:action_type"`                        //1-发布评论，2-删除评论
-        CommentText                string                `gorm:"column:comment_text"`                //用户填写的评论内容
-        CreateTime                time.Time        `gorm:"column:create_time"`                        //评论时间
+        Id          int64     `gorm:"column:comment_id"`   //评论id
+        VideoId     int64     `gorm:"column:video_id"`     //视频id
+        UserId      int64     `gorm:"column:user_id"`      //发出该评论的用户id
+        ActionType  int32     `gorm:"column:action_type"`  //1-发布评论，2-删除评论
+        CommentText string    `gorm:"column:comment_text"` //用户填写的评论内容
+        CreateTime  time.Time `gorm:"column:create_time"`  //评论时间
 }
 
 type Remark1 struct {
-        Id                                 int64                `gorm:"column:comment_id"`                        //评论id
-        User                        User                `gorm:"column:user_id"`                                //发出该评论的用户id
-        Content                        string                `gorm:"column:comment_text"`                //用户填写的评论内容
-        CreateDate                time.Time        `gorm:"column:create_time"`                        //评论时间
+        Id         int64     `gorm:"column:comment_id"`   //评论id
+        User       User      `gorm:"column:user_id"`      //发出该评论的用户id
+        Content    string    `gorm:"column:comment_text"` //用户填写的评论内容
+        CreateDate time.Time `gorm:"column:create_time"`  //评论时间
 }
-
 
 //设置表名，可以通过给struct类型定义 TableName函数，返回当前struct绑定的mysql表名是什么
 func (u Remark) TableName() string <span class="cov8" title="1">{
@@ -1199,7 +1215,7 @@ type RemarkDao struct {
 var remarkDao *RemarkDao
 var remarkOnce sync.Once
 
-func NewRemarkDaoINstance()*RemarkDao  <span class="cov8" title="1">{
+func NewRemarkDaoINstance() *RemarkDao <span class="cov8" title="1">{
         remarkOnce.Do(
                 func() </span><span class="cov8" title="1">{
                         remarkDao = &amp;RemarkDao{}
@@ -1209,10 +1225,10 @@ func NewRemarkDaoINstance()*RemarkDao  <span class="cov8" title="1">{
 }
 
 //根据视频id查询评论
-func  (*RemarkDao)QueryByVideoId(videoId uint64) ([]map[string]interface{},error) <span class="cov0" title="0">{
-        var  remarkList  []map[string]interface{}
-        result := DB.Table("remark").Where("video_id = ?",videoId).Order("create_time desc").Find(&amp;remarkList).Error
-        return remarkList,result
+func (*RemarkDao) QueryByVideoId(videoId uint64) ([]map[string]interface{}, error) <span class="cov0" title="0">{
+        var remarkList []map[string]interface{}
+        result := DB.Table("remark").Where("video_id = ?", videoId).Order("create_time desc").Find(&amp;remarkList).Error
+        return remarkList, result
 }</span>
 
 ////根据评论id查询评论
@@ -1222,50 +1238,46 @@ func  (*RemarkDao)QueryByVideoId(videoId uint64) ([]map[string]interface{},error
 //        return remarkList,result.Error
 //}
 
-
 //插入评论,计算videoid 下的评论总条数,同时更新到video列表
-func (*RemarkDao)InsertByCommentIDAndVideo(remarkdata *Remark,videoId uint64) (int64,error) <span class="cov8" title="1">{
+func (*RemarkDao) InsertByCommentIDAndVideo(remarkdata *Remark, videoId uint64) (int64, error) <span class="cov8" title="1">{
         //cid为获取新插入的评论commetn_id
-        var cid int64
-        cid = 0 //初始化
-        var count int64
-        count = 0
+        var cid int64 = 0
+        var count int64 = 0
+
         //开启事务
         DB.Transaction(func(tx *gorm.DB) error </span><span class="cov8" title="1">{
-                if err := tx.Create(remarkdata).Error ; err != nil</span><span class="cov0" title="0">{
-                        logger.Logger.Println("err",err)
+                if err := tx.Create(remarkdata).Error; err != nil </span><span class="cov0" title="0">{
+                        logger.Logger.Println("err", err)
                         return err
                 }</span>
-                <span class="cov8" title="1">if result := tx.Table("remark").Where("video_id = ?", videoId).Count(&amp;count) ; result.Error != nil</span><span class="cov0" title="0">{
-                        logger.Logger.Println("err",result.Error)
+                <span class="cov8" title="1">if result := tx.Table("remark").Where("video_id = ?", videoId).Count(&amp;count); result.Error != nil </span><span class="cov0" title="0">{
+                        logger.Logger.Println("err", result.Error)
                         return result.Error
                 }</span>
-                <span class="cov8" title="1">if err := tx.Table("video").Where("video_id = ?", videoId).Update("comment_count", count).Error ; err != nil</span><span class="cov0" title="0">{
-                        logger.Logger.Println("err",err)
+                <span class="cov8" title="1">if err := tx.Table("video").Where("video_id = ?", videoId).Update("comment_count", count).Error; err != nil </span><span class="cov0" title="0">{
+                        logger.Logger.Println("err", err)
                         return err
                 }</span>
                 //if err := tx.Table("video").Where("video_id = ?", videoId).Update("comment_count", gorm.Expr("comment_count + ?", 1)).Error ; err != nil{
                 //        logger.Logger.Println("err",err)
                 //        return err
                 //}
-                        <span class="cov8" title="1">return nil</span>
-                })
-        <span class="cov8" title="1">if err := DB.Table("remark").Select("comment_id").Where("video_id = ?",remarkdata.VideoId).Where("comment_text = ?",remarkdata.CommentText).Where("user_id=?",remarkdata.UserId).Limit(1).Take(&amp;cid).Error; err != nil</span><span class="cov0" title="0">{
-                logger.Logger.Println("err",err)
-                return cid,err
+                <span class="cov8" title="1">return nil</span>
+        })
+        <span class="cov8" title="1">if err := DB.Table("remark").Select("comment_id").Where("video_id = ?", remarkdata.VideoId).Where("comment_text = ?", remarkdata.CommentText).Where("user_id=?", remarkdata.UserId).Limit(1).Take(&amp;cid).Error; err != nil </span><span class="cov0" title="0">{
+                logger.Logger.Println("err", err)
+                return cid, err
         }</span>
-        <span class="cov8" title="1">return  cid,nil</span>
+        <span class="cov8" title="1">return cid, nil</span>
 }
-
 
 // 根据videoID查找所有评论
 func VideoCommentList(videoId uint64) (*[]map[string]interface{}, error) <span class="cov8" title="1">{
         var commentList []map[string]interface{}
-        err := DB.Table("remark").Where("video_id = ?",videoId).Order("create_time desc").Find(&amp;commentList).Error
+        err := DB.Table("remark").Where("video_id = ?", videoId).Order("create_time desc").Find(&amp;commentList).Error
 
         return &amp;commentList, err
 }</span>
-
 
 //// 根据videoid和userid和comment_text删除评论,comment_id为主键
 //func DeleteByVdUdAndContent(videoId uint64,userId uint64,content string)(error){
@@ -1283,25 +1295,25 @@ func VideoCommentList(videoId uint64) (*[]map[string]interface{}, error) <span c
 //}
 
 // 根据commentId 删除评论
-func DeleteByComentID(commentId uint64 ,videoId uint64)error<span class="cov8" title="1">{
+func DeleteByComentID(commentId uint64, videoId uint64) error <span class="cov8" title="1">{
         var reamrk Remark
-        var count int64
-        count = 0
-        if result := DB.Table("remark").Where("comment_id = ?",commentId).Limit(1).Take(&amp;reamrk); result.Error != nil</span><span class="cov8" title="1">{
-                logger.Logger.Println("err",result.Error)
+        var count int64 = 0
+
+        if result := DB.Table("remark").Where("comment_id = ?", commentId).Limit(1).Take(&amp;reamrk); result.Error != nil </span><span class="cov8" title="1">{
+                logger.Logger.Println("err", result.Error)
                 return result.Error
         }</span>
         <span class="cov0" title="0">DB.Transaction(func(tx *gorm.DB) error </span><span class="cov0" title="0">{
-                if err := tx.Table("remark").Where("comment_id = ?",commentId).Delete(&amp;Remark{}).Error ; err != nil</span><span class="cov0" title="0">{
-                        logger.Logger.Println("err",err)
+                if err := tx.Table("remark").Where("comment_id = ?", commentId).Delete(&amp;Remark{}).Error; err != nil </span><span class="cov0" title="0">{
+                        logger.Logger.Println("err", err)
                         return err
                 }</span>
-                <span class="cov0" title="0">if result := tx.Table("remark").Where("video_id = ?", videoId).Count(&amp;count) ; result.Error != nil</span><span class="cov0" title="0">{
-                        logger.Logger.Println("err",result.Error)
+                <span class="cov0" title="0">if result := tx.Table("remark").Where("video_id = ?", videoId).Count(&amp;count); result.Error != nil </span><span class="cov0" title="0">{
+                        logger.Logger.Println("err", result.Error)
                         return result.Error
                 }</span>
-                <span class="cov0" title="0">if err := tx.Table("video").Where("video_id = ?", videoId).Update("comment_count", count).Error ; err != nil</span><span class="cov0" title="0">{
-                        logger.Logger.Println("err",err)
+                <span class="cov0" title="0">if err := tx.Table("video").Where("video_id = ?", videoId).Update("comment_count", count).Error; err != nil </span><span class="cov0" title="0">{
+                        logger.Logger.Println("err", err)
                         return err
                 }</span>
                 //if err := tx.Table("video").Where("video_id = ?", videoId).Update("comment_count", gorm.Expr("comment_count - ?", 1)).Error ; err != nil{
@@ -1312,9 +1324,6 @@ func DeleteByComentID(commentId uint64 ,videoId uint64)error<span class="cov8" t
         })
         <span class="cov0" title="0">return nil</span>
 }
-
-
-
 </pre>
 		
 		<pre class="file" id="file10" style="display: none">package repository
@@ -1448,8 +1457,9 @@ func HandleError(err error, when string) <span class="cov0" title="0">{
 
 import (
         "DouYin/logger"
-        "gorm.io/gorm"
         "sync"
+
+        "gorm.io/gorm"
 )
 
 type Star struct {
@@ -1477,75 +1487,75 @@ func NewStarDaoInstance() *StarDao <span class="cov8" title="1">{
 }
 
 // AddStar 当进行点赞时，插入数据库,同时更新点赞数
-func (*StarDao) AddStar(userId, videoId uint64) error <span class="cov8" title="1">{
+func (*StarDao) AddStar(userId, videoId uint64) error <span class="cov0" title="0">{
         star := Star{
                 UserId:  userId,
                 VideoId: videoId,
         }
         //开启事务
         tx := DB.Begin()
-        defer func() </span><span class="cov8" title="1">{
+        defer func() </span><span class="cov0" title="0">{
                 if r := recover(); r != nil </span><span class="cov0" title="0">{
                         tx.Rollback()
                 }</span>
         }()
-        <span class="cov8" title="1">if err := tx.Error; err != nil </span><span class="cov0" title="0">{
+        <span class="cov0" title="0">if err := tx.Error; err != nil </span><span class="cov0" title="0">{
                 return err
         }</span>
         //插入star表数据
-        <span class="cov8" title="1">if err := tx.Table("star").Create(&amp;star).Error; err != nil </span><span class="cov0" title="0">{
+        <span class="cov0" title="0">if err := tx.Table("star").Create(&amp;star).Error; err != nil </span><span class="cov0" title="0">{
                 logger.Logger.Printf("err, %v", err)
                 return err
         }</span>
         //锁住指定video_id的记录
-        <span class="cov8" title="1">video := VideoTable{}
-        if err := tx.Table("video").Set("gorm:query_option", "FOR UPDATE").First(&amp;video, videoId).Error; err != nil </span><span class="cov8" title="1">{
-                tx.Rollback()
-                return err
-        }</span>
-        //更新操作
-        <span class="cov8" title="1">tx.Table("video").Where("video_id = ?", videoId).Update("favorite_count", gorm.Expr("favorite_count + ?", 1))
-        // commit事务，释放锁
-        if err := tx.Commit().Error; err != nil </span><span class="cov0" title="0">{
-                return err
-        }</span>
-        <span class="cov8" title="1">return nil</span>
-}
-
-// DeleteStar 当进行取消点赞时，删除数据库数据。
-func (*StarDao) DeleteStar(userId, videoId uint64) error <span class="cov8" title="1">{
-        //开启事务
-        tx := DB.Begin()
-        defer func() </span><span class="cov8" title="1">{
-                if r := recover(); r != nil </span><span class="cov0" title="0">{
-                        tx.Rollback()
-                }</span>
-        }()
-        <span class="cov8" title="1">if err := tx.Error; err != nil </span><span class="cov0" title="0">{
-                return err
-        }</span>
-        //删除star表数据
-        <span class="cov8" title="1">if err := tx.Table("star").Where("user_id = ? and video_id = ?", userId, videoId).Delete(&amp;Star{}).Error; err != nil </span><span class="cov0" title="0">{
-                logger.Logger.Printf("err", err)
-                return err
-        }</span>
-        //锁住指定video_id的记录
-        <span class="cov8" title="1">video := VideoTable{}
+        <span class="cov0" title="0">video := VideoTable{}
         if err := tx.Table("video").Set("gorm:query_option", "FOR UPDATE").First(&amp;video, videoId).Error; err != nil </span><span class="cov0" title="0">{
                 tx.Rollback()
                 return err
         }</span>
         //更新操作
-        <span class="cov8" title="1">tx.Table("video").Where("video_id = ?", videoId).Update("favorite_count", gorm.Expr("favorite_count - ?", 1))
+        <span class="cov0" title="0">tx.Table("video").Where("video_id = ?", videoId).Update("favorite_count", gorm.Expr("favorite_count + ?", 1))
         // commit事务，释放锁
         if err := tx.Commit().Error; err != nil </span><span class="cov0" title="0">{
                 return err
         }</span>
-        <span class="cov8" title="1">return nil</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+// DeleteStar 当进行取消点赞时，删除数据库数据。
+func (*StarDao) DeleteStar(userId, videoId uint64) error <span class="cov0" title="0">{
+        //开启事务
+        tx := DB.Begin()
+        defer func() </span><span class="cov0" title="0">{
+                if r := recover(); r != nil </span><span class="cov0" title="0">{
+                        tx.Rollback()
+                }</span>
+        }()
+        <span class="cov0" title="0">if err := tx.Error; err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        //删除star表数据
+        <span class="cov0" title="0">if err := tx.Table("star").Where("user_id = ? and video_id = ?", userId, videoId).Delete(&amp;Star{}).Error; err != nil </span><span class="cov0" title="0">{
+                logger.Logger.Println(err)
+                return err
+        }</span>
+        //锁住指定video_id的记录
+        <span class="cov0" title="0">video := VideoTable{}
+        if err := tx.Table("video").Set("gorm:query_option", "FOR UPDATE").First(&amp;video, videoId).Error; err != nil </span><span class="cov0" title="0">{
+                tx.Rollback()
+                return err
+        }</span>
+        //更新操作
+        <span class="cov0" title="0">tx.Table("video").Where("video_id = ?", videoId).Update("favorite_count", gorm.Expr("favorite_count - ?", 1))
+        // commit事务，释放锁
+        if err := tx.Commit().Error; err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov0" title="0">return nil</span>
 }
 
 // VideoInfo 根据视频ID获取视频信息
-func (*StarDao) VideoInfo(videoID uint64) (*VideoTable, error) <span class="cov8" title="1">{
+func (*StarDao) VideoInfo(videoID uint64) (*VideoTable, error) <span class="cov0" title="0">{
         var video VideoTable
         result := DB.Table("video").Where("video_id = ?", videoID).Find(&amp;video)
         return &amp;video, result.Error
@@ -1566,13 +1576,12 @@ func (*StarDao) StarList(userID uint64) (*[]map[string]interface{}, error) <span
 }</span>
 
 //IsThumbUp 返回点赞状态
-func (*StarDao) IsThumbUp(userID, videoID uint64) (*Star, error) <span class="cov8" title="1">{
+func (*StarDao) IsThumbUp(userID, videoID uint64) (bool, error) <span class="cov8" title="1">{
         var star Star
-        if result := DB.Table("star").Where("user_id = ? and video_id = ?", userID, videoID).First(&amp;star); result.Error != nil </span><span class="cov8" title="1">{
-                return nil, result.Error
-        }</span>
-        <span class="cov8" title="1">return &amp;star, nil</span>
-}
+        result := DB.Table("star").Where("user_id = ? and video_id = ?", userID, videoID).Limit(1).Find(&amp;star)
+
+        return result.RowsAffected != 0, result.Error
+}</span>
 </pre>
 		
 		<pre class="file" id="file12" style="display: none">package repository
@@ -1599,10 +1608,10 @@ type User struct {
 //         return &amp;user, err
 // }
 
-func FindUserbyNameandPwd(name, pwd string) (*User, error) <span class="cov8" title="1">{
+func FindUserbyNameandPwd(name, pwd string) (*User, int, error) <span class="cov8" title="1">{
         var user User
-        err := DB.Table("user").Where("user_name = ? and password = ?", name, pwd).First(&amp;user).Error
-        return &amp;user, err
+        res := DB.Table("user").Where("user_name = ? and password = ?", name, pwd).Limit(1).Find(&amp;user)
+        return &amp;user, int(res.RowsAffected), res.Error
 }</span>
 
 //根据email查找用户
@@ -1612,21 +1621,19 @@ func FindUserbyNameandPwd(name, pwd string) (*User, error) <span class="cov8" ti
 //         return &amp;user, err
 // }
 
-func FindUserbyName(name string) (*User, error) <span class="cov8" title="1">{
+func FindUserbyName(name string) (int, error) <span class="cov8" title="1">{
         var user User
-        err := DB.Table("user").Where("user_name = ? ", name).First(&amp;user).Error
-        return &amp;user, err
+        res := DB.Table("user").Where("user_name = ? ", name).Limit(1).Find(&amp;user)
+        return int(res.RowsAffected), res.Error
 }</span>
 
 //根据userid查找用户
-func FindUserbyID(userid string) (*User, error) <span class="cov0" title="0">{
-        var user User
-        // fmt.Println("string = ", userid)
-        id, _ := strconv.Atoi(userid)
-        // fmt.Println("int = ", id)
-        err := DB.Table("user").Where("user_id = ?", id).First(&amp;user).Error
-        return &amp;user, err
-}</span>
+// func FindUserbyID(userid string) (int, error) {
+//         var user User
+//         id, err := strconv.ParseUint(userid, 10, 64)
+//         res := DB.Table("user").Where("user_id = ?", id).Limit(1).Find(&amp;user)
+//         return int(res.RowsAffected), res.Error
+// }
 
 // 创建用户
 func CreateUser(username, pwd string) (*User, error) <span class="cov8" title="1">{
@@ -1691,16 +1698,16 @@ type VideoTable struct {
         Title         string `gorm:"column:title"`
 }
 
-func InsertVideoTable(videoTable *VideoTable) error <span class="cov0" title="0">{
+func InsertVideoTable(videoTable *VideoTable) error <span class="cov8" title="1">{
         err := DB.Table("video").Create(&amp;videoTable).Error
         if err != nil </span><span class="cov0" title="0">{
                 logger.Println(err.Error())
         }</span>
-        <span class="cov0" title="0">return err</span>
+        <span class="cov8" title="1">return err</span>
 }
 
 // InsertCover 生成并保存图像
-func InsertCover(path string, videoName string, coverName string) error <span class="cov0" title="0">{
+func InsertCover(path string, videoName string, coverName string) error <span class="cov8" title="1">{
         buf := bytes.NewBuffer(nil)
         err := ffmpeg.Input("."+path+videoName).
                 Filter("select", ffmpeg.Args{fmt.Sprintf("gte(n,%d)", 0)}).
@@ -1711,18 +1718,18 @@ func InsertCover(path string, videoName string, coverName string) error <span cl
                 return err
         }</span>
 
-        <span class="cov0" title="0">var image image.Image
+        <span class="cov8" title="1">var image image.Image
         image, err = imaging.Decode(buf)
         if err != nil </span><span class="cov0" title="0">{
                 return err
         }</span>
 
-        <span class="cov0" title="0">err = imaging.Save(image, "."+path+coverName)
+        <span class="cov8" title="1">err = imaging.Save(image, "."+path+coverName)
         if err != nil </span><span class="cov0" title="0">{
                 return err
         }</span>
 
-        <span class="cov0" title="0">return nil</span>
+        <span class="cov8" title="1">return nil</span>
 }
 
 // FeedAll 查找时间upload_time&lt;latestTime, 降序排列的30条视频
@@ -1738,13 +1745,13 @@ func FeedAll(latestTime uint64) (*[]map[string]interface{}, error) <span class="
 func AuthorInfo(userID uint64) (*User, error) <span class="cov0" title="0">{
         var user User
 
-        err := DB.Table("user").Select("user_id", "user_name", "follow_count", "follower_count").Where("user_id = ?", userID).First(&amp;user).Error
+        err := DB.Table("user").Select("user_id", "user_name", "follow_count", "follower_count").Where("user_id = ?", userID).Limit(1).Find(&amp;user).Error
 
         return &amp;user, err
 }</span>
 
 // UserVideoList 根据user_id查找所有视频
-func UserVideoList(userID uint64) (*[]map[string]interface{}, error) <span class="cov0" title="0">{
+func UserVideoList(userID uint64) (*[]map[string]interface{}, error) <span class="cov8" title="1">{
         var videoList []map[string]interface{}
         err := DB.Table("video").Where("user_id = ?", userID).Order("upload_time desc").Find(&amp;videoList).Error
         return &amp;videoList, err
@@ -1804,12 +1811,12 @@ func setupRouter(r *gin.Engine) <span class="cov8" title="1">{
                 ctx.JSON(200, body)
         }</span>)
 
-        <span class="cov8" title="1">r.POST("/douyin/publish/action/", func(ctx *gin.Context) </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">r.POST("/douyin/publish/action/", func(ctx *gin.Context) </span><span class="cov8" title="1">{
                 body := controller.PublishAction(ctx)
                 ctx.JSON(200, body)
         }</span>)
 
-        <span class="cov8" title="1">r.GET("/douyin/publish/list/", func(ctx *gin.Context) </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">r.GET("/douyin/publish/list/", func(ctx *gin.Context) </span><span class="cov8" title="1">{
                 body := controller.PublishList(ctx)
                 ctx.JSON(200, body)
         }</span>)
@@ -1825,7 +1832,7 @@ func setupRouter(r *gin.Engine) <span class="cov8" title="1">{
                 ctx.JSON(200, body)
         }</span>)
 
-        <span class="cov8" title="1">r.POST("/douyin/favorite/action/", func(ctx *gin.Context) </span><span class="cov8" title="1">{
+        <span class="cov8" title="1">r.POST("/douyin/favorite/action/", func(ctx *gin.Context) </span><span class="cov0" title="0">{
                 body := controller.Favorite(ctx)
                 ctx.JSON(200, body)
         }</span>)
@@ -2055,7 +2062,7 @@ func RelationAction(token string, toUserID uint64, action bool) error <span clas
         }</span>
 
         // 生成锁信息
-        <span class="cov8" title="1">k := fmt.Sprintf("relation_%d_%d", userID, toUserID)
+        <span class="cov8" title="1">k := fmt.Sprintf("lock_relation_%d_%d", userID, toUserID)
         v := uuid.NewString()
 
         // 获得锁
@@ -2102,9 +2109,13 @@ func RelationAction(token string, toUserID uint64, action bool) error <span clas
         <span class="cov8" title="1">tx.Commit()
 
         // 删除redis缓存
+        // 删除user缓存
         key1 := fmt.Sprintf("user_%v", userID)
         key2 := fmt.Sprintf("user_%v", toUserID)
-        _, err = repository.RDB.Del(repository.CTX, key1, key2).Result()
+        // 删除relation缓存
+        key3 := fmt.Sprintf("relation_%v_%v", userID, toUserID)
+
+        _, err = repository.RDB.Del(repository.CTX, key1, key2, key3).Result()
         if err != nil </span><span class="cov0" title="0">{
                 return err
         }</span>
@@ -2130,7 +2141,7 @@ func FollowList(curUserID uint64, userID uint64) (*[]FollowResponse, error) <spa
                         return nil, err
                 }</span>
 
-                <span class="cov0" title="0">isFollow, err := repository.IsFollower(curUserID, userID)
+                <span class="cov0" title="0">isFollow, err := repository.IsFollower(curUserID, followUserID)
                 if err != nil </span><span class="cov0" title="0">{
                         return nil, err
                 }</span>
@@ -2319,23 +2330,19 @@ import (
         "DouYin/repository"
 )
 
-func AddStar(userId, videoId uint64) <span class="cov8" title="1">{
-        repository.NewStarDaoInstance().AddStar(userId, videoId)
+func AddStar(userId, videoId uint64) error <span class="cov0" title="0">{
+        return repository.NewStarDaoInstance().AddStar(userId, videoId)
 }</span>
 
-func DeleteStar(userId, videoId uint64) <span class="cov8" title="1">{
-        repository.NewStarDaoInstance().DeleteStar(userId, videoId)
+func DeleteStar(userId, videoId uint64) error <span class="cov0" title="0">{
+        return repository.NewStarDaoInstance().DeleteStar(userId, videoId)
 }</span>
 
 //IsThumbUp 返回点赞状态
-func IsThumbUp(userId, videoId uint64) bool <span class="cov8" title="1">{
-        stool, _ := repository.NewStarDaoInstance().IsThumbUp(userId, videoId)
-        if stool == nil </span><span class="cov8" title="1">{
-                return false
-        }</span> else<span class="cov8" title="1"> {
-                return true
-        }</span>
-}
+func IsThumbUp(userId, videoId uint64) (bool, error) <span class="cov0" title="0">{
+        return repository.NewStarDaoInstance().IsThumbUp(userId, videoId)
+
+}</span>
 
 //StarVideoList 获取userID的所有的视频列表
 func StarVideoList(token string, userID uint64) (*[]PublishActionResponse, error) <span class="cov8" title="1">{
@@ -2353,7 +2360,7 @@ func StarVideoList(token string, userID uint64) (*[]PublishActionResponse, error
         if err != nil </span><span class="cov0" title="0">{
                 return nil, err
         }</span>
-        <span class="cov8" title="1">for i := range *starList </span><span class="cov8" title="1">{
+        <span class="cov8" title="1">for i := range *starList </span><span class="cov0" title="0">{
                 //视频ID
                 videoId := uint64((*starList)[i]["video_id"].(int64))
                 //从视频ID获取视频信息
@@ -2364,7 +2371,7 @@ func StarVideoList(token string, userID uint64) (*[]PublishActionResponse, error
                 if err1 != nil </span><span class="cov0" title="0">{
                         continue</span>
                 }
-                <span class="cov8" title="1">response_i := PublishActionResponse{
+                <span class="cov0" title="0">response_i := PublishActionResponse{
                         ID:            videoInfo.VideoId,
                         Author:        *author,
                         PlayUrl:       server_ip + videoInfo.PlayUrl,
@@ -2490,14 +2497,18 @@ func Feed(latestTime uint64, token string) (uint64, *[]FeedResponse, error) <spa
                 if err != nil </span><span class="cov0" title="0">{
                         continue</span>
                 }
-                //返回视频点赞状态
-                <span class="cov8" title="1">stool, _ := repository.NewStarDaoInstance().IsThumbUp(currentUserId, (*videoList)[i]["video_id"].(uint64))
-                var isFavorite bool
-                if stool == nil </span><span class="cov8" title="1">{
-                        isFavorite = false
-                }</span> else<span class="cov0" title="0"> {
-                        isFavorite = true
+
+                <span class="cov8" title="1">author.IsFollow, err = repository.IsFollower(currentUserId, userID)
+                if err != nil </span><span class="cov0" title="0">{
+                        return 0, nil, err
                 }</span>
+
+                //返回视频点赞状态
+                <span class="cov8" title="1">isFavorite, err := repository.NewStarDaoInstance().IsThumbUp(currentUserId, (*videoList)[i]["video_id"].(uint64))
+                if err != nil </span><span class="cov0" title="0">{
+                        return 0, nil, err
+                }</span>
+
                 <span class="cov8" title="1">response_i := FeedResponse{
                         ID:            (*videoList)[i]["video_id"].(uint64),
                         Author:        *author,
@@ -2515,23 +2526,23 @@ func Feed(latestTime uint64, token string) (uint64, *[]FeedResponse, error) <spa
 }
 
 // UserVideoList 获取userID的所有的视频列表
-func UserVideoList(token string, userID uint64) (*[]PublishActionResponse, error) <span class="cov0" title="0">{
+func UserVideoList(token string, userID uint64) (*[]PublishActionResponse, error) <span class="cov8" title="1">{
         // 检查token
         var currentUserId uint64
         var err error
 
-        if token != "" </span><span class="cov0" title="0">{
+        if token != "" </span><span class="cov8" title="1">{
                 currentUserId, err = Token2ID(token)
                 if err != nil </span><span class="cov0" title="0">{
                         return nil, err
                 }</span>
         }
 
-        <span class="cov0" title="0">author, err := AuthorInfo(userID)
+        <span class="cov8" title="1">author, err := AuthorInfo(userID)
         if err != nil </span><span class="cov0" title="0">{
                 return nil, err
         }</span>
-        <span class="cov0" title="0">author.IsFollow, _ = repository.IsFollower(currentUserId, userID)
+        <span class="cov8" title="1">author.IsFollow, _ = repository.IsFollower(currentUserId, userID)
 
         // 根据userID查找数据库，按上传时间排序
         videoList, err := repository.UserVideoList(userID)
@@ -2539,17 +2550,15 @@ func UserVideoList(token string, userID uint64) (*[]PublishActionResponse, error
                 return nil, err
         }</span>
 
-        <span class="cov0" title="0">var response []PublishActionResponse
+        <span class="cov8" title="1">var response []PublishActionResponse
         // 将视频列表中填充author信息
         for i := range *videoList </span><span class="cov0" title="0">{
                 //返回视频点赞状态
-                stool, _ := repository.NewStarDaoInstance().IsThumbUp(currentUserId, (*videoList)[i]["video_id"].(uint64))
-                var isFavorite bool
-                if stool == nil </span><span class="cov0" title="0">{
-                        isFavorite = false
-                }</span> else<span class="cov0" title="0"> {
-                        isFavorite = true
+                isFavorite, err := repository.NewStarDaoInstance().IsThumbUp(currentUserId, (*videoList)[i]["video_id"].(uint64))
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
                 }</span>
+
                 <span class="cov0" title="0">response_i := PublishActionResponse{
                         ID:            (*videoList)[i]["video_id"].(uint64),
                         Author:        *author,
@@ -2563,7 +2572,7 @@ func UserVideoList(token string, userID uint64) (*[]PublishActionResponse, error
                 response = append(response, response_i)</span>
         }
 
-        <span class="cov0" title="0">return &amp;response, nil</span>
+        <span class="cov8" title="1">return &amp;response, nil</span>
 }
 </pre>
 		
