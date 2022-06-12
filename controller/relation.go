@@ -81,7 +81,7 @@ func FollowList(ctx *gin.Context) *gin.H {
 	}
 }
 
-// 获取粉丝列表
+// 获取userID的粉丝列表
 func FollowerList(ctx *gin.Context) *gin.H {
 	// 获取参数
 	userIDStr := ctx.Query("user_id")
@@ -97,9 +97,9 @@ func FollowerList(ctx *gin.Context) *gin.H {
 	}
 
 	// 验证token
-	_, err = service.Token2ID(token)
+	curUserID, err := service.Token2ID(token)
 	if err != nil {
-		logger.Println(err.Error())
+		logger.Println(err.Error(), token)
 		return &gin.H{
 			"status_code": 1,
 			"status_msg":  err.Error(),
@@ -107,7 +107,7 @@ func FollowerList(ctx *gin.Context) *gin.H {
 	}
 
 	// 获取粉丝列表
-	followerList, err := service.FollowerList(userID)
+	followerList, err := service.FollowerList(curUserID, userID)
 	if err != nil {
 		logger.Println(err.Error())
 		return &gin.H{

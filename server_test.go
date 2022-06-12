@@ -337,10 +337,103 @@ func TestLoginWithouRegister(t *testing.T) {
 
 // 测试关注操作
 func TestRelation(t *testing.T) {
+	username1 := "testRelation1"
+	username2 := "testRelation2"
+	password := "123456"
+
+	// 注册用户
+	err := repository.DB.Table("user").Where("user_id in ?", []string{username1, username2}).Delete(&repository.User{}).Error
+	assert.Equal(t, err, nil)
+
+	users := []repository.User{
+		{UserName: username1, Password: password},
+		{UserName: username2, Password: password},
+	}
+	err = repository.DB.Table("user").Create(&users).Error
+	assert.Equal(t, err, nil)
+
+	token, err := service.GenerateToken(users[0].UserId)
+	assert.Equal(t, err, nil)
+
+	// 关注
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/relation/action/?token=%v&to_user_id=%v&action_type=%v", token, users[1].UserId, 1), nil)
+	assert.Equal(t, err, nil)
+
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
+
+	body := make(map[string]interface{})
+	err = json.Unmarshal(response.Body.Bytes(), &body)
+	assert.Equal(t, err, nil)
+
+	assert.Equal(t, int(body["status_code"].(float64)), 0)
+
+	// 取消关注
+	response = httptest.NewRecorder()
+	request, err = http.NewRequest("POST", fmt.Sprintf("/douyin/relation/action/?token=%v&to_user_id=%v&action_type=%v", token, users[1].UserId, 2), nil)
+	assert.Equal(t, err, nil)
+
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
+
+	body = make(map[string]interface{})
+	err = json.Unmarshal(response.Body.Bytes(), &body)
+	assert.Equal(t, err, nil)
+
+	assert.Equal(t, int(body["status_code"].(float64)), 0)
 
 }
 
 // 测试重复关注
+func TestRalationAgain(t *testing.T) {
+	username1 := "testRelation1"
+	username2 := "testRelation2"
+	password := "123456"
+
+	// 注册用户
+	err := repository.DB.Table("user").Where("user_id in ?", []string{username1, username2}).Delete(&repository.User{}).Error
+	assert.Equal(t, err, nil)
+
+	users := []repository.User{
+		{UserName: username1, Password: password},
+		{UserName: username2, Password: password},
+	}
+	err = repository.DB.Table("user").Create(&users).Error
+	assert.Equal(t, err, nil)
+
+	token, err := service.GenerateToken(users[0].UserId)
+	assert.Equal(t, err, nil)
+
+	// 关注
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/relation/action/?token=%v&to_user_id=%v&action_type=%v", token, users[1].UserId, 1), nil)
+	assert.Equal(t, err, nil)
+
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
+
+	body := make(map[string]interface{})
+	err = json.Unmarshal(response.Body.Bytes(), &body)
+	assert.Equal(t, err, nil)
+
+	assert.Equal(t, int(body["status_code"].(float64)), 0)
+
+	// 重复关注
+	response = httptest.NewRecorder()
+	request, err = http.NewRequest("POST", fmt.Sprintf("/douyin/relation/action/?token=%v&to_user_id=%v&action_type=%v", token, users[1].UserId, 1), nil)
+	assert.Equal(t, err, nil)
+
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
+
+	body = make(map[string]interface{})
+	err = json.Unmarshal(response.Body.Bytes(), &body)
+	assert.Equal(t, err, nil)
+
+	assert.Equal(t, int(body["status_code"].(float64)), 1)
+	assert.Equal(t, body["status_msg"].(string), "已关注，禁止重复关注")
+}
 
 // 测试取消关注
 

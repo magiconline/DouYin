@@ -71,9 +71,12 @@ func Action(tx *gorm.DB, userID uint64, toUserID uint64, action bool) error {
 		} else {
 			// 已创建relation，修改relation记录
 			err = tx.Model(&relation).Where("user_id = ? AND to_user_id = ?", userID, toUserID).Update("relation", true).Error
+			if err != nil {
+				return err
+			}
 		}
 
-		return err
+		return nil
 	} else {
 		// 取消关注操作
 		err := tx.Model(&relation).Where("user_id = ? AND to_user_id = ?", userID, toUserID).Update("relation", false).Error
