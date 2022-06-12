@@ -68,7 +68,7 @@ func FeedAll(latestTime uint64) (*[]map[string]interface{}, error) {
 func AuthorInfo(userID uint64) (*User, error) {
 	var user User
 
-	err := DB.Table("user").Select("user_id", "user_name", "follow_count", "follower_count").Where("user_id = ?", userID).First(&user).Error
+	err := DB.Table("user").Select("user_id", "user_name", "follow_count", "follower_count").Where("user_id = ?", userID).Limit(1).Find(&user).Error
 
 	return &user, err
 }

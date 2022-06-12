@@ -17,7 +17,7 @@ func Init(logFilePath string) error {
 		return err
 	}
 
-	Logger = *log.New(logFile, "", log.Ldate|log.Ltime|log.Lshortfile)
+	Logger = *log.New(logFile, "", log.Ldate|log.Ltime|log.Llongfile)
 
 	return nil
 }
