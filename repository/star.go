@@ -2,8 +2,9 @@ package repository
 
 import (
 	"DouYin/logger"
-	"gorm.io/gorm"
 	"sync"
+
+	"gorm.io/gorm"
 )
 
 type Star struct {
@@ -48,7 +49,7 @@ func (*StarDao) AddStar(userId, videoId uint64) error {
 	}
 	//插入star表数据
 	if err := tx.Table("star").Create(&star).Error; err != nil {
-		logger.Logger.Printf("err", err)
+		logger.Logger.Printf("err, %v", err)
 		return err
 	}
 	//锁住指定video_id的记录
@@ -80,7 +81,7 @@ func (*StarDao) DeleteStar(userId, videoId uint64) error {
 	}
 	//删除star表数据
 	if err := tx.Table("star").Where("user_id = ? and video_id = ?", userId, videoId).Delete(&Star{}).Error; err != nil {
-		logger.Logger.Printf("err", err)
+		logger.Logger.Println(err)
 		return err
 	}
 	//锁住指定video_id的记录
@@ -120,10 +121,9 @@ func (*StarDao) StarList(userID uint64) (*[]map[string]interface{}, error) {
 }
 
 //IsThumbUp 返回点赞状态
-func (*StarDao) IsThumbUp(userID, videoID uint64) (*Star, error) {
+func (*StarDao) IsThumbUp(userID, videoID uint64) (bool, error) {
 	var star Star
-	if result := DB.Table("star").Where("user_id = ? and video_id = ?", userID, videoID).First(&star); result.Error != nil {
-		return nil, result.Error
-	}
-	return &star, nil
+	result := DB.Table("star").Where("user_id = ? and video_id = ?", userID, videoID).Limit(1).Find(&star)
+
+	return result.RowsAffected != 0, result.Error
 }

@@ -54,6 +54,15 @@ func RelationAction(token string, toUserID uint64, action bool) error {
 	// 释放锁
 	defer repository.DeleteRedisLock(k, v)
 
+	// 检测重复关注/取消关注
+	if isFollow, _ := repository.IsFollower(userID, toUserID); isFollow == action {
+		if isFollow {
+			return errors.New("已关注，禁止重复操作")
+		} else {
+			return errors.New("已取消关注，禁止重复操作")
+		}
+	}
+
 	// 开启事务更新relation表和user表
 	tx := repository.DB.Begin()
 	// 修改relation
@@ -79,11 +88,21 @@ func RelationAction(token string, toUserID uint64, action bool) error {
 	}
 
 	tx.Commit()
+
+	// 删除redis缓存
+	key1 := fmt.Sprintf("user_%v", userID)
+	key2 := fmt.Sprintf("user_%v", toUserID)
+	_, err = repository.RDB.Del(repository.CTX, key1, key2).Result()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-// 获取关注列表
-func FollowList(userID uint64) (*[]FollowResponse, error) {
+// 获取userID的关注列表
+// curUserID用来获取IsFollow信息
+func FollowList(curUserID uint64, userID uint64) (*[]FollowResponse, error) {
 	var followList []FollowResponse
 	followUserIDList, err := repository.FollowList(userID)
 	if err != nil {
@@ -94,7 +113,12 @@ func FollowList(userID uint64) (*[]FollowResponse, error) {
 		followUserID := (*followUserIDList)[i].ToUserID
 
 		// 获取其他信息
-		userInfo, err := repository.UserInfo(int64(followUserID))
+		userInfo, err := repository.UserInfo(followUserID)
+		if err != nil {
+			return nil, err
+		}
+
+		isFollow, err := repository.IsFollower(curUserID, followUserID)
 		if err != nil {
 			return nil, err
 		}
@@ -104,15 +128,16 @@ func FollowList(userID uint64) (*[]FollowResponse, error) {
 			Name:          userInfo.UserName,
 			FollowCount:   userInfo.FollowCount,
 			FollowerCount: userInfo.FollowerCount,
-			IsFollow:      true,
+			IsFollow:      isFollow,
 		})
 	}
 
 	return &followList, nil
 }
 
-// 获取粉丝列表
-func FollowerList(userID uint64) (*[]FollowResponse, error) {
+// 获取userID的粉丝列表
+// curUserID 用来查询curUserID是否已关注userID
+func FollowerList(curUserID uint64, userID uint64) (*[]FollowResponse, error) {
 	var followerList []FollowResponse
 	followerUserIDList, err := repository.FollowerList(userID)
 	if err != nil {
@@ -120,15 +145,15 @@ func FollowerList(userID uint64) (*[]FollowResponse, error) {
 	}
 
 	for i := range *followerUserIDList {
-		followerUserID := (*followerUserIDList)[i].ToUserID
+		followerUserID := (*followerUserIDList)[i].UserID
 
 		// 获取其他信息
-		userInfo, err := repository.UserInfo(int64(followerUserID))
+		userInfo, err := repository.UserInfo(followerUserID)
 		if err != nil {
 			return nil, err
 		}
 
-		isFollow, err := repository.IsFollower(userID, followerUserID)
+		isFollow, err := repository.IsFollower(curUserID, followerUserID)
 		if err != nil {
 			return nil, err
 		}

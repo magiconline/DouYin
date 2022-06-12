@@ -2,12 +2,13 @@ package repository
 
 // "DouYin/json"
 import (
+	"fmt"
 	"strconv"
 )
 
 type User struct {
 	// gorm.Model
-	UserId        int64  `gorm:"column:user_id; primary_key; AUTO_INCREMENT"`
+	UserId        uint64 `gorm:"column:user_id; primary_key; AUTO_INCREMENT"`
 	UserName      string `gorm:"column:user_name"`
 	Password      string `gorm:"column:password"`
 	FollowCount   uint64 `gorm:"column:follow_count"`
@@ -21,10 +22,10 @@ type User struct {
 // 	return &user, err
 // }
 
-func FindUserbyNameandPwd(name, pwd string) (*User, error) {
+func FindUserbyNameandPwd(name, pwd string) (*User, int, error) {
 	var user User
-	err := DB.Table("user").Where("user_name = ? and password = ?", name, pwd).First(&user).Error
-	return &user, err
+	res := DB.Table("user").Where("user_name = ? and password = ?", name, pwd).Limit(1).Find(&user)
+	return &user, int(res.RowsAffected), res.Error
 }
 
 //根据email查找用户
@@ -34,21 +35,19 @@ func FindUserbyNameandPwd(name, pwd string) (*User, error) {
 // 	return &user, err
 // }
 
-func FindUserbyName(name string) (*User, error) {
+func FindUserbyName(name string) (int, error) {
 	var user User
-	err := DB.Table("user").Where("user_name = ? ", name).First(&user).Error
-	return &user, err
+	res := DB.Table("user").Where("user_name = ? ", name).Limit(1).Find(&user)
+	return int(res.RowsAffected), res.Error
 }
 
 //根据userid查找用户
-func FindUserbyID(userid string) (*User, error) {
-	var user User
-	// fmt.Println("string = ", userid)
-	id, _ := strconv.Atoi(userid)
-	// fmt.Println("int = ", id)
-	err := DB.Table("user").Where("user_id = ?", id).First(&user).Error
-	return &user, err
-}
+// func FindUserbyID(userid string) (int, error) {
+// 	var user User
+// 	id, err := strconv.ParseUint(userid, 10, 64)
+// 	res := DB.Table("user").Where("user_id = ?", id).Limit(1).Find(&user)
+// 	return int(res.RowsAffected), res.Error
+// }
 
 // 创建用户
 func CreateUser(username, pwd string) (*User, error) {
@@ -63,10 +62,28 @@ func CreateUser(username, pwd string) (*User, error) {
 }
 
 // 为关注/粉丝列表查询用户信息(user_name, follow_count, follower_count)
-func UserInfo(userID int64) (*User, error) {
+// 使用redis缓存
+func UserInfo(userID uint64) (*User, error) {
 	var result User
 
-	err := DB.Table("user").Where(User{UserId: userID}).Select("user_name", "follow_count", "follower_count").Take(&result).Error
+	// 查询缓存
+	key := fmt.Sprintf("user_%v", userID)
+	rdbResult, err := RDB.HGetAll(CTX, key).Result()
+	if err == nil && len(rdbResult) != 0 {
+		// 缓存找到
+		result.UserName = rdbResult["user_name"]
+		follow_count, _ := strconv.ParseUint(rdbResult["follow_count"], 10, 64)
+		result.FollowCount = follow_count
+		follower_count, _ := strconv.ParseUint(rdbResult["follower_count"], 10, 64)
+		result.FollowerCount = follower_count
+		return &result, nil
+	}
+
+	// 没有找到缓存
+	err = DB.Table("user").Where(User{UserId: userID}).Select("user_name", "follow_count", "follower_count").Limit(1).Find(&result).Error
+
+	// 更新缓存
+	RDB.HSet(CTX, key, "user_name", result.UserName, "follow_count", result.FollowCount, "follower_count", result.FollowerCount)
 
 	return &result, err
 }

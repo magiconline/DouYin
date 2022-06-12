@@ -4,8 +4,11 @@ import (
 	"DouYin/logger"
 	"DouYin/repository"
 	"DouYin/service"
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -166,6 +169,157 @@ func TestFeedWithEndTime(t *testing.T) {
 	l := len(body["video_list"].([]interface{}))
 	assert.NotEqual(t, l, 0)
 	assert.NotEqual(t, body["next_time"], timeStamp)
+}
+
+// 测试视频上传
+// 手动指定视频文件
+func TestPublishAction(t *testing.T) {
+	userName := "testPublishAction"
+	password := "123456"
+	title := "test title"
+	var token string
+
+	videoPath := "./static/8c6ce24b-e859-4459-97b3-f1f169b3c81a.mp4"
+
+	// 根据userName查找是否注册过
+	var count int64
+	err := repository.DB.Table("user").Where("user_name = ?", userName).Count(&count).Error
+	assert.Equal(t, err, nil)
+
+	if count == 0 {
+		// 没有注册过，进行注册
+		response := httptest.NewRecorder()
+		request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/user/register/?username=%v&password=%v", userName, password), nil)
+		assert.Equal(t, err, nil)
+
+		r.ServeHTTP(response, request)
+		assert.Equal(t, response.Code, 200)
+
+		body := make(map[string]interface{})
+		err = json.Unmarshal(response.Body.Bytes(), &body)
+		assert.Equal(t, err, nil)
+
+		assert.Equal(t, int(body["status_code"].(float64)), 0)
+		token = body["token"].(string)
+
+	} else {
+		// 已注册，登录
+		response := httptest.NewRecorder()
+		request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/user/login/?username=%v&password=%v", userName, password), nil)
+		assert.Equal(t, err, nil)
+
+		r.ServeHTTP(response, request)
+		assert.Equal(t, response.Code, 200)
+
+		body := make(map[string]interface{})
+		err = json.Unmarshal(response.Body.Bytes(), &body)
+		assert.Equal(t, err, nil)
+
+		assert.Equal(t, int(body["status_code"].(float64)), 0)
+		token = body["token"].(string)
+
+	}
+
+	// 上传视频
+	videoFile, err := os.Open(videoPath)
+	if err != nil {
+		t.Fatalf("打开文件 %v 失败，请查看文件是否存在, err: %v", videoPath, err.Error())
+	}
+
+	var bufReader = new(bytes.Buffer)
+	writer := multipart.NewWriter(bufReader)
+	err = writer.WriteField("token", token)
+	assert.Equal(t, err, nil)
+
+	err = writer.WriteField("title", title)
+	assert.Equal(t, err, nil)
+
+	fw, err := writer.CreateFormFile("data", videoPath)
+	assert.Equal(t, err, nil)
+
+	_, err = io.Copy(fw, videoFile)
+	assert.Equal(t, err, nil)
+
+	writer.Close()
+
+	// 发起请求
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("POST", "/douyin/publish/action/", bufReader)
+	assert.Equal(t, err, nil)
+	request.Header.Set("Content-Type", writer.FormDataContentType())
+
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
+
+	body := make(map[string]interface{})
+	err = json.Unmarshal(response.Body.Bytes(), &body)
+	assert.Equal(t, err, nil)
+
+	assert.Equal(t, int(body["status_code"].(float64)), 0)
+}
+
+// 测试获取登录用户的视频列表
+// 获取自己(userID==token)的视频列表
+func TestPublishList(t *testing.T) {
+	userName := "testPublishList"
+	password := "123456"
+	token := ""
+
+	var userID float64
+
+	// 根据userName查找是否注册过
+	var count int64
+	err := repository.DB.Table("user").Where("user_name = ?", userName).Count(&count).Error
+	assert.Equal(t, err, nil)
+
+	if count == 0 {
+		// 没有注册过，进行注册
+		response := httptest.NewRecorder()
+		request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/user/register/?username=%v&password=%v", userName, password), nil)
+		assert.Equal(t, err, nil)
+
+		r.ServeHTTP(response, request)
+		assert.Equal(t, response.Code, 200)
+
+		body := make(map[string]interface{})
+		err = json.Unmarshal(response.Body.Bytes(), &body)
+		assert.Equal(t, err, nil)
+
+		assert.Equal(t, int(body["status_code"].(float64)), 0)
+		token = body["token"].(string)
+		userID = body["user_id"].(float64)
+	} else {
+		// 已注册，登录
+		response := httptest.NewRecorder()
+		request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/user/login/?username=%v&password=%v", userName, password), nil)
+		assert.Equal(t, err, nil)
+
+		r.ServeHTTP(response, request)
+		assert.Equal(t, response.Code, 200)
+
+		body := make(map[string]interface{})
+		err = json.Unmarshal(response.Body.Bytes(), &body)
+		assert.Equal(t, err, nil)
+
+		assert.Equal(t, int(body["status_code"].(float64)), 0)
+		token = body["token"].(string)
+		userID = body["user_id"].(float64)
+	}
+
+	// 发起请求
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("GET", fmt.Sprintf("/douyin/publish/list/?token=%v&user_id=%v", token, userID), nil)
+	assert.Equal(t, err, nil)
+
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
+
+	body := make(map[string]interface{})
+	err = json.Unmarshal(response.Body.Bytes(), &body)
+	assert.Equal(t, err, nil)
+
+	assert.Equal(t, int(body["status_code"].(float64)), 0)
+
 }
 
 // 正常注册
@@ -335,27 +489,113 @@ func TestLoginWithouRegister(t *testing.T) {
 
 }
 
-//
-
 // 测试关注操作
+func TestRelation(t *testing.T) {
+	username1 := "testRelation1"
+	username2 := "testRelation2"
+	password := "123456"
+
+	// 注册用户
+	err := repository.DB.Table("user").Where("user_id in ?", []string{username1, username2}).Delete(&repository.User{}).Error
+	assert.Equal(t, err, nil)
+
+	users := []repository.User{
+		{UserName: username1, Password: password},
+		{UserName: username2, Password: password},
+	}
+	err = repository.DB.Table("user").Create(&users).Error
+	assert.Equal(t, err, nil)
+
+	token, err := service.GenerateToken(users[0].UserId)
+	assert.Equal(t, err, nil)
+
+	// 关注
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/relation/action/?token=%v&to_user_id=%v&action_type=%v", token, users[1].UserId, 1), nil)
+	assert.Equal(t, err, nil)
+
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
+
+	body := make(map[string]interface{})
+	err = json.Unmarshal(response.Body.Bytes(), &body)
+	assert.Equal(t, err, nil)
+
+	assert.Equal(t, int(body["status_code"].(float64)), 0)
+
+	// 取消关注
+	response = httptest.NewRecorder()
+	request, err = http.NewRequest("POST", fmt.Sprintf("/douyin/relation/action/?token=%v&to_user_id=%v&action_type=%v", token, users[1].UserId, 2), nil)
+	assert.Equal(t, err, nil)
+
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
+
+	body = make(map[string]interface{})
+	err = json.Unmarshal(response.Body.Bytes(), &body)
+	assert.Equal(t, err, nil)
+
+	assert.Equal(t, int(body["status_code"].(float64)), 0)
+
+}
+
+// 测试重复关注
+func TestRalationAgain(t *testing.T) {
+	username1 := "testRelation1"
+	username2 := "testRelation2"
+	password := "123456"
+
+	// 注册用户
+	err := repository.DB.Table("user").Where("user_id in ?", []string{username1, username2}).Delete(&repository.User{}).Error
+	assert.Equal(t, err, nil)
+
+	users := []repository.User{
+		{UserName: username1, Password: password},
+		{UserName: username2, Password: password},
+	}
+	err = repository.DB.Table("user").Create(&users).Error
+	assert.Equal(t, err, nil)
+
+	token, err := service.GenerateToken(users[0].UserId)
+	assert.Equal(t, err, nil)
+
+	// 关注
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/relation/action/?token=%v&to_user_id=%v&action_type=%v", token, users[1].UserId, 1), nil)
+	assert.Equal(t, err, nil)
+
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
+
+	body := make(map[string]interface{})
+	err = json.Unmarshal(response.Body.Bytes(), &body)
+	assert.Equal(t, err, nil)
+
+	assert.Equal(t, int(body["status_code"].(float64)), 0)
+
+	// 重复关注
+	response = httptest.NewRecorder()
+	request, err = http.NewRequest("POST", fmt.Sprintf("/douyin/relation/action/?token=%v&to_user_id=%v&action_type=%v", token, users[1].UserId, 1), nil)
+	assert.Equal(t, err, nil)
+
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
+
+	body = make(map[string]interface{})
+	err = json.Unmarshal(response.Body.Bytes(), &body)
+	assert.Equal(t, err, nil)
+
+	assert.Equal(t, int(body["status_code"].(float64)), 1)
+	assert.Equal(t, body["status_msg"].(string), "已关注，禁止重复操作")
+}
+
+// 测试取消关注
+
+// 测试重复取消关注
 
 // 测试关注列表
 
 // 测试粉丝列表
-
-// --------------------benchmark----------------------------------------
-
-// func BenchmarkFeed(b *testing.B) {
-// 	b.SetParallelism(10)
-
-// 	req := fmt.Sprintf("http://127.0.0.1:8080/douyin/feed/?latest_time=%v", time.Now().UnixMilli())
-
-// 	b.RunParallel(func(p *testing.PB) {
-// 		for p.Next() {
-// 			http.Get(req)
-// 		}
-// 	})
-// }
 
 //测试点赞操作
 func TestFavorite(t *testing.T) {
@@ -365,7 +605,9 @@ func TestFavorite(t *testing.T) {
 	// 检查是否已经点赞
 	userId, err := service.Token2ID(token)
 	assert.Equal(t, err, nil)
-	flag := service.IsThumbUp(userId, uint64(videoId))
+	flag, err := service.IsThumbUp(userId, uint64(videoId))
+	assert.Equal(t, err, nil)
+
 	//如果返回true 说明已点赞 删除点赞状态
 	if flag {
 		service.DeleteStar(userId, uint64(videoId))
@@ -391,12 +633,14 @@ func TestFavorite(t *testing.T) {
 //测试取消点赞操作
 func TestCancelFavorite(t *testing.T) {
 	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MSwiZXhwIjoxNjYyMTk5OTc5LCJpc3MiOiJ6amN5In0.oNrcj2xrgiy5zh0j2So-Sm_vxIG_lsYxRT2rcCQ5EGA"
-	videoId := 1
+	videoId := 8
 	actionType := 2
 	// 检查是否已经点赞
 	userId, err := service.Token2ID(token)
 	assert.Equal(t, err, nil)
-	flag := service.IsThumbUp(userId, uint64(videoId))
+	flag, err := service.IsThumbUp(userId, uint64(videoId))
+	assert.Equal(t, err, nil)
+
 	//如果返回false 说明未点赞 增加点赞状态
 	if !flag {
 		service.AddStar(userId, uint64(videoId))
@@ -422,12 +666,13 @@ func TestCancelFavorite(t *testing.T) {
 //测试重复点赞
 func TestRepeatFavorite(t *testing.T) {
 	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MSwiZXhwIjoxNjYyMTk5OTc5LCJpc3MiOiJ6amN5In0.oNrcj2xrgiy5zh0j2So-Sm_vxIG_lsYxRT2rcCQ5EGA"
-	videoId := 1
+	videoId := 8
 	actionType := 1
 	// 检查是否已经点赞
 	userId, err := service.Token2ID(token)
 	assert.Equal(t, err, nil)
-	flag := service.IsThumbUp(userId, uint64(videoId))
+	flag, err := service.IsThumbUp(userId, uint64(videoId))
+	assert.Equal(t, err, nil)
 	//如果返回false 说明未点赞 插入点赞数据
 	if !flag {
 		service.AddStar(userId, uint64(videoId))
@@ -458,7 +703,9 @@ func TestCancelFavoriteWithoutFavorite(t *testing.T) {
 	// 检查是否已经点赞
 	userId, err := service.Token2ID(token)
 	assert.Equal(t, err, nil)
-	flag := service.IsThumbUp(userId, uint64(videoId))
+	flag, err := service.IsThumbUp(userId, uint64(videoId))
+	assert.Equal(t, err, nil)
+
 	//如果返回true 说明已点赞 删除点赞数据
 	if flag {
 		service.DeleteStar(userId, uint64(videoId))
@@ -521,4 +768,152 @@ func TestFavoriteLogin(t *testing.T) {
 
 	assert.Equal(t, int(body["status_code"].(float64)), 0)
 	assert.Equal(t, body["status_msg"], "success")
+}
+
+// 测试remark没有token
+func TestReamrkWithoutToken(t *testing.T) {
+	//请求值的参数
+	videoid := 1
+	actiontype := 1
+
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/comment/action/?video_id=%v&action_type=%v&comment_text=tokentest", videoid, actiontype), nil)
+	assert.Equal(t, err, nil)
+
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
+
+	body := make(map[string]interface{})
+	err = json.Unmarshal(response.Body.Bytes(), &body)
+	assert.Equal(t, err, nil)
+
+	if int(body["status_code"].(float64)) != 0 {
+		//t.Errorf("status_code: %v != 0, status_msg: %v", body["status_code"], body["status_msg"])
+		//t.FailNow()
+		assert.Equal(t, body["status_msg"], "用户未登录")
+	}
+
+}
+
+// 测试错误token
+func TestReamrkWithWrongToken(t *testing.T) {
+	//请求值的参数
+	token := "132"
+	videoid := 1
+	actiontype := 1
+
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/comment/action/?token=%v&video_id=%v&action_type=%v&comment_text=tokentest", token, videoid, actiontype), nil)
+	assert.Equal(t, err, nil)
+
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
+
+	body := make(map[string]interface{})
+	err = json.Unmarshal(response.Body.Bytes(), &body)
+	assert.Equal(t, err, nil)
+
+	assert.Equal(t, int(body["status_code"].(float64)), 1)
+	assert.Equal(t, body["status_msg"].(string), "token has some error")
+}
+
+//测试过期token
+func TestRemarkWithExpiredToken(t *testing.T) {
+	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MiwiZXhwIjoxNjU0NzAwNzcyLCJpc3MiOiJ6amN5In0.X9VuPerdOP8TNFxVpWY3vLVFPHdVE72un8TiimFMFPk"
+	videoid := 1
+	actiontype := 1
+
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/comment/action/?token=%v&video_id=%v&action_type=%v&comment_text=tokentest", token, videoid, actiontype), nil)
+	assert.Equal(t, err, nil)
+
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
+
+	body := make(map[string]interface{})
+	err = json.Unmarshal(response.Body.Bytes(), &body)
+	assert.Equal(t, err, nil)
+
+	assert.Equal(t, int(body["status_code"].(float64)), 1)
+
+	result, err := regexp.Match("token has some error", []byte(body["status_msg"].(string)))
+	if err != nil {
+		t.Fatal(err.Error())
+		t.FailNow()
+	}
+	if result != true {
+		t.Fatalf("status_msg: %v != token has some error", body["status_msg"].(string))
+		t.FailNow()
+	}
+}
+
+//测试插入评论
+func TestInsertRemark(t *testing.T) {
+	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MSwiZXhwIjoxNjYyMTk2OTE0LCJpc3MiOiJ6amN5In0.WeN4fZgkitj_ETYIvwAP-nvIPewWMIRBT4tIbX_mTYY"
+	videoid := 1
+	actiontype := 1
+	commenttext := "test1"
+
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/comment/action/?token=%v&video_id=%v&action_type=%v&comment_text=%v", token, videoid, actiontype, commenttext), nil)
+	assert.Equal(t, err, nil)
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
+
+	body := make(map[string]interface{})
+	err = json.Unmarshal(response.Body.Bytes(), &body)
+	assert.Equal(t, err, nil)
+
+	//如果插入失败
+	if int(body["status_code"].(float64)) == 1 {
+		assert.Equal(t, body["status_msg"].(string), "insert error")
+	} else {
+		assert.Equal(t, int(body["status_code"].(float64)), 0)
+	}
+}
+
+//测试删除评论
+func TestDeleteRemark(t *testing.T) {
+	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MSwiZXhwIjoxNjYyMTk2OTE0LCJpc3MiOiJ6amN5In0.WeN4fZgkitj_ETYIvwAP-nvIPewWMIRBT4tIbX_mTYY"
+	videoid := 1
+	actiontype := 2
+	commenttext := "testdelete"
+	commentid := 111
+
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/comment/action/?token=%v&video_id=%v&action_type=%v&comment_text=%v&comment_id=%v", token, videoid, actiontype, commenttext, commentid), nil)
+	assert.Equal(t, err, nil)
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
+
+	body := make(map[string]interface{})
+	err = json.Unmarshal(response.Body.Bytes(), &body)
+	assert.Equal(t, err, nil)
+
+	//如果删除失败
+	if int(body["status_code"].(float64)) == 1 {
+		assert.Equal(t, body["status_msg"].(string), "delete error")
+	} else {
+		assert.Equal(t, int(body["status_code"].(float64)), 0)
+	}
+
+}
+
+//测试查看所有评论列表
+func TestRemarkList(t *testing.T) {
+	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MSwiZXhwIjoxNjYyMTk2OTE0LCJpc3MiOiJ6amN5In0.WeN4fZgkitj_ETYIvwAP-nvIPewWMIRBT4tIbX_mTYY"
+	videoid := 1
+
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("GET", fmt.Sprintf("/douyin/comment/list/?token=%v&video_id=%v", token, videoid), nil)
+	assert.Equal(t, err, nil)
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
+
+	body := make(map[string]interface{})
+	err = json.Unmarshal(response.Body.Bytes(), &body)
+	assert.Equal(t, err, nil)
+
+	assert.Equal(t, int(body["status_code"].(float64)), 0)
+
 }

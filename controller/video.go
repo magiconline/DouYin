@@ -21,18 +21,18 @@ func Feed(ctx *gin.Context) *gin.H {
 	token := ctx.Query("token")
 
 	// 类型转换
-	latestTimeInt, err := strconv.Atoi(latestTimeStr)
+	latestTimeInt, err := strconv.ParseUint(latestTimeStr, 10, 64)
 	if err != nil {
-		logger.Logger.Println("error:", err.Error())
+		logger.Println("error:", err.Error())
 		return &gin.H{
 			"status_code": 1,
 			"status_msg":  err.Error(),
 		}
 	}
-	nextTime, videoList, err := service.Feed(uint64(latestTimeInt), token)
+	nextTime, videoList, err := service.Feed(latestTimeInt, token)
 	// 获得视频流错误
 	if err != nil {
-		logger.Logger.Println("error:", err)
+		logger.Logger.Println(err)
 		return &gin.H{
 			"status_code": 1,
 			"status_msg":  err.Error(),

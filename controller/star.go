@@ -65,8 +65,14 @@ func Favorite(ctx *gin.Context) *gin.H {
 	}
 	if actionTypeInt == 1 {
 		//查询数据库，获取点赞状态
-		flag := service.IsThumbUp(currentUserID, videoIdInt)
-		if flag == true {
+		flag, err := service.IsThumbUp(currentUserID, videoIdInt)
+		if err != nil {
+			return &gin.H{
+				"status_code": 1,
+				"status_msg":  err,
+			}
+		}
+		if flag {
 			return &gin.H{
 				"status_code": 5,
 				"status_msg":  "请勿重复点赞！",
@@ -79,8 +85,14 @@ func Favorite(ctx *gin.Context) *gin.H {
 		}
 	} else {
 		//查询数据库，获取点赞状态
-		flag := service.IsThumbUp(currentUserID, videoIdInt)
-		if flag == false {
+		flag, err := service.IsThumbUp(currentUserID, videoIdInt)
+		if err != nil {
+			return &gin.H{
+				"status_code": 1,
+				"status_msg":  err.Error(),
+			}
+		}
+		if !flag {
 			return &gin.H{
 				"status_code": 6,
 				"status_msg":  "当前暂无点赞数据！",
