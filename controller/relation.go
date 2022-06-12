@@ -40,7 +40,7 @@ func RelationAction(ctx *gin.Context) *gin.H {
 	}
 }
 
-// 获取关注列表
+// 获取user_id的关注列表
 func FollowList(ctx *gin.Context) *gin.H {
 	// 获取参数
 	userIDStr := ctx.Query("user_id")
@@ -56,7 +56,7 @@ func FollowList(ctx *gin.Context) *gin.H {
 	}
 
 	// 验证token
-	_, err = service.Token2ID(token)
+	curUserID, err := service.Token2ID(token)
 	if err != nil {
 		logger.Println(err.Error())
 		return &gin.H{
@@ -66,7 +66,7 @@ func FollowList(ctx *gin.Context) *gin.H {
 	}
 
 	// 获取关注列表
-	followList, err := service.FollowList(userID)
+	followList, err := service.FollowList(curUserID, userID)
 	if err != nil {
 		logger.Println(err.Error())
 		return &gin.H{

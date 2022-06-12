@@ -432,7 +432,7 @@ func TestRalationAgain(t *testing.T) {
 	assert.Equal(t, err, nil)
 
 	assert.Equal(t, int(body["status_code"].(float64)), 1)
-	assert.Equal(t, body["status_msg"].(string), "已关注，禁止重复关注")
+	assert.Equal(t, body["status_msg"].(string), "已关注，禁止重复操作")
 }
 
 // 测试取消关注
@@ -442,20 +442,6 @@ func TestRalationAgain(t *testing.T) {
 // 测试关注列表
 
 // 测试粉丝列表
-
-// --------------------benchmark----------------------------------------
-
-// func BenchmarkFeed(b *testing.B) {
-// 	b.SetParallelism(10)
-
-// 	req := fmt.Sprintf("http://127.0.0.1:8080/douyin/feed/?latest_time=%v", time.Now().UnixMilli())
-
-// 	b.RunParallel(func(p *testing.PB) {
-// 		for p.Next() {
-// 			http.Get(req)
-// 		}
-// 	})
-// }
 
 //测试点赞操作
 func TestFavorite(t *testing.T) {

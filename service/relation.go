@@ -54,10 +54,12 @@ func RelationAction(token string, toUserID uint64, action bool) error {
 	// 释放锁
 	defer repository.DeleteRedisLock(k, v)
 
-	// 关注操作中检测是否已关注
-	if action {
-		if isFollow, _ := repository.IsFollower(userID, toUserID); isFollow {
-			return errors.New("已关注，禁止重复关注")
+	// 检测重复关注/取消关注
+	if isFollow, _ := repository.IsFollower(userID, toUserID); isFollow == action {
+		if isFollow {
+			return errors.New("已关注，禁止重复操作")
+		} else {
+			return errors.New("已取消关注，禁止重复操作")
 		}
 	}
 
@@ -98,8 +100,9 @@ func RelationAction(token string, toUserID uint64, action bool) error {
 	return nil
 }
 
-// 获取关注列表
-func FollowList(userID uint64) (*[]FollowResponse, error) {
+// 获取userID的关注列表
+// curUserID用来获取IsFollow信息
+func FollowList(curUserID uint64, userID uint64) (*[]FollowResponse, error) {
 	var followList []FollowResponse
 	followUserIDList, err := repository.FollowList(userID)
 	if err != nil {
@@ -115,12 +118,17 @@ func FollowList(userID uint64) (*[]FollowResponse, error) {
 			return nil, err
 		}
 
+		isFollow, err := repository.IsFollower(curUserID, userID)
+		if err != nil {
+			return nil, err
+		}
+
 		followList = append(followList, FollowResponse{
 			ID:            followUserID,
 			Name:          userInfo.UserName,
 			FollowCount:   userInfo.FollowCount,
 			FollowerCount: userInfo.FollowerCount,
-			IsFollow:      true,
+			IsFollow:      isFollow,
 		})
 	}
 
