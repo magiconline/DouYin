@@ -11,15 +11,6 @@ import (
 func Favorite(ctx *gin.Context) *gin.H {
 	videoIdStr := ctx.Query("video_id")
 	token := ctx.Query("token")
-/*	k := videoIdStr
-	v := "null"
-	if err := repository.GetRedisLock(k, v, 10*time.Second); err != nil {
-		return &gin.H{
-			"status_code": 1,
-			"status_msg":  err.Error(),
-		}
-	}
-	defer repository.DeleteRedisLock(k, v)*/
 	//1.点赞 2.取消点赞
 	actionTypeStr := ctx.Query("action_type")
 	if token == "" {
@@ -78,10 +69,17 @@ func Favorite(ctx *gin.Context) *gin.H {
 				"status_msg":  "请勿重复点赞！",
 			}
 		}
-		service.AddStar(currentUserID, videoIdInt)
-		return &gin.H{
-			"status_code": 0,
-			"status_msg":  "点赞成功！",
+		err = service.AddStar(currentUserID, videoIdInt)
+		if err != nil {
+			return &gin.H{
+				"status_code": 7,
+				"status_msg":  "点赞失败！",
+			}
+		} else {
+			return &gin.H{
+				"status_code": 0,
+				"status_msg":  "点赞成功！",
+			}
 		}
 	} else {
 		//查询数据库，获取点赞状态
@@ -98,10 +96,17 @@ func Favorite(ctx *gin.Context) *gin.H {
 				"status_msg":  "当前暂无点赞数据！",
 			}
 		}
-		service.DeleteStar(currentUserID, videoIdInt)
-		return &gin.H{
-			"status_code": 0,
-			"status_msg":  "取消点赞成功！",
+		err = service.DeleteStar(currentUserID, videoIdInt)
+		if err != nil {
+			return &gin.H{
+				"status_code": 7,
+				"status_msg":  "取消点赞失败！",
+			}
+		} else {
+			return &gin.H{
+				"status_code": 0,
+				"status_msg":  "取消点赞成功！",
+			}
 		}
 	}
 }

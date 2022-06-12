@@ -4,12 +4,12 @@ import (
 	"DouYin/repository"
 )
 
-func AddStar(userId, videoId uint64) {
-	repository.NewStarDaoInstance().AddStar(userId, videoId)
+func AddStar(userId, videoId uint64) error {
+	return repository.NewStarDaoInstance().AddStar(userId, videoId)
 }
 
-func DeleteStar(userId, videoId uint64) {
-	repository.NewStarDaoInstance().DeleteStar(userId, videoId)
+func DeleteStar(userId, videoId uint64) error {
+	return repository.NewStarDaoInstance().DeleteStar(userId, videoId)
 }
 
 //IsThumbUp 返回点赞状态
