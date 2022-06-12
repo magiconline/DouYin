@@ -4,9 +4,9 @@ import (
 	"DouYin/logger"
 	"DouYin/repository"
 	"DouYin/service"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 //登录
@@ -19,18 +19,16 @@ func UserLogin(c *gin.Context) *gin.H {
 	//2.对请求参数进行表单验证，以保证数据库的安全---待完成
 
 	// 3.数据库查询用户名
-	_, err1 := repository.FindUserbyName(username)
-	if err1 == gorm.ErrRecordNotFound {
-		logger.Println(err1.Error())
+	numOfRowsAffected, err1 := repository.FindUserbyName(username)
+	if numOfRowsAffected == 0 {
 		return &gin.H{
 			"status_code": 1,
 			"status_msg":  "用户名不存在,请注册",
 		}
 	} else if err1 == nil {
-		user, err := repository.FindUserbyNameandPwd(username, pwd)
+		user, num1OfRowsAffected, err := repository.FindUserbyNameandPwd(username, pwd)
 		//如果数据库查不到或者密码错误
-		if err == gorm.ErrRecordNotFound {
-			logger.Println(err.Error())
+		if num1OfRowsAffected == 0 {
 			return &gin.H{
 				"status_code": 1,
 				"status_msg":  "用户密码错误",
@@ -72,10 +70,10 @@ func UserLogin(c *gin.Context) *gin.H {
 func UserRegister(c *gin.Context) *gin.H {
 	username := c.Query("username")
 	pwd := c.Query("password")
-	_, err1 := repository.FindUserbyName(username)
+	numOfRowsAffected, err1 := repository.FindUserbyName(username)
 	//若数据库中不存在此email
 	// if err == gorm.ErrRecordNotFound {
-	if err1 == gorm.ErrRecordNotFound {
+	if numOfRowsAffected == 0 {
 		u, err := repository.CreateUser(username, pwd)
 		//若创建新用户不成功
 		if err != nil {
@@ -105,7 +103,7 @@ func UserRegister(c *gin.Context) *gin.H {
 				"status_msg":  "数据库查询用户操作错误",
 			}
 		}
-		if err1 == nil {
+		if numOfRowsAffected > 0 {
 			return &gin.H{
 				"status_code": 1,
 				"status_msg":  "该用户名已被注册",
@@ -120,39 +118,34 @@ func UserRegister(c *gin.Context) *gin.H {
 }
 
 func UserInfo(c *gin.Context) *gin.H {
-	userid := c.Query("user_id")
+	useridStr := c.Query("user_id")
 	token := c.Query("token")
-
-	type UserInformation struct {
-		UserId        int64  `gorm:"column:user_id"`
-		UserName      string `gorm:"column:user_name"`
-		FollowCount   int    `gorm:"column:follow_count"`
-		FollowerCount int    `gorm:"column:follower_count"`
-	}
-
-	user, err := repository.FindUserbyID(userid)
-	if err == gorm.ErrRecordNotFound {
-		return &gin.H{
-			"status_code": 1,
-			"status_msg":  "用户不存在",
-		}
-	}
-
-	// if token == "" {
-	// 	return &gin.H{
-	// 		"status_code": 1,
-	// 		"status_msg":  "token不存在",
-	// 	}
-	// }
-
-	_, err = service.ParseToken(token)
+	UserID, err := strconv.ParseUint(useridStr, 10, 64)
 	if err != nil {
+		logger.Println(err.Error())
 		return &gin.H{
 			"status_code": 1,
-			"status_msg":  "token解析失败",
+			"status_msg":  err.Error(),
 		}
 	}
 
+	_, err1 := service.ParseToken(token)
+	if err1 != nil {
+		logger.Println(err1.Error())
+		return &gin.H{
+			"status_code": 1,
+			"status_msg":  err1.Error(),
+		}
+	}
+
+	user, err := repository.UserInfo(UserID)
+	if err != nil {
+		logger.Println(err.Error())
+		return &gin.H{
+			"status_code": 1,
+			"status_msg":  err.Error(),
+		}
+	}
 	return &gin.H{
 		"status_code": 0,
 		"status_msg":  "sucess",
