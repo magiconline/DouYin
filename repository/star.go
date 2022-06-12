@@ -81,7 +81,7 @@ func (*StarDao) DeleteStar(userId, videoId uint64) error {
 	}
 	//删除star表数据
 	if err := tx.Table("star").Where("user_id = ? and video_id = ?", userId, videoId).Delete(&Star{}).Error; err != nil {
-		logger.Logger.Printf("err", err)
+		logger.Logger.Println(err)
 		return err
 	}
 	//锁住指定video_id的记录
