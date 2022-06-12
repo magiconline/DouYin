@@ -535,7 +535,9 @@ func TestRelation(t *testing.T) {
 	err = json.Unmarshal(response.Body.Bytes(), &body)
 	assert.Equal(t, err, nil)
 
-	assert.Equal(t, int(body["status_code"].(float64)), 0)
+	if int(body["status_code"].(float64)) != 0 {
+		t.Fatalf("status_code: %v != 0, status_msg: %v", int(body["status_code"].(float64)), body["status_msg"].(string))
+	}
 
 }
 
