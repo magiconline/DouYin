@@ -28,7 +28,7 @@ func UserInfo(userId uint64) (*UserResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &UserResponse{ID: uint64(user.UserId), Name: user.UserName, FollowCount: 0, FollowerCount: 0, IsFollow: false}, nil
+	return &UserResponse{ID: user.UserId, Name: user.UserName, FollowCount: user.FollowCount, FollowerCount: user.FollowerCount}, nil
 }
 
 //将评论内容插入数据库
@@ -77,9 +77,11 @@ func NewInsetRemark(token string, videoId uint64, remark repository.Remark) (*Co
 
 //获得videoId的所有评论列表
 func VideoList(token string, videoid uint64) (*[]CommentActionResponse, error) {
+	var curUserID uint64
+	var err error
 	//检查token
 	if token != "" {
-		_, err := Token2ID(token)
+		curUserID, err = Token2ID(token)
 		if err != nil {
 			return nil, err
 		}
@@ -89,7 +91,10 @@ func VideoList(token string, videoid uint64) (*[]CommentActionResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	user.IsFollow, err = repository.IsFollower(curUserID, user_id)
+	if err != nil {
+		return nil, err
+	}
 	//根据videoId查找数据库中对应所有评论
 	commentList, err := repository.VideoCommentList(videoid)
 	if err != nil {

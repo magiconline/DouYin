@@ -79,6 +79,15 @@ func RelationAction(token string, toUserID uint64, action bool) error {
 	}
 
 	tx.Commit()
+
+	// 删除redis缓存
+	key1 := fmt.Sprintf("user_%v", userID)
+	key2 := fmt.Sprintf("user_%v", toUserID)
+	_, err = repository.RDB.Del(repository.CTX, key1, key2).Result()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

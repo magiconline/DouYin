@@ -2,6 +2,8 @@ package service
 
 import (
 	"DouYin/repository"
+	"fmt"
+	"strconv"
 	"time"
 )
 
@@ -35,11 +37,37 @@ type FeedResponse struct {
 type PublishActionResponse FeedResponse
 
 func AuthorInfo(userID uint64) (*AuthorResponse, error) {
+	key := fmt.Sprintf("user_%v", userID)
+
+	// 查询redis
+	rdbAuthor, err := repository.RDB.HGetAll(repository.CTX, key).Result()
+
+	if err == nil && len(rdbAuthor) != 0 {
+		// redis可用并且查到缓存
+		followCount, _ := strconv.ParseUint(rdbAuthor["follow_count"], 10, 0)
+		followerCount, _ := strconv.ParseUint(rdbAuthor["follower_count"], 10, 0)
+		return &AuthorResponse{
+			ID:            userID,
+			Name:          rdbAuthor["user_name"],
+			FollowCount:   followCount,
+			FollowerCount: followerCount,
+		}, nil
+	}
+
+	// redis不可用或没有缓存，查询mysql
 	author, err := repository.AuthorInfo(userID)
 	if err != nil {
 		return nil, err
 	}
-	return &AuthorResponse{ID: uint64(author.UserId), Name: author.UserName, FollowCount: 0, FollowerCount: 0, IsFollow: false}, nil
+
+	// 更新redis, 不关心是否成功
+	repository.RDB.HSet(repository.CTX, key,
+		"user_name", author.UserName,
+		"follow_count", strconv.FormatUint(uint64(author.FollowCount), 10),
+		"follower_count", strconv.FormatUint(uint64(author.FollowerCount), 10),
+	)
+
+	return &AuthorResponse{ID: uint64(author.UserId), Name: author.UserName, FollowCount: author.FollowCount, FollowerCount: author.FollowerCount, IsFollow: false}, nil
 }
 
 //Feed 获得视频流
