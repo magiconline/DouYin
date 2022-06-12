@@ -108,14 +108,18 @@ func Feed(latestTime uint64, token string) (uint64, *[]FeedResponse, error) {
 		if err != nil {
 			continue
 		}
-		//返回视频点赞状态
-		stool, _ := repository.NewStarDaoInstance().IsThumbUp(currentUserId, (*videoList)[i]["video_id"].(uint64))
-		var isFavorite bool
-		if stool == nil {
-			isFavorite = false
-		} else {
-			isFavorite = true
+
+		author.IsFollow, err = repository.IsFollower(currentUserId, userID)
+		if err != nil {
+			return 0, nil, err
 		}
+
+		//返回视频点赞状态
+		isFavorite, err := repository.NewStarDaoInstance().IsThumbUp(currentUserId, (*videoList)[i]["video_id"].(uint64))
+		if err != nil {
+			return 0, nil, err
+		}
+
 		response_i := FeedResponse{
 			ID:            (*videoList)[i]["video_id"].(uint64),
 			Author:        *author,
@@ -161,13 +165,11 @@ func UserVideoList(token string, userID uint64) (*[]PublishActionResponse, error
 	// 将视频列表中填充author信息
 	for i := range *videoList {
 		//返回视频点赞状态
-		stool, _ := repository.NewStarDaoInstance().IsThumbUp(currentUserId, (*videoList)[i]["video_id"].(uint64))
-		var isFavorite bool
-		if stool == nil {
-			isFavorite = false
-		} else {
-			isFavorite = true
+		isFavorite, err := repository.NewStarDaoInstance().IsThumbUp(currentUserId, (*videoList)[i]["video_id"].(uint64))
+		if err != nil {
+			return nil, err
 		}
+
 		response_i := PublishActionResponse{
 			ID:            (*videoList)[i]["video_id"].(uint64),
 			Author:        *author,
