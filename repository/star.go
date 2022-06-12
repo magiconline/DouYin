@@ -48,7 +48,7 @@ func (*StarDao) AddStar(userId, videoId uint64) error {
 	}
 	//插入star表数据
 	if err := tx.Table("star").Create(&star).Error; err != nil {
-		logger.Logger.Printf("err", err)
+		logger.Logger.Printf("err, %v", err)
 		return err
 	}
 	//锁住指定video_id的记录

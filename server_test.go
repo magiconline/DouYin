@@ -491,7 +491,7 @@ func TestFavorite(t *testing.T) {
 //测试取消点赞操作
 func TestCancelFavorite(t *testing.T) {
 	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MSwiZXhwIjoxNjYyMTk5OTc5LCJpc3MiOiJ6amN5In0.oNrcj2xrgiy5zh0j2So-Sm_vxIG_lsYxRT2rcCQ5EGA"
-	videoId := 1
+	videoId := 8
 	actionType := 2
 	// 检查是否已经点赞
 	userId, err := service.Token2ID(token)
@@ -522,7 +522,7 @@ func TestCancelFavorite(t *testing.T) {
 //测试重复点赞
 func TestRepeatFavorite(t *testing.T) {
 	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MSwiZXhwIjoxNjYyMTk5OTc5LCJpc3MiOiJ6amN5In0.oNrcj2xrgiy5zh0j2So-Sm_vxIG_lsYxRT2rcCQ5EGA"
-	videoId := 1
+	videoId := 8
 	actionType := 1
 	// 检查是否已经点赞
 	userId, err := service.Token2ID(token)
@@ -623,7 +623,6 @@ func TestFavoriteLogin(t *testing.T) {
 	assert.Equal(t, body["status_msg"], "success")
 }
 
-
 // 测试remark没有token
 func TestReamrkWithoutToken(t *testing.T) {
 	//请求值的参数
@@ -631,7 +630,7 @@ func TestReamrkWithoutToken(t *testing.T) {
 	actiontype := 1
 
 	response := httptest.NewRecorder()
-	request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/comment/action/?video_id=%v&action_type=%v&comment_text=tokentest", videoid,actiontype), nil)
+	request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/comment/action/?video_id=%v&action_type=%v&comment_text=tokentest", videoid, actiontype), nil)
 	assert.Equal(t, err, nil)
 
 	r.ServeHTTP(response, request)
@@ -644,11 +643,10 @@ func TestReamrkWithoutToken(t *testing.T) {
 	if int(body["status_code"].(float64)) != 0 {
 		//t.Errorf("status_code: %v != 0, status_msg: %v", body["status_code"], body["status_msg"])
 		//t.FailNow()
-		assert.Equal(t,body["status_msg"],"用户未登录")
+		assert.Equal(t, body["status_msg"], "用户未登录")
 	}
 
 }
-
 
 // 测试错误token
 func TestReamrkWithWrongToken(t *testing.T) {
@@ -658,7 +656,7 @@ func TestReamrkWithWrongToken(t *testing.T) {
 	actiontype := 1
 
 	response := httptest.NewRecorder()
-	request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/comment/action/?token=%v&video_id=%v&action_type=%v&comment_text=tokentest", token,videoid,actiontype), nil)
+	request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/comment/action/?token=%v&video_id=%v&action_type=%v&comment_text=tokentest", token, videoid, actiontype), nil)
 	assert.Equal(t, err, nil)
 
 	r.ServeHTTP(response, request)
@@ -679,7 +677,7 @@ func TestRemarkWithExpiredToken(t *testing.T) {
 	actiontype := 1
 
 	response := httptest.NewRecorder()
-	request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/comment/action/?token=%v&video_id=%v&action_type=%v&comment_text=tokentest", token,videoid,actiontype), nil)
+	request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/comment/action/?token=%v&video_id=%v&action_type=%v&comment_text=tokentest", token, videoid, actiontype), nil)
 	assert.Equal(t, err, nil)
 
 	r.ServeHTTP(response, request)
@@ -703,14 +701,14 @@ func TestRemarkWithExpiredToken(t *testing.T) {
 }
 
 //测试插入评论
-func TestInsertRemark(t *testing.T)  {
+func TestInsertRemark(t *testing.T) {
 	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MSwiZXhwIjoxNjYyMTk2OTE0LCJpc3MiOiJ6amN5In0.WeN4fZgkitj_ETYIvwAP-nvIPewWMIRBT4tIbX_mTYY"
-	videoid  :=1
-	actiontype  :=1
+	videoid := 1
+	actiontype := 1
 	commenttext := "test1"
 
-	response :=httptest.NewRecorder()
-	request, err := http.NewRequest("POST",fmt.Sprintf("/douyin/comment/action/?token=%v&video_id=%v&action_type=%v&comment_text=%v", token,videoid,actiontype,commenttext),nil)
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/comment/action/?token=%v&video_id=%v&action_type=%v&comment_text=%v", token, videoid, actiontype, commenttext), nil)
 	assert.Equal(t, err, nil)
 	r.ServeHTTP(response, request)
 	assert.Equal(t, response.Code, 200)
@@ -720,23 +718,23 @@ func TestInsertRemark(t *testing.T)  {
 	assert.Equal(t, err, nil)
 
 	//如果插入失败
-	if int(body["status_code"].(float64))==1 {
-		assert.Equal(t,body["status_msg"].(string),"insert error")
-	}else {
+	if int(body["status_code"].(float64)) == 1 {
+		assert.Equal(t, body["status_msg"].(string), "insert error")
+	} else {
 		assert.Equal(t, int(body["status_code"].(float64)), 0)
 	}
 }
 
 //测试删除评论
-func TestDeleteRemark(t *testing.T)  {
+func TestDeleteRemark(t *testing.T) {
 	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MSwiZXhwIjoxNjYyMTk2OTE0LCJpc3MiOiJ6amN5In0.WeN4fZgkitj_ETYIvwAP-nvIPewWMIRBT4tIbX_mTYY"
-	videoid  :=1
-	actiontype  :=2
+	videoid := 1
+	actiontype := 2
 	commenttext := "testdelete"
 	commentid := 111
 
-	response :=httptest.NewRecorder()
-	request, err := http.NewRequest("POST",fmt.Sprintf("/douyin/comment/action/?token=%v&video_id=%v&action_type=%v&comment_text=%v&comment_id=%v", token,videoid,actiontype,commenttext,commentid),nil)
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/comment/action/?token=%v&video_id=%v&action_type=%v&comment_text=%v&comment_id=%v", token, videoid, actiontype, commenttext, commentid), nil)
 	assert.Equal(t, err, nil)
 	r.ServeHTTP(response, request)
 	assert.Equal(t, response.Code, 200)
@@ -745,22 +743,22 @@ func TestDeleteRemark(t *testing.T)  {
 	err = json.Unmarshal(response.Body.Bytes(), &body)
 	assert.Equal(t, err, nil)
 
-
 	//如果删除失败
-	if int(body["status_code"].(float64))==1 {
-		assert.Equal(t,body["status_msg"].(string),"delete error")
-	}else {
+	if int(body["status_code"].(float64)) == 1 {
+		assert.Equal(t, body["status_msg"].(string), "delete error")
+	} else {
 		assert.Equal(t, int(body["status_code"].(float64)), 0)
 	}
 
 }
-//测试查看所有评论列表
-func TestRemarkList(t *testing.T)  {
-	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MSwiZXhwIjoxNjYyMTk2OTE0LCJpc3MiOiJ6amN5In0.WeN4fZgkitj_ETYIvwAP-nvIPewWMIRBT4tIbX_mTYY"
-	videoid  :=1
 
-	response :=httptest.NewRecorder()
-	request, err := http.NewRequest("GET",fmt.Sprintf("/douyin/comment/list/?token=%v&video_id=%v", token,videoid),nil)
+//测试查看所有评论列表
+func TestRemarkList(t *testing.T) {
+	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MSwiZXhwIjoxNjYyMTk2OTE0LCJpc3MiOiJ6amN5In0.WeN4fZgkitj_ETYIvwAP-nvIPewWMIRBT4tIbX_mTYY"
+	videoid := 1
+
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("GET", fmt.Sprintf("/douyin/comment/list/?token=%v&video_id=%v", token, videoid), nil)
 	assert.Equal(t, err, nil)
 	r.ServeHTTP(response, request)
 	assert.Equal(t, response.Code, 200)

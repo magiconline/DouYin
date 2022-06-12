@@ -4,9 +4,10 @@ import (
 	"DouYin/logger"
 	"DouYin/repository"
 	"DouYin/service"
-	"github.com/gin-gonic/gin"
 	"strconv"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 func strToInt(a string) int {
@@ -52,12 +53,12 @@ func Leave_remark(c *gin.Context) *gin.H {
 	if actionTypeInt == 1 {
 		//插入评论不需要检查该字段是否已经评论过
 		//插入数据库
-		comment,err := service.NewInsetRemark(token, uint64(videoIdInt),remark)
-		if err!=nil {
+		comment, err := service.NewInsetRemark(token, uint64(videoIdInt), remark)
+		if err != nil {
 			return &gin.H{
 				"status_code": 1,
-				"status_msg":  err,
-				"comment": "数据库插入失败",
+				"status_msg":  err.Error(),
+				"comment":     "数据库插入失败",
 			}
 		}
 		comment1 = comment
@@ -65,7 +66,7 @@ func Leave_remark(c *gin.Context) *gin.H {
 			//错误返回
 			return &gin.H{
 				"status_code": 1,
-				"status_msg":  err,
+				"status_msg":  err.Error(),
 			}
 		}
 	}
@@ -73,7 +74,7 @@ func Leave_remark(c *gin.Context) *gin.H {
 	if actionTypeInt == 2 {
 		//获取评论参数
 		commentId := c.Query("comment_id")
-		err :=service.DeleteByCommentID(uint64(strToInt(commentId)), uint64(videoIdInt))
+		err := service.DeleteByCommentID(uint64(strToInt(commentId)), uint64(videoIdInt))
 		if err != nil {
 			return &gin.H{
 				"status_code": 1,
