@@ -11,6 +11,15 @@ import (
 func Favorite(ctx *gin.Context) *gin.H {
 	videoIdStr := ctx.Query("video_id")
 	token := ctx.Query("token")
+/*	k := videoIdStr
+	v := "null"
+	if err := repository.GetRedisLock(k, v, 10*time.Second); err != nil {
+		return &gin.H{
+			"status_code": 1,
+			"status_msg":  err.Error(),
+		}
+	}
+	defer repository.DeleteRedisLock(k, v)*/
 	//1.点赞 2.取消点赞
 	actionTypeStr := ctx.Query("action_type")
 	if token == "" {

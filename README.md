@@ -23,9 +23,3 @@ https://gin-gonic.com/zh-cn/docs/testing/
 
 转换为html  
 `go tool cover -html=cover.out -o cover.html`
-
-# 缓存
-- user信息 哈希表
-  - k: "user_{user_id}"
-  - v: ["user_name", "follow_count", "follower_count"]
-

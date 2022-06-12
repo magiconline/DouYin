@@ -125,7 +125,6 @@ func PublishAction(ctx *gin.Context) *gin.H {
 	}
 
 	err = repository.InsertVideoTable(&videoTable)
-
 	if err != nil {
 		logger.Println(err.Error())
 		return &gin.H{
