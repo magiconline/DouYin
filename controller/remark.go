@@ -123,7 +123,6 @@ func View_video_remark(c *gin.Context) *gin.H {
 		"status_msg":   "success",
 		"comment_list": comment_list,
 	}
-	return nil
 	//1.收到请求参数，获取参数中关于评论的各项参数
 	//2.对请求参数进行验证，有错误就返回错误json
 	//3.从数据库中根据video_id查询所有评论条数放到list

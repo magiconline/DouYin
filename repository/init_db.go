@@ -59,19 +59,5 @@ func Init() error {
 		return err
 	}
 
-	err = initRedisVariable()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func initRedisVariable() error {
-	// 用来标示缓存中最新的video 信息
-	err := RDB.SetNX(CTX, "video_latestTime", 0, 0).Err()
-	if err != nil {
-		return err
-	}
-
 	return nil
 }

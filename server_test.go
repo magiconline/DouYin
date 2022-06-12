@@ -605,7 +605,9 @@ func TestFavorite(t *testing.T) {
 	// 检查是否已经点赞
 	userId, err := service.Token2ID(token)
 	assert.Equal(t, err, nil)
-	flag := service.IsThumbUp(userId, uint64(videoId))
+	flag, err := service.IsThumbUp(userId, uint64(videoId))
+	assert.Equal(t, err, nil)
+
 	//如果返回true 说明已点赞 删除点赞状态
 	if flag {
 		service.DeleteStar(userId, uint64(videoId))
@@ -636,7 +638,9 @@ func TestCancelFavorite(t *testing.T) {
 	// 检查是否已经点赞
 	userId, err := service.Token2ID(token)
 	assert.Equal(t, err, nil)
-	flag := service.IsThumbUp(userId, uint64(videoId))
+	flag, err := service.IsThumbUp(userId, uint64(videoId))
+	assert.Equal(t, err, nil)
+
 	//如果返回false 说明未点赞 增加点赞状态
 	if !flag {
 		service.AddStar(userId, uint64(videoId))
@@ -667,7 +671,8 @@ func TestRepeatFavorite(t *testing.T) {
 	// 检查是否已经点赞
 	userId, err := service.Token2ID(token)
 	assert.Equal(t, err, nil)
-	flag := service.IsThumbUp(userId, uint64(videoId))
+	flag, err := service.IsThumbUp(userId, uint64(videoId))
+	assert.Equal(t, err, nil)
 	//如果返回false 说明未点赞 插入点赞数据
 	if !flag {
 		service.AddStar(userId, uint64(videoId))
@@ -698,7 +703,9 @@ func TestCancelFavoriteWithoutFavorite(t *testing.T) {
 	// 检查是否已经点赞
 	userId, err := service.Token2ID(token)
 	assert.Equal(t, err, nil)
-	flag := service.IsThumbUp(userId, uint64(videoId))
+	flag, err := service.IsThumbUp(userId, uint64(videoId))
+	assert.Equal(t, err, nil)
+
 	//如果返回true 说明已点赞 删除点赞数据
 	if flag {
 		service.DeleteStar(userId, uint64(videoId))

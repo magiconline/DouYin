@@ -13,13 +13,9 @@ func DeleteStar(userId, videoId uint64) {
 }
 
 //IsThumbUp 返回点赞状态
-func IsThumbUp(userId, videoId uint64) bool {
-	stool, _ := repository.NewStarDaoInstance().IsThumbUp(userId, videoId)
-	if stool == nil {
-		return false
-	} else {
-		return true
-	}
+func IsThumbUp(userId, videoId uint64) (bool, error) {
+	return repository.NewStarDaoInstance().IsThumbUp(userId, videoId)
+
 }
 
 //StarVideoList 获取userID的所有的视频列表
