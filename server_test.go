@@ -721,7 +721,7 @@ func TestInsertRemark(t *testing.T)  {
 
 	//如果插入失败
 	if int(body["status_code"].(float64))==1 {
-		assert.Equal(t,body["status_msg"].(string),"delete error")
+		assert.Equal(t,body["status_msg"].(string),"insert error")
 	}else {
 		assert.Equal(t, int(body["status_code"].(float64)), 0)
 	}
