@@ -2,6 +2,7 @@ package repository
 
 // "DouYin/json"
 import (
+	"fmt"
 	"strconv"
 )
 
@@ -63,10 +64,28 @@ func CreateUser(username, pwd string) (*User, error) {
 }
 
 // 为关注/粉丝列表查询用户信息(user_name, follow_count, follower_count)
+// 使用redis缓存
 func UserInfo(userID uint64) (*User, error) {
 	var result User
 
-	err := DB.Table("user").Where(User{UserId: userID}).Select("user_name", "follow_count", "follower_count").Take(&result).Error
+	// 查询缓存
+	key := fmt.Sprintf("user_%v", userID)
+	rdbResult, err := RDB.HGetAll(CTX, key).Result()
+	if err == nil && len(rdbResult) != 0 {
+		// 缓存找到
+		result.UserName = rdbResult["user_name"]
+		follow_count, _ := strconv.ParseUint(rdbResult["follow_count"], 10, 64)
+		result.FollowCount = follow_count
+		follower_count, _ := strconv.ParseUint(rdbResult["follower_count"], 10, 64)
+		result.FollowerCount = follower_count
+		return &result, nil
+	}
+
+	// 没有找到缓存
+	err = DB.Table("user").Where(User{UserId: userID}).Select("user_name", "follow_count", "follower_count").Limit(1).Find(&result).Error
+
+	// 更新缓存
+	RDB.HSet(CTX, key, "user_name", result.UserName, "follow_count", result.FollowCount, "follower_count", result.FollowerCount)
 
 	return &result, err
 }
