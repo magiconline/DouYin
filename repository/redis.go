@@ -15,8 +15,8 @@ import (
 type UserInfomation struct {
 	UserId        int64  `gorm:"column:user_id"`
 	UserName      string `gorm:"column:user_name"`
-	FollowCount   int    `gorm:"column:follow_count"`
-	FollowerCount int    `gorm:"column:follower_count"`
+	FollowCount   uint64 `gorm:"column:follow_count"`
+	FollowerCount uint64 `gorm:"column:follower_count"`
 }
 
 //序列化

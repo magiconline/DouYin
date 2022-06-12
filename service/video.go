@@ -56,6 +56,10 @@ func Feed(latestTime uint64, token string) (uint64, *[]FeedResponse, error) {
 		}
 	}
 
+	//获取当前用户
+	currentUserId, _ = Token2ID(token)
+
+
 	var response []FeedResponse
 	var nextTime = latestTime
 
@@ -107,8 +111,11 @@ func Feed(latestTime uint64, token string) (uint64, *[]FeedResponse, error) {
 // UserVideoList 获取userID的所有的视频列表
 func UserVideoList(token string, userID uint64) (*[]PublishActionResponse, error) {
 	// 检查token
+	var currentUserId uint64
+	var err error
+
 	if token != "" {
-		_, err := Token2ID(token)
+		currentUserId, err = Token2ID(token)
 		if err != nil {
 			return nil, err
 		}
@@ -118,13 +125,13 @@ func UserVideoList(token string, userID uint64) (*[]PublishActionResponse, error
 	if err != nil {
 		return nil, err
 	}
+	author.IsFollow, _ = repository.IsFollower(currentUserId, userID)
 
 	// 根据userID查找数据库，按上传时间排序
 	videoList, err := repository.UserVideoList(userID)
 	if err != nil {
 		return nil, err
 	}
-	currentUserId, err := Token2ID(token)
 
 	var response []PublishActionResponse
 	// 将视频列表中填充author信息
