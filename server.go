@@ -97,14 +97,14 @@ func setupRouter(r *gin.Engine) {
 
 func main() {
 	// 创建日志文件夹
-	err := os.Mkdir(".\\log", 0750)
+	err := os.Mkdir("./log", 0750)
 	if err != nil && !os.IsExist(err) {
 		fmt.Println("日志文件夹创建失败")
 		os.Exit(1)
 	}
 
 	// 初始化项目日志
-	err = logger.Init(".\\log\\log.log")
+	err = logger.Init("./log/log.log")
 	if err != nil {
 		fmt.Println("日志初始化失败,", err)
 		os.Exit(1)
@@ -132,7 +132,7 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 
 	// 初始化gin日志
-	file, err := os.OpenFile(".\\log\\gin.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	file, err := os.OpenFile("./log/gin.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		logger.Fatalln("gin日志初始化失败,", err.Error())
 	}
@@ -145,7 +145,7 @@ func main() {
 	setupRouter(r)
 
 	// 托管静态资源
-	r.Static("\\static", ".\\static")
+	r.Static("/static", "./static")
 
 	// 启动服务器
 	logger.Println("启动服务器")
