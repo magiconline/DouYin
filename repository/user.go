@@ -7,7 +7,7 @@ import (
 
 type User struct {
 	// gorm.Model
-	UserId        int64  `gorm:"column:user_id; primary_key; AUTO_INCREMENT"`
+	UserId        uint64 `gorm:"column:user_id; primary_key; AUTO_INCREMENT"`
 	UserName      string `gorm:"column:user_name"`
 	Password      string `gorm:"column:password"`
 	FollowCount   uint64 `gorm:"column:follow_count"`
@@ -63,7 +63,7 @@ func CreateUser(username, pwd string) (*User, error) {
 }
 
 // 为关注/粉丝列表查询用户信息(user_name, follow_count, follower_count)
-func UserInfo(userID int64) (*User, error) {
+func UserInfo(userID uint64) (*User, error) {
 	var result User
 
 	err := DB.Table("user").Where(User{UserId: userID}).Select("user_name", "follow_count", "follower_count").Take(&result).Error

@@ -44,7 +44,7 @@ func UserLogin(c *gin.Context) *gin.H {
 		}
 
 		//token
-		token, err := service.GenerateToken(uint(user.UserId))
+		token, err := service.GenerateToken(user.UserId)
 		if err != nil {
 			logger.Println(err.Error())
 			return &gin.H{
@@ -84,7 +84,7 @@ func UserRegister(c *gin.Context) *gin.H {
 				"status_msg":  "数据库创建用户操作错误",
 			}
 		}
-		token, err := service.GenerateToken(uint(u.UserId))
+		token, err := service.GenerateToken(u.UserId)
 		if err != nil {
 			return &gin.H{
 				"status_code": 1,

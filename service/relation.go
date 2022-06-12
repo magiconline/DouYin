@@ -94,7 +94,7 @@ func FollowList(userID uint64) (*[]FollowResponse, error) {
 		followUserID := (*followUserIDList)[i].ToUserID
 
 		// 获取其他信息
-		userInfo, err := repository.UserInfo(int64(followUserID))
+		userInfo, err := repository.UserInfo(followUserID)
 		if err != nil {
 			return nil, err
 		}
@@ -123,7 +123,7 @@ func FollowerList(userID uint64) (*[]FollowResponse, error) {
 		followerUserID := (*followerUserIDList)[i].ToUserID
 
 		// 获取其他信息
-		userInfo, err := repository.UserInfo(int64(followerUserID))
+		userInfo, err := repository.UserInfo(followerUserID)
 		if err != nil {
 			return nil, err
 		}

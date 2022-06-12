@@ -109,6 +109,7 @@ func main() {
 		fmt.Println("日志初始化失败,", err)
 		os.Exit(1)
 	}
+
 	logger.Println("项目日志初始化成功")
 
 	// 初始化静态资源 URL 前缀

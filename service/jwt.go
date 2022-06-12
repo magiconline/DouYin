@@ -10,11 +10,11 @@ var jwtSecret = []byte("16849841325189456f487") //密钥
 var jwtEffectTime = 2000 * time.Hour            //有效时间
 
 type Claims struct {
-	ID                 uint
+	ID                 uint64
 	jwt.StandardClaims //jwt-go提供的标准claim
 }
 
-func GenerateToken(id uint) (string, error) {
+func GenerateToken(id uint64) (string, error) {
 	//过期时间
 	nowTime := time.Now()
 
@@ -71,7 +71,7 @@ func Token2ID(token string) (uint64, error) {
 		// }
 		return 0, err
 	}
-	return uint64(claims.ID), nil
+	return claims.ID, nil
 }
 
 func RefreshToken(tokenString string) (string, error) {

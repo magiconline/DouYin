@@ -3,6 +3,7 @@ package main
 import (
 	"DouYin/logger"
 	"DouYin/repository"
+	"DouYin/service"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -334,9 +335,16 @@ func TestLoginWithouRegister(t *testing.T) {
 
 }
 
-//
-
 // 测试关注操作
+func TestRelation(t *testing.T) {
+
+}
+
+// 测试重复关注
+
+// 测试取消关注
+
+// 测试重复取消关注
 
 // 测试关注列表
 
@@ -356,25 +364,168 @@ func TestLoginWithouRegister(t *testing.T) {
 // 	})
 // }
 
-/*func TestFavorite(t *testing.T) {
-	// 初始化请求
-	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MSwiZXhwIjoxNjYyMDM2NTkzLCJpc3MiOiJ6amN5In0.HWHm5JzbcIBeiXVOWXyKV6uQNB1po6CyK8bPQRMGvSc"
-	videoId := 2
-	actionType := 2
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", fmt.Sprintf("/douyin/favorite/action/?token=%v&video_id=%v&action_type=%v", token, videoId, actionType), nil)
-	r.ServeHTTP(w, req)
+//测试点赞操作
+func TestFavorite(t *testing.T) {
+	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MSwiZXhwIjoxNjYyMTk5OTc5LCJpc3MiOiJ6amN5In0.oNrcj2xrgiy5zh0j2So-Sm_vxIG_lsYxRT2rcCQ5EGA"
+	videoId := 1
+	actionType := 1
+	// 检查是否已经点赞
+	userId, err := service.Token2ID(token)
+	assert.Equal(t, err, nil)
+	flag := service.IsThumbUp(userId, uint64(videoId))
+	//如果返回true 说明已点赞 删除点赞状态
+	if flag {
+		service.DeleteStar(userId, uint64(videoId))
+	}
+
+	// 点赞操作
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/favorite/action/?token=%v&video_id=%v&action_type=%v", token, videoId, actionType), nil)
+	assert.Equal(t, err, nil)
+
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
+
+	body := make(map[string]interface{})
+	err = json.Unmarshal(response.Body.Bytes(), &body)
+	assert.Equal(t, err, nil)
+
+	assert.Equal(t, int(body["status_code"].(float64)), 0)
+	assert.Equal(t, body["status_msg"], "点赞成功！")
+
 }
-func BenchmarkFavorite(b *testing.B) {
-	// 初始化请求
-	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MSwiZXhwIjoxNjYyMDM2NTkzLCJpc3MiOiJ6amN5In0.HWHm5JzbcIBeiXVOWXyKV6uQNB1po6CyK8bPQRMGvSc"
-	videoId := 2
+
+//测试取消点赞操作
+func TestCancelFavorite(t *testing.T) {
+	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MSwiZXhwIjoxNjYyMTk5OTc5LCJpc3MiOiJ6amN5In0.oNrcj2xrgiy5zh0j2So-Sm_vxIG_lsYxRT2rcCQ5EGA"
+	videoId := 1
 	actionType := 2
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", fmt.Sprintf("/douyin/favorite/action/?token=%v&video_id=%v&action_type=%v", token, videoId, actionType), nil)
-	b.RunParallel(func(pb *testing.PB) {
-		for pb.Next() {
-			r.ServeHTTP(w, req)
-		}
-	})
-}*/
+	// 检查是否已经点赞
+	userId, err := service.Token2ID(token)
+	assert.Equal(t, err, nil)
+	flag := service.IsThumbUp(userId, uint64(videoId))
+	//如果返回false 说明未点赞 增加点赞状态
+	if !flag {
+		service.AddStar(userId, uint64(videoId))
+	}
+
+	// 取消点赞操作
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/favorite/action/?token=%v&video_id=%v&action_type=%v", token, videoId, actionType), nil)
+	assert.Equal(t, err, nil)
+
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
+
+	body := make(map[string]interface{})
+	err = json.Unmarshal(response.Body.Bytes(), &body)
+	assert.Equal(t, err, nil)
+
+	assert.Equal(t, int(body["status_code"].(float64)), 0)
+	assert.Equal(t, body["status_msg"], "取消点赞成功！")
+
+}
+
+//测试重复点赞
+func TestRepeatFavorite(t *testing.T) {
+	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MSwiZXhwIjoxNjYyMTk5OTc5LCJpc3MiOiJ6amN5In0.oNrcj2xrgiy5zh0j2So-Sm_vxIG_lsYxRT2rcCQ5EGA"
+	videoId := 1
+	actionType := 1
+	// 检查是否已经点赞
+	userId, err := service.Token2ID(token)
+	assert.Equal(t, err, nil)
+	flag := service.IsThumbUp(userId, uint64(videoId))
+	//如果返回false 说明未点赞 插入点赞数据
+	if !flag {
+		service.AddStar(userId, uint64(videoId))
+	}
+
+	// 点赞操作
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/favorite/action/?token=%v&video_id=%v&action_type=%v", token, videoId, actionType), nil)
+	assert.Equal(t, err, nil)
+
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
+
+	body := make(map[string]interface{})
+	err = json.Unmarshal(response.Body.Bytes(), &body)
+	assert.Equal(t, err, nil)
+
+	assert.Equal(t, int(body["status_code"].(float64)), 5)
+	assert.Equal(t, body["status_msg"], "请勿重复点赞！")
+
+}
+
+//测试在未点赞的状态下取消点赞的操作
+func TestCancelFavoriteWithoutFavorite(t *testing.T) {
+	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MSwiZXhwIjoxNjYyMTk5OTc5LCJpc3MiOiJ6amN5In0.oNrcj2xrgiy5zh0j2So-Sm_vxIG_lsYxRT2rcCQ5EGA"
+	videoId := 1
+	actionType := 2
+	// 检查是否已经点赞
+	userId, err := service.Token2ID(token)
+	assert.Equal(t, err, nil)
+	flag := service.IsThumbUp(userId, uint64(videoId))
+	//如果返回true 说明已点赞 删除点赞数据
+	if flag {
+		service.DeleteStar(userId, uint64(videoId))
+	}
+
+	// 取消点赞操作
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("POST", fmt.Sprintf("/douyin/favorite/action/?token=%v&video_id=%v&action_type=%v", token, videoId, actionType), nil)
+	assert.Equal(t, err, nil)
+
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
+
+	body := make(map[string]interface{})
+	err = json.Unmarshal(response.Body.Bytes(), &body)
+	assert.Equal(t, err, nil)
+
+	assert.Equal(t, int(body["status_code"].(float64)), 6)
+	assert.Equal(t, body["status_msg"], "当前暂无点赞数据！")
+
+}
+
+//测试获取未登录用户获取点赞视频列表
+func TestFavoriteWithoutLogin(t *testing.T) {
+	token := ""
+	userId := "1"
+
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("GET", fmt.Sprintf("http://127.0.0.1:8080/douyin/favorite/list/?token=%v&user_id=%v", token, userId), nil)
+
+	assert.Equal(t, err, nil)
+
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
+
+	body := make(map[string]interface{})
+	err = json.Unmarshal(response.Body.Bytes(), &body)
+	assert.Equal(t, err, nil)
+
+	assert.Equal(t, int(body["status_code"].(float64)), 1)
+	assert.Equal(t, body["status_msg"], "用户未登录")
+}
+
+//测试获取登录用户获取点赞视频列表
+func TestFavoriteLogin(t *testing.T) {
+	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MSwiZXhwIjoxNjYyMTY2MDcwLCJpc3MiOiJ6amN5In0.7jRyQql7BZ78PDqmL-zn2hhf_9yTxIUvKPo-dCbTEwg"
+	userId := "1"
+
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("GET", fmt.Sprintf("http://127.0.0.1:8080/douyin/favorite/list/?token=%v&user_id=%v", token, userId), nil)
+
+	assert.Equal(t, err, nil)
+
+	r.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, 200)
+
+	body := make(map[string]interface{})
+	err = json.Unmarshal(response.Body.Bytes(), &body)
+	assert.Equal(t, err, nil)
+
+	assert.Equal(t, int(body["status_code"].(float64)), 0)
+	assert.Equal(t, body["status_msg"], "success")
+}
