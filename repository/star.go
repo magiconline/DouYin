@@ -2,8 +2,9 @@ package repository
 
 import (
 	"DouYin/logger"
-	"gorm.io/gorm"
 	"sync"
+
+	"gorm.io/gorm"
 )
 
 type Star struct {
@@ -122,7 +123,7 @@ func (*StarDao) StarList(userID uint64) (*[]map[string]interface{}, error) {
 //IsThumbUp 返回点赞状态
 func (*StarDao) IsThumbUp(userID, videoID uint64) (*Star, error) {
 	var star Star
-	if result := DB.Table("star").Where("user_id = ? and video_id = ?", userID, videoID).First(&star); result.Error != nil {
+	if result := DB.Table("star").Where("user_id = ? and video_id = ?", userID, videoID).Limit(1).Find(&star); result.Error != nil {
 		return nil, result.Error
 	}
 	return &star, nil

@@ -118,7 +118,7 @@ func FollowList(curUserID uint64, userID uint64) (*[]FollowResponse, error) {
 			return nil, err
 		}
 
-		isFollow, err := repository.IsFollower(curUserID, userID)
+		isFollow, err := repository.IsFollower(curUserID, followUserID)
 		if err != nil {
 			return nil, err
 		}
