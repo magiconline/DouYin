@@ -46,7 +46,7 @@ func Init() error {
 		return err
 	}
 
-	DB.AutoMigrate(&Star{})
+	// DB.AutoMigrate(&Star{})
 	DB.AutoMigrate(&Relation{})
 
 	RDB = redis.NewClient(&redis.Options{
