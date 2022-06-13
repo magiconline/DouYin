@@ -12,7 +12,7 @@ import (
 
 type VideoTable struct {
 	VideoId       uint64 `gorm:"column:video_id"`
-	UserId        uint64 `gorm:"column:user_id"`
+	UserId        uint64 `gorm:"column:user_id;index"`
 	PlayUrl       string `gorm:"column:play_url"`
 	CoverUrl      string `gorm:"column:cover_url"`
 	FavoriteCount uint32 `gorm:"column:favorite_count"`
