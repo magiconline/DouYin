@@ -22,7 +22,7 @@ https://www.apifox.cn/apidoc/shared-8cc50618-0da6-4d5e-a398-76f3b8f766c5/api-183
 
 # 项目架构
 ```
-|-- go-project
+|-- DouYin
     |-- .gitignore
     |-- README.md
     |-- cover.html              // 覆盖率报告
