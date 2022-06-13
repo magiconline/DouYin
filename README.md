@@ -1,7 +1,6 @@
 # 项目介绍
 字节跳动青训营极简版抖音项目后端实现。  
-演示视频  
-<iframe height=498 width=510 src="https://github.com/magiconline/DouYin/blob/main/demo.mp4">
+演示视频 https://github.com/magiconline/DouYin/blob/main/demo.mp4
 
 # 项目功能
 https://www.apifox.cn/apidoc/shared-8cc50618-0da6-4d5e-a398-76f3b8f766c5/api-18345145
