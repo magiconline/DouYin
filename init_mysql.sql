@@ -8,8 +8,8 @@ CREATE TABLE `video`
 (
     `video_id`       BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     `user_id`        BIGINT UNSIGNED NOT NULL,
-    `play_url`       TEXT            NOT NULL,
-    `cover_url`      TEXT            NOT NULL,
+    `play_url`       CHAR(59)        NOT NULL,
+    `cover_url`      CHAR(59)        NOT NULL,
     `favorite_count` INT UNSIGNED    NOT NULL DEFAULT 0,
     `comment_count`  INT UNSIGNED    NOT NULL DEFAULT 0,
     `upload_time`    BIGINT UNSIGNED    NOT NULL,
