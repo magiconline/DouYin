@@ -166,9 +166,18 @@ func TestFeedWithEndTime(t *testing.T) {
 
 	assert.Equal(t, int(body["status_code"].(float64)), 0)
 
-	l := len(body["video_list"].([]interface{}))
-	assert.NotEqual(t, l, 0)
-	assert.NotEqual(t, body["next_time"], timeStamp)
+	var videoCount int64
+	err = repository.DB.Table("video").Count(&videoCount).Error
+	assert.Equal(t, err, nil)
+
+	if videoCount == 0 {
+		assert.Equal(t, body["video_list"], nil)
+	} else {
+		l := len(body["video_list"].([]interface{}))
+		assert.NotEqual(t, l, 0)
+		assert.NotEqual(t, body["next_time"], timeStamp)
+	}
+
 }
 
 // 测试视频上传
@@ -870,7 +879,6 @@ func TestRemarkWithExpiredToken(t *testing.T) {
 	result, err := regexp.Match("token has some error", []byte(body["status_msg"].(string)))
 	if err != nil {
 		t.Fatal(err.Error())
-		t.FailNow()
 	}
 	if result != true {
 		t.Fatalf("status_msg: %v != token has some error", body["status_msg"].(string))
