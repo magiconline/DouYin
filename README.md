@@ -15,6 +15,7 @@ https://www.apifox.cn/apidoc/shared-8cc50618-0da6-4d5e-a398-76f3b8f766c5/api-183
   - JWT
   - uuid
   - redis
+  - ffmpeg-go
 - MySQL
 - Redis
 - ffmpeg
@@ -90,8 +91,8 @@ video 表
 +----------------+-----------+-----------------+------------+----------------+
 | video_id       | bigint    | bigint unsigned | PRI        | auto_increment |
 | user_id        | bigint    | bigint unsigned | MUL        |                |
-| play_url       | text      | text            |            |                |
-| cover_url      | text      | text            |            |                |
+| play_url       | text      | char(59)        |            |                |
+| cover_url      | text      | char(59)        |            |                |
 | favorite_count | int       | int unsigned    |            |                |
 | comment_count  | int       | int unsigned    |            |                |
 | upload_time    | bigint    | bigint unsigned |            |                |
